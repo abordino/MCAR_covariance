@@ -283,5 +283,18 @@ for (kkk in 1:5000){
 plot(m_k_plus_s_k, R_k, col="red", pch=19, cex=0.1, main="d = 4, |x-y|/2",xlim=c(0,1))
 curve(x^1, add=T)
 
-##### EVEN FOR d=4, WHERE R=0 IFF |x-y|=0, THE LOWER BOUND SEEMS TO BE LOOSE. WHAT ARE WE MISSING HERE?
-
+##### EVEN FOR d=4, WHERE R=0 IFF |x-y|=0, THE LOWER BOUND SEEMS TO BE LOOSE. 
+####  WHAT ARE WE MISSING HERE? ANY Patterns?
+A = diag(4)
+A[1,2] = (max(SigmaS[[1]][1,2],SigmaS[[2]][1,2])-tmp)/(1-tmp)
+A[2,1] = (max(SigmaS[[1]][1,2],SigmaS[[2]][1,2])-tmp)/(1-tmp)
+A[1,3] = SigmaS[[1]][1,3]/(1-tmp)
+A[3,1] = SigmaS[[1]][1,3]/(1-tmp)
+A[2,3] = SigmaS[[1]][2,3]/(1-tmp)
+A[3,2] =  SigmaS[[1]][2,3]/(1-tmp)
+A[1,4] =  SigmaS[[2]][1,3]/(1-tmp)
+A[4,1] =  SigmaS[[2]][1,3]/(1-tmp)
+A[2,4] =  SigmaS[[2]][2,3]/(1-tmp)
+A[4,2] =  SigmaS[[2]][2,3]/(1-tmp)
+A 
+result$Sigma/(1-result$R)
