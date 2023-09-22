@@ -41,7 +41,7 @@ computeR = function(patterns=list(), SigmaS=list()) {
     }
   }
   
-
+  
   
   #----------------------------------------------------------------------------------------
   ########## GENERATE SIGMA IF NOT SPECIFIED
@@ -209,11 +209,17 @@ computeR = function(patterns=list(), SigmaS=list()) {
   #----------------------------------------------------------------------------------------
   Sigma = SDP$X[[1]]
   
+  SigmaSprime = list()
+  for (i in 1:card_patterns){
+    SigmaSprime[[1]] = SDP$X[[i+1]]
+  }
+  
   
   #----------------------------------------------------------------------------------------
   #----------------------------------------------------------------------------------------
   #----------------------------------------------------------------------------------------
-  my_list = list("R" = R, "XS" = XS, "XS0" = XS0, "Sigma" = Sigma, "SigmaS" = SigmaS)
+  my_list = list("R" = R, "XS" = XS, "XS0" = XS0, "Sigma" = Sigma, "SigmaS" = SigmaS, 
+                 "SigmaSprime" = SigmaSprime)
   return(my_list)
   
 }
@@ -246,11 +252,11 @@ SigmaS[[2]][1,2] = cos(0)
 SigmaS[[2]][2,1] = cos(0)
 
 for (rho in seq(0, pi, length.out = 1000)){
-SigmaS[[3]][1,2] = cos(rho)
-SigmaS[[3]][2,1] = cos(rho)
-
-result = computeR(list(c(1,2),c(2,3), c(1,3)), SigmaS = SigmaS)
-R_rho = c(R_rho, result$R)
+  SigmaS[[3]][1,2] = cos(rho)
+  SigmaS[[3]][2,1] = cos(rho)
+  
+  result = computeR(list(c(1,2),c(2,3), c(1,3)), SigmaS = SigmaS)
+  R_rho = c(R_rho, result$R)
 }
 
 plot(seq(0, pi, length.out = 1000), R_rho, col="red", pch=19, cex=0.1)
@@ -259,42 +265,219 @@ plot(seq(0, pi, length.out = 1000), R_rho, col="red", pch=19, cex=0.1)
 
 m_k_plus_s_k = c()
 R_k = c()
-d=4
+d=3
 
-for (kkk in 1:5000){
+for (kkk in 1:30000){
   SigmaS=list() 
-  for(j in 1:2){
-    A = matrix(runif((d-1)^2)*2-1, ncol=d-1) 
-    tmp_0 = t(A) %*% A
-    SigmaS[[j]]=round(as.matrix(cov2cor(tmp_0)),10)
-  }
+
+  a = matrix(runif((d)^2)*2-1, ncol=d)
+  tmp_0 = t(a) %*% a
+  SigmaS[[2]]=round(as.matrix(cov2cor(tmp_0)),10)
+  
+  a = matrix(runif((d-1)^2)*2-1, ncol=d-1)
+  tmp_0 = t(a) %*% a
+  SigmaS[[1]]=round(as.matrix(cov2cor(tmp_0)),10)
+  
   if(is.positive.definite(SigmaS[[1]])==F || is.positive.definite(SigmaS[[2]])==F){
     print("NOT PSD")
     next
   }
-  result = computeR(list(c(1,2,3),c(1,2,4)), SigmaS = SigmaS)
+  result = computeR(list(c(1,2),c(1,2,3)), SigmaS = SigmaS)
   
   R_k = c(R_k, result$R)
-  tmp = norm(SigmaS[[1]][c(-(d-1)),c(-(d-1))]-SigmaS[[2]][c(-(d-1)),c(-(d-1))], type = "M")/2
+  
+  tmp = abs(SigmaS[[1]][1,2]-SigmaS[[2]][1,2])/2
   m_k_plus_s_k = c(m_k_plus_s_k, tmp)
   
 }
 
-plot(m_k_plus_s_k, R_k, col="red", pch=19, cex=0.1, main="d = 4, |x-y|/2",xlim=c(0,1))
+plot(m_k_plus_s_k, R_k, col="red", pch=19, cex=0.1, main="d = 3, |x-y|/2")
 curve(x^1, add=T)
 
-##### EVEN FOR d=4, WHERE R=0 IFF |x-y|=0, THE LOWER BOUND SEEMS TO BE LOOSE. 
-####  WHAT ARE WE MISSING HERE? ANY Patterns?
-A = diag(4)
-A[1,2] = (max(SigmaS[[1]][1,2],SigmaS[[2]][1,2])-tmp)/(1-tmp)
-A[2,1] = (max(SigmaS[[1]][1,2],SigmaS[[2]][1,2])-tmp)/(1-tmp)
-A[1,3] = SigmaS[[1]][1,3]/(1-tmp)
-A[3,1] = SigmaS[[1]][1,3]/(1-tmp)
-A[2,3] = SigmaS[[1]][2,3]/(1-tmp)
-A[3,2] =  SigmaS[[1]][2,3]/(1-tmp)
-A[1,4] =  SigmaS[[2]][1,3]/(1-tmp)
-A[4,1] =  SigmaS[[2]][1,3]/(1-tmp)
-A[2,4] =  SigmaS[[2]][2,3]/(1-tmp)
-A[4,2] =  SigmaS[[2]][2,3]/(1-tmp)
-A 
-result$Sigma/(1-result$R)
+##### EVEN FOR d=3, WHERE R=0 IFF |x-y|=0, THE LOWER BOUND SEEMS TO BE LOOSE. 
+####  WHAT ARE WE MISSING HERE? ANY Patterns? For varying y?
+  R_y = c()
+  for (y in seq(-1, 1, length.out=1000)){
+    SigmaS[[1]][1,2] = y
+    SigmaS[[1]][2,1] = y
+    result = computeR(list(c(1,2),c(1,2,3)), SigmaS = SigmaS)
+    R_y = c(R_y, result$R)
+    
+  }
+  plot(seq(-1, 1, length.out=1000), R_y, col="red", pch=19, cex=0.1, 
+       main=paste("d = 3, for varying y, and x = ", SigmaS[[2]][1,2]))
+  curve(abs(x-SigmaS[[2]][1,2])/2, add=T)
+  curve(1-(1-x)/(1-SigmaS[[2]][1,2]), add=T)
+  curve(1-(1+x)/(1+SigmaS[[2]][1,2]), add=T)
+  
+ #### \mathbb{S} = {[d-2]U{d}, [d-1]} 
+  R_n = c()
+  theta_n = c()
+  ub_n = c()
+  d = 7
+  
+  for (i in 1:1000){
+
+  SigmaS=list() 
+  for(j in 1:2){
+    A = matrix(runif((d-1)^2)*2-1, ncol=d-1)
+    tmp_0 = t(A) %*% A
+    SigmaS[[j]]=round(as.matrix(cov2cor(tmp_0)),10)
+  }
+  
+  result = computeR(list(c(1,2,3,4,5,7),c(1,2,3,4,5,6)), SigmaS = SigmaS)
+  R_n = c(R_n, result$R)
+  
+  O = abs(SigmaS[[1]][1:(d-2),1:(d-2)] - SigmaS[[2]][1:(d-2),1:(d-2)])
+  i = which(O==max(O), arr.ind=T)[1,1]
+  j = which(O==max(O), arr.ind=T)[1,2]
+  
+  tmp = abs(SigmaS[[1]][i,j] - SigmaS[[2]][i,j])/2
+  theta_n = c(theta_n, tmp)
+  
+  tmp = 1 - min((1-min(SigmaS[[1]][i,j],SigmaS[[2]][i,j]))/(1-max(SigmaS[[1]][i,j],SigmaS[[2]][i,j])), 
+                (1+min(SigmaS[[1]][i,j],SigmaS[[2]][i,j]))/(1+max(SigmaS[[1]][i,j],SigmaS[[2]][i,j])))
+  ub_n = c(ub_n, tmp)
+  
+}
+  
+  plot(1:1000, sort(R_n), col="red", pch=19, cex=0.1, ylim = c(0,1), type="l",
+       main=paste("d = 7, for varying y, and x = ", SigmaS[[1]][1,2]))
+  lines(theta_n[sort(R_n, index.return=TRUE)$ix], col="blue")
+  lines(ub_n[sort(R_n, index.return=TRUE)$ix], col="green")
+  # curve(abs(x-SigmaS[[1]][1,2])/2, add=T)
+  # curve(1-(1-x)/(1-SigmaS[[1]][1,2]), add=T)
+  # curve(1-(1+x)/(1+SigmaS[[1]][1,2]), add=T)
+  
+  
+  ########## trying to see if we can find soime patterns for the worst points (best for LB)
+  for (i in 1:100000){
+    
+    SigmaS=list() 
+    for(j in 1:2){
+      A = matrix(runif((d-1)^2)*2-1, ncol=d-1)
+      tmp_0 = t(A) %*% A
+      SigmaS[[j]]=round(as.matrix(cov2cor(tmp_0)),10)
+    }
+    
+    result = computeR(list(c(1,2,3,4,5,7),c(1,2,3,4,5,6)), SigmaS = SigmaS)
+    theta = max(abs(SigmaS[[1]][1:(d-2),1:(d-2)] - SigmaS[[2]][1:(d-2),1:(d-2)]))/2
+    if (result$R - theta > 0.6){
+      break
+    }
+  }
+  
+  result
+  
+  
+  ############## NEW BLOCK EXAMPLE ############
+  m = 3 
+  rho = 0.6
+  
+  tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
+  tmp = t(tmp) %*% tmp
+  P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
+  while(norm(P, type="2") > 1){
+    tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
+    tmp = t(tmp) %*% tmp
+    P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
+  }
+  
+  SigmaS=list() 
+  
+  SigmaS[[1]]=diag(2*m)
+  SigmaS[[1]][1:m, (m+1):(2*m)] = P
+  SigmaS[[1]][(m+1):(2*m), 1:m] = t(P)
+  
+  SigmaS[[2]]=diag(2*m)
+  SigmaS[[2]][1:m, (m+1):(2*m)] = -P
+  SigmaS[[2]][(m+1):(2*m), 1:m] = -t(P)
+  
+  SigmaS[[3]]=diag(2*m)
+  SigmaS[[3]][1:m, (m+1):(2*m)] = rho*diag(m)
+  SigmaS[[3]][(m+1):(2*m), 1:m] = rho*diag(m)
+  
+  result = computeR(list(c(1,2,3,4,5,6),c(1,2,3,7,8,9), c(4,5,6,7,8,9)), SigmaS = SigmaS)
+  print(paste("||P||_op = ", norm(P, "2"), "; sqrt(1-rho)/sqrt(2) = ", sqrt((1-rho)/2)))
+  
+  
+  ############## Conjecture for part A
+  m = 3 
+  rho = 0.6
+  
+  result$R = 1
+  while(result$R > 0.001){
+  tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
+  tmp = t(tmp) %*% tmp
+  P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
+  while(norm(P, type="2") > 1){
+    tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
+    tmp = t(tmp) %*% tmp
+    P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
+  }
+  
+  SigmaS=list() 
+  
+  SigmaS[[1]]=diag(2*m)
+  SigmaS[[1]][1:m, (m+1):(2*m)] = P
+  SigmaS[[1]][(m+1):(2*m), 1:m] = t(P)
+  
+  SigmaS[[2]]=diag(2*m)
+  SigmaS[[2]][1:m, (m+1):(2*m)] = -P
+  SigmaS[[2]][(m+1):(2*m), 1:m] = -t(P)
+  
+  SigmaS[[3]]=diag(2*m)
+  SigmaS[[3]][1:m, (m+1):(2*m)] = rho*diag(m)
+  SigmaS[[3]][(m+1):(2*m), 1:m] = rho*diag(m)
+  
+  result = computeR(list(c(1,2,3,4,5,6),c(1,2,3,7,8,9), c(4,5,6,7,8,9)), SigmaS = SigmaS)
+  print(paste("||P||_op = ", norm(P, "2"), "; sqrt(1-rho)/sqrt(2) = ", sqrt((1-rho)/2)))
+  }
+  
+#   ############## Conjecture for part B
+for (kkk in 1:50){
+    m = 4
+    R_rho = c()
+    
+    tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
+    tmp = t(tmp) %*% tmp
+    P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
+    while(norm(P, type="2") > 1){
+      tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
+      tmp = t(tmp) %*% tmp
+      P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
+    }
+    
+    SigmaS=list() 
+    
+    SigmaS[[1]]=diag(2*m)
+    SigmaS[[1]][1:m, (m+1):(2*m)] = P
+    SigmaS[[1]][(m+1):(2*m), 1:m] = t(P)
+    
+    SigmaS[[2]]=diag(2*m)
+    SigmaS[[2]][1:m, (m+1):(2*m)] = -P
+    SigmaS[[2]][(m+1):(2*m), 1:m] = -t(P)
+    
+    for (rho in seq(0.5, 1, length.out=200)){
+      SigmaS[[3]]=diag(2*m)
+      SigmaS[[3]][1:m, (m+1):(2*m)] = rho*diag(m)
+      SigmaS[[3]][(m+1):(2*m), 1:m] = rho*diag(m)
+      
+      # result = computeR(list(c(1,2,3,4,5,6),c(1,2,3,7,8,9), c(4,5,6,7,8,9)), SigmaS = SigmaS)
+      result = computeR(list(c(1,2,3,4,5,6,7,8),c(1,2,3,4,9,10,11,12),
+                             c(5,6,7,8,9,10,11,12)), SigmaS = SigmaS)
+      R_rho = c(R_rho, result$R)
+    }
+    
+    png(filename=paste("Documents/phd/MCAR_covariance/code/3_blocks_example/", kkk, "_4.png"))
+    plot(seq(0.5, 1, length.out=200), R_rho, col="red", pch=19, cex=0.1, 
+         main=paste("||P||_op = ", norm(P, "2"), ": m = ", m), ylim=c(0,1))
+    curve((-sqrt((1-x)/2) + norm(P, "2"))/(norm(P, "2")/R_rho[200]), 
+          col="orange", add=T)
+    curve((-(1-x)/2 + norm(P, "2"))/(norm(P, "2")/R_rho[200]), 
+          col="blue", add=T)
+    curve((-(1-x)/2 + norm(P, "2"))/((-1/4+norm(P, "2"))/R_rho[1]), 
+          col="blue", add=T)
+    dev.off()
+}
+ 
