@@ -410,7 +410,7 @@ curve(x^1, add=T)
   tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
   tmp = t(tmp) %*% tmp
   P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
-  while(norm(P, type="2") > 1){
+  while(norm(P, type="2") > 0.45){
     tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
     tmp = t(tmp) %*% tmp
     P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
@@ -435,49 +435,116 @@ curve(x^1, add=T)
   }
   
 #   ############## Conjecture for part B
-for (kkk in 1:50){
-    m = 4
-    R_rho = c()
-    
-    tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
-    tmp = t(tmp) %*% tmp
-    P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
-    while(norm(P, type="2") > 1){
+  for (m in 2:9){
+    for (kkk in 1:40){
+      R_rho = c()
+      R_cycle = c()
+      
       tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
       tmp = t(tmp) %*% tmp
       P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
-    }
-    
-    SigmaS=list() 
-    
-    SigmaS[[1]]=diag(2*m)
-    SigmaS[[1]][1:m, (m+1):(2*m)] = P
-    SigmaS[[1]][(m+1):(2*m), 1:m] = t(P)
-    
-    SigmaS[[2]]=diag(2*m)
-    SigmaS[[2]][1:m, (m+1):(2*m)] = -P
-    SigmaS[[2]][(m+1):(2*m), 1:m] = -t(P)
-    
-    for (rho in seq(0.5, 1, length.out=200)){
-      SigmaS[[3]]=diag(2*m)
-      SigmaS[[3]][1:m, (m+1):(2*m)] = rho*diag(m)
-      SigmaS[[3]][(m+1):(2*m), 1:m] = rho*diag(m)
       
-      # result = computeR(list(c(1,2,3,4,5,6),c(1,2,3,7,8,9), c(4,5,6,7,8,9)), SigmaS = SigmaS)
-      result = computeR(list(c(1,2,3,4,5,6,7,8),c(1,2,3,4,9,10,11,12),
-                             c(5,6,7,8,9,10,11,12)), SigmaS = SigmaS)
-      R_rho = c(R_rho, result$R)
-    }
+      while(norm(P, type="2") > 1){
+        tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
+        tmp = t(tmp) %*% tmp
+        P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
+      }
+      
+      SigmaS=list() 
+      
+      SigmaS[[1]]=diag(2*m)
+      SigmaS[[1]][1:m, (m+1):(2*m)] = P
+      SigmaS[[1]][(m+1):(2*m), 1:m] = t(P)
+      
+      SigmaS[[2]]=diag(2*m)
+      SigmaS[[2]][1:m, (m+1):(2*m)] = -P
+      SigmaS[[2]][(m+1):(2*m), 1:m] = -t(P)
+      
+      for (rho in seq(0, 1, length.out=50)){
+        SigmaS[[3]]=diag(2*m)
+        SigmaS[[3]][1:m, (m+1):(2*m)] = rho*diag(m)
+        SigmaS[[3]][(m+1):(2*m), 1:m] = rho*diag(m)
+        
+        result = computeR(list(c(1:(2*m)),c(1:m,(2*m+1):(3*m)),c((m+1):(3*m))), SigmaS = SigmaS)
+        R_rho = c(R_rho, result$R)
+        
+        cycle = list()
+        cycle[[1]] = diag(2)
+        cycle[[1]][1,2] = norm(P, "2"); cycle[[1]][2,1] = norm(P, "2")
+        
+        cycle[[2]] = diag(2)
+        cycle[[2]][1,2] = rho; cycle[[1]][2,1] = rho
+        
+        cycle[[3]] = diag(2)
+        cycle[[3]][1,2] = -norm(P, "2"); cycle[[2]][2,1] = -norm(P, "2")
+        
+        
+        result = computeR(list(c(1,2), c(2,3), c(1,3)), SigmaS = cycle)
+        R_cycle = c(R_cycle, result$R)
+        
+      }
+      
+      png(filename=paste("Documents/phd/MCAR_covariance/code/3_blocks_example/", m, "-",kkk,"_.png"))
+      plot(seq(0, 1, length.out=50), R_rho, type="l",col="red", pch=19, cex=0.1, 
+           main=paste("||P||_op = ", norm(P, "2"), "m = ", m,", c = 1/m"), ylim=c(0,1))
+      lines(seq(0, 1, length.out=50), R_cycle/m, col="blue")
+      dev.off()
+  }
+  }
+  
+  
+  #### proving strategy: 3) implies 2) if we can control the 3-cycle
+  m = 5
+  R_rho = c()
+  R_cycle = c()
+  
+  tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
+  tmp = t(tmp) %*% tmp
+  P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
+  
+  while(norm(P, type="2") > 1){
+    tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
+    tmp = t(tmp) %*% tmp
+    P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
+  }
+  
+  SigmaS=list() 
+  
+  SigmaS[[1]]=diag(2*m)
+  SigmaS[[1]][1:m, (m+1):(2*m)] = P
+  SigmaS[[1]][(m+1):(2*m), 1:m] = t(P)
+  
+  SigmaS[[2]]=diag(2*m)
+  SigmaS[[2]][1:m, (m+1):(2*m)] = -P
+  SigmaS[[2]][(m+1):(2*m), 1:m] = t(-P)
+  
+  for (rho in seq(0, 1, length.out=50)){
+    SigmaS[[3]]=diag(2*m)
+    SigmaS[[3]][1:m, (m+1):(2*m)] = rho*diag(m)
+    SigmaS[[3]][(m+1):(2*m), 1:m] = rho*diag(m)
     
-    png(filename=paste("Documents/phd/MCAR_covariance/code/3_blocks_example/", kkk, "_4.png"))
-    plot(seq(0.5, 1, length.out=200), R_rho, col="red", pch=19, cex=0.1, 
-         main=paste("||P||_op = ", norm(P, "2"), ": m = ", m), ylim=c(0,1))
-    curve((-sqrt((1-x)/2) + norm(P, "2"))/(norm(P, "2")/R_rho[200]), 
-          col="orange", add=T)
-    curve((-(1-x)/2 + norm(P, "2"))/(norm(P, "2")/R_rho[200]), 
-          col="blue", add=T)
-    curve((-(1-x)/2 + norm(P, "2"))/((-1/4+norm(P, "2"))/R_rho[1]), 
-          col="blue", add=T)
-    dev.off()
-}
+    result = computeR(list(c(1:(2*m)),c(1:m,(2*m+1):(3*m)),c((m+1):(3*m))), SigmaS = SigmaS)
+    R_rho = c(R_rho, result$R)
+    
+    cycle = list()
+    cycle[[1]] = diag(2)
+    cycle[[1]][1,2] = norm(P, "2"); cycle[[1]][2,1] = norm(P, "2")
+    
+    cycle[[2]] = diag(2)
+    cycle[[2]][1,2] = rho; cycle[[1]][2,1] = rho
+    
+    cycle[[3]] = diag(2)
+    cycle[[3]][1,2] = -norm(P, "2"); cycle[[2]][2,1] = -norm(P, "2")
+    
+    
+    result = computeR(list(c(1,2), c(2,3), c(1,3)), SigmaS = cycle)
+    R_cycle = c(R_cycle, result$R)
+    
+  }
+  
+  plot(seq(0, 1, length.out=50), R_rho, type="l",col="red", pch=19, cex=0.1, 
+       main=paste("||P||_op = ", norm(P, "2"), "m = ", m,", c = 1/m"), ylim=c(0,1))
+  lines(seq(0, 1, length.out=50), R_cycle/m, col="blue")
+  curve((1/m)*(norm(P, "2")^2 - (1-x)/2), add=T, col="green")
+  
  
