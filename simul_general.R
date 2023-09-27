@@ -267,7 +267,7 @@ m_k_plus_s_k = c()
 R_k = c()
 d=3
 
-for (kkk in 1:30000){
+for (kkk in 1:3000){
   SigmaS=list() 
 
   a = matrix(runif((d)^2)*2-1, ncol=d)
@@ -310,7 +310,7 @@ curve(x^1, add=T)
   curve(1-(1-x)/(1-SigmaS[[2]][1,2]), add=T)
   curve(1-(1+x)/(1+SigmaS[[2]][1,2]), add=T)
   
- #### \mathbb{S} = {[d-2]U{d}, [d-1]} 
+ #### \mathbb{S} = {[d-2]U{d}, [d-1]} ###############
   R_n = c()
   theta_n = c()
   ub_n = c()
@@ -345,30 +345,7 @@ curve(x^1, add=T)
        main=paste("d = 7, for varying y, and x = ", SigmaS[[1]][1,2]))
   lines(theta_n[sort(R_n, index.return=TRUE)$ix], col="blue")
   lines(ub_n[sort(R_n, index.return=TRUE)$ix], col="green")
-  # curve(abs(x-SigmaS[[1]][1,2])/2, add=T)
-  # curve(1-(1-x)/(1-SigmaS[[1]][1,2]), add=T)
-  # curve(1-(1+x)/(1+SigmaS[[1]][1,2]), add=T)
-  
-  
-  ########## trying to see if we can find soime patterns for the worst points (best for LB)
-  for (i in 1:100000){
-    
-    SigmaS=list() 
-    for(j in 1:2){
-      A = matrix(runif((d-1)^2)*2-1, ncol=d-1)
-      tmp_0 = t(A) %*% A
-      SigmaS[[j]]=round(as.matrix(cov2cor(tmp_0)),10)
-    }
-    
-    result = computeR(list(c(1,2,3,4,5,7),c(1,2,3,4,5,6)), SigmaS = SigmaS)
-    theta = max(abs(SigmaS[[1]][1:(d-2),1:(d-2)] - SigmaS[[2]][1:(d-2),1:(d-2)]))/2
-    if (result$R - theta > 0.6){
-      break
-    }
-  }
-  
-  result
-  
+
   
   ############## NEW BLOCK EXAMPLE ############
   m = 3 
@@ -406,6 +383,8 @@ curve(x^1, add=T)
   rho = 0.6
   
   result$R = 1
+  
+  
   while(result$R > 0.001){
   tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
   tmp = t(tmp) %*% tmp
@@ -435,7 +414,7 @@ curve(x^1, add=T)
   }
   
 #   ############## Conjecture for part B
-  for (m in 2:9){
+  for (m in 2:6){
     for (kkk in 1:40){
       R_rho = c()
       R_cycle = c()
@@ -444,7 +423,7 @@ curve(x^1, add=T)
       tmp = t(tmp) %*% tmp
       P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
       
-      while(norm(P, type="2") > 1){
+      while(norm(P, type="2") > 1-0.01*kkk){
         tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
         tmp = t(tmp) %*% tmp
         P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
@@ -488,63 +467,59 @@ curve(x^1, add=T)
       plot(seq(0, 1, length.out=50), R_rho, type="l",col="red", pch=19, cex=0.1, 
            main=paste("||P||_op = ", norm(P, "2"), "m = ", m,", c = 1/m"), ylim=c(0,1))
       lines(seq(0, 1, length.out=50), R_cycle/m, col="blue")
+      lines(seq(0, 1, length.out=50), R_cycle, col="darkblue")
+      curve((1/m)*(norm(P, "2")^2 - (1-x)/2)*(norm(P, "2")^2 - (1-x)/2 >=0), 
+            add=T, col="green")
       dev.off()
   }
   }
   
-  
-  #### proving strategy: 3) implies 2) if we can control the 3-cycle
-  m = 5
-  R_rho = c()
-  R_cycle = c()
-  
-  tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
-  tmp = t(tmp) %*% tmp
-  P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
-  
-  while(norm(P, type="2") > 1){
-    tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
-    tmp = t(tmp) %*% tmp
-    P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
-  }
-  
-  SigmaS=list() 
-  
-  SigmaS[[1]]=diag(2*m)
-  SigmaS[[1]][1:m, (m+1):(2*m)] = P
-  SigmaS[[1]][(m+1):(2*m), 1:m] = t(P)
-  
-  SigmaS[[2]]=diag(2*m)
-  SigmaS[[2]][1:m, (m+1):(2*m)] = -P
-  SigmaS[[2]][(m+1):(2*m), 1:m] = t(-P)
-  
-  for (rho in seq(0, 1, length.out=50)){
-    SigmaS[[3]]=diag(2*m)
-    SigmaS[[3]][1:m, (m+1):(2*m)] = rho*diag(m)
-    SigmaS[[3]][(m+1):(2*m), 1:m] = rho*diag(m)
+  ######## SV lower bound
+  for (m in 4:8){
+    R_P = c()
+    normP = c()
+    R_cycle = c()
     
-    result = computeR(list(c(1:(2*m)),c(1:m,(2*m+1):(3*m)),c((m+1):(3*m))), SigmaS = SigmaS)
-    R_rho = c(R_rho, result$R)
+    rho = 0.6
     
-    cycle = list()
-    cycle[[1]] = diag(2)
-    cycle[[1]][1,2] = norm(P, "2"); cycle[[1]][2,1] = norm(P, "2")
+    for (kkk in 1:100){
+      P = 0.5*matrix(runif((m)^2)*2-1, ncol=m)
+      
+      while(norm(P, type="2") > 1){
+        P = 0.5*matrix(runif((m)^2)*2-1, ncol=m)
+      }
+      
+      P = runif(1,0,1)*P
+      sqSingValues=eigen(t(P)%*%P)$values
+      guess=(1/m)*sum(pmax(sqSingValues-(1-rho)/2,0))
+      normP = c(normP, guess)
+      
+      SigmaS=list()
+      
+      SigmaS[[1]]=diag(2*m)
+      SigmaS[[1]][1:m, (m+1):(2*m)] = P
+      SigmaS[[1]][(m+1):(2*m), 1:m] = t(P)
+      
+      SigmaS[[2]]=diag(2*m)
+      SigmaS[[2]][1:m, (m+1):(2*m)] = -P
+      SigmaS[[2]][(m+1):(2*m), 1:m] = -t(P)
+      
+      SigmaS[[3]]=diag(2*m)
+      SigmaS[[3]][1:m, (m+1):(2*m)] = rho*diag(m)
+      SigmaS[[3]][(m+1):(2*m), 1:m] = rho*diag(m)
+      
+      result = computeR(list(c(1:(2*m)),c(1:m,(2*m+1):(3*m)),c((m+1):(3*m))),
+                        SigmaS = SigmaS)
+      R_P = c(R_P, result$R)
+      
+    }
     
-    cycle[[2]] = diag(2)
-    cycle[[2]][1,2] = rho; cycle[[1]][2,1] = rho
+    if (abs(result$R - norm(P, type="2")^2 + (1-rho)/2)<0.001){
+      break
+    }
     
-    cycle[[3]] = diag(2)
-    cycle[[3]][1,2] = -norm(P, "2"); cycle[[2]][2,1] = -norm(P, "2")
-    
-    
-    result = computeR(list(c(1,2), c(2,3), c(1,3)), SigmaS = cycle)
-    R_cycle = c(R_cycle, result$R)
-    
-  }
-  
-  plot(seq(0, 1, length.out=50), R_rho, type="l",col="red", pch=19, cex=0.1, 
-       main=paste("||P||_op = ", norm(P, "2"), "m = ", m,", c = 1/m"), ylim=c(0,1))
-  lines(seq(0, 1, length.out=50), R_cycle/m, col="blue")
-  curve((1/m)*(norm(P, "2")^2 - (1-x)/2), add=T, col="green")
-  
- 
+    plot(normP, R_P, col="red", pch=19, cex=0.5,
+         main=paste("m = ", m, "; rho = ", rho), ylim=c(0,1))
+    curve(x^1, add=T, col="green")
+
+  } 
