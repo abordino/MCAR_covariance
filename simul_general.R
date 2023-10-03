@@ -260,6 +260,32 @@ for (rho in seq(0, pi, length.out = 1000)){
 }
 
 plot(seq(0, pi, length.out = 1000), R_rho, col="red", pch=19, cex=0.1)
+curve(sin(x/2)^2, add=T)
+
+
+R_rho = c()
+theta_2 = pi/4
+d = 3
+SigmaS=list() #Random 2x2 correlation matrices (necessarily consistent)
+for(j in 1:d){
+  x=runif(2,min=-1,max=1); y=runif(2,min=-1,max=1); SigmaS[[j]]=cov2cor(x%*%t(x) + y%*%t(y))
+}
+
+SigmaS[[1]][1,2] = cos(0)
+SigmaS[[1]][2,1] = cos(0)
+SigmaS[[2]][1,2] = cos(theta_2)
+SigmaS[[2]][2,1] = cos(theta_2)
+
+for (rho in seq(0, pi, length.out = 1000)){
+  SigmaS[[3]][1,2] = cos(rho)
+  SigmaS[[3]][2,1] = cos(rho)
+  
+  result = computeR(list(c(1,2),c(2,3), c(1,3)), SigmaS = SigmaS)
+  R_rho = c(R_rho, result$R)
+}
+
+plot(seq(0, pi, length.out = 1000), R_rho, col="red", pch=19, cex=0.1)
+curve(abs((cos(x)-cos(theta_2)))/2, add=T)
 
 ################## 1-Schatten + maximum modulus LOWER and UPPER BOUND. ########
 
@@ -347,142 +373,19 @@ curve(x^1, add=T)
   lines(ub_n[sort(R_n, index.return=TRUE)$ix], col="green")
 
   
-  ############## NEW BLOCK EXAMPLE ############
-  m = 3 
-  rho = 0.6
-  
-  tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
-  tmp = t(tmp) %*% tmp
-  P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
-  while(norm(P, type="2") > 1){
-    tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
-    tmp = t(tmp) %*% tmp
-    P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
-  }
-  
-  SigmaS=list() 
-  
-  SigmaS[[1]]=diag(2*m)
-  SigmaS[[1]][1:m, (m+1):(2*m)] = P
-  SigmaS[[1]][(m+1):(2*m), 1:m] = t(P)
-  
-  SigmaS[[2]]=diag(2*m)
-  SigmaS[[2]][1:m, (m+1):(2*m)] = -P
-  SigmaS[[2]][(m+1):(2*m), 1:m] = -t(P)
-  
-  SigmaS[[3]]=diag(2*m)
-  SigmaS[[3]][1:m, (m+1):(2*m)] = rho*diag(m)
-  SigmaS[[3]][(m+1):(2*m), 1:m] = rho*diag(m)
-  
-  result = computeR(list(c(1,2,3,4,5,6),c(1,2,3,7,8,9), c(4,5,6,7,8,9)), SigmaS = SigmaS)
-  print(paste("||P||_op = ", norm(P, "2"), "; sqrt(1-rho)/sqrt(2) = ", sqrt((1-rho)/2)))
-  
-  
-  ############## Conjecture for part A
-  m = 3 
-  rho = 0.6
-  
-  result$R = 1
-  
-  
-  while(result$R > 0.001){
-  tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
-  tmp = t(tmp) %*% tmp
-  P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
-  while(norm(P, type="2") > 0.45){
-    tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
-    tmp = t(tmp) %*% tmp
-    P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
-  }
-  
-  SigmaS=list() 
-  
-  SigmaS[[1]]=diag(2*m)
-  SigmaS[[1]][1:m, (m+1):(2*m)] = P
-  SigmaS[[1]][(m+1):(2*m), 1:m] = t(P)
-  
-  SigmaS[[2]]=diag(2*m)
-  SigmaS[[2]][1:m, (m+1):(2*m)] = -P
-  SigmaS[[2]][(m+1):(2*m), 1:m] = -t(P)
-  
-  SigmaS[[3]]=diag(2*m)
-  SigmaS[[3]][1:m, (m+1):(2*m)] = rho*diag(m)
-  SigmaS[[3]][(m+1):(2*m), 1:m] = rho*diag(m)
-  
-  result = computeR(list(c(1,2,3,4,5,6),c(1,2,3,7,8,9), c(4,5,6,7,8,9)), SigmaS = SigmaS)
-  print(paste("||P||_op = ", norm(P, "2"), "; sqrt(1-rho)/sqrt(2) = ", sqrt((1-rho)/2)))
-  }
-  
-#   ############## Conjecture for part B
-  for (m in 2:6){
-    for (kkk in 1:40){
-      R_rho = c()
-      R_cycle = c()
-      
-      tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
-      tmp = t(tmp) %*% tmp
-      P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
-      
-      while(norm(P, type="2") > 1-0.01*kkk){
-        tmp = matrix(runif(2*m^2)*2-1, ncol=2*m)
-        tmp = t(tmp) %*% tmp
-        P = round(as.matrix(cov2cor(tmp)),10)[1:m, (m+1):(2*m)]
-      }
-      
-      SigmaS=list() 
-      
-      SigmaS[[1]]=diag(2*m)
-      SigmaS[[1]][1:m, (m+1):(2*m)] = P
-      SigmaS[[1]][(m+1):(2*m), 1:m] = t(P)
-      
-      SigmaS[[2]]=diag(2*m)
-      SigmaS[[2]][1:m, (m+1):(2*m)] = -P
-      SigmaS[[2]][(m+1):(2*m), 1:m] = -t(P)
-      
-      for (rho in seq(0, 1, length.out=50)){
-        SigmaS[[3]]=diag(2*m)
-        SigmaS[[3]][1:m, (m+1):(2*m)] = rho*diag(m)
-        SigmaS[[3]][(m+1):(2*m), 1:m] = rho*diag(m)
-        
-        result = computeR(list(c(1:(2*m)),c(1:m,(2*m+1):(3*m)),c((m+1):(3*m))), SigmaS = SigmaS)
-        R_rho = c(R_rho, result$R)
-        
-        cycle = list()
-        cycle[[1]] = diag(2)
-        cycle[[1]][1,2] = norm(P, "2"); cycle[[1]][2,1] = norm(P, "2")
-        
-        cycle[[2]] = diag(2)
-        cycle[[2]][1,2] = rho; cycle[[1]][2,1] = rho
-        
-        cycle[[3]] = diag(2)
-        cycle[[3]][1,2] = -norm(P, "2"); cycle[[2]][2,1] = -norm(P, "2")
-        
-        
-        result = computeR(list(c(1,2), c(2,3), c(1,3)), SigmaS = cycle)
-        R_cycle = c(R_cycle, result$R)
-        
-      }
-      
-      png(filename=paste("Documents/phd/MCAR_covariance/code/3_blocks_example/", m, "-",kkk,"_.png"))
-      plot(seq(0, 1, length.out=50), R_rho, type="l",col="red", pch=19, cex=0.1, 
-           main=paste("||P||_op = ", norm(P, "2"), "m = ", m,", c = 1/m"), ylim=c(0,1))
-      lines(seq(0, 1, length.out=50), R_cycle/m, col="blue")
-      lines(seq(0, 1, length.out=50), R_cycle, col="darkblue")
-      curve((1/m)*(norm(P, "2")^2 - (1-x)/2)*(norm(P, "2")^2 - (1-x)/2 >=0), 
-            add=T, col="green")
-      dev.off()
-  }
-  }
+  ############## block 3-cycle ############
   
   ######## SV lower bound
-  for (m in 4:8){
+  for (m in 2:7){
     R_P = c()
+    R_SV = c()
     normP = c()
     R_cycle = c()
     
-    rho = 0.6
+    rho = 0.8
     
-    for (kkk in 1:100){
+    for (kkk in 1:1000){
+      
       P = 0.5*matrix(runif((m)^2)*2-1, ncol=m)
       
       while(norm(P, type="2") > 1){
@@ -512,14 +415,101 @@ curve(x^1, add=T)
                         SigmaS = SigmaS)
       R_P = c(R_P, result$R)
       
+      # Q = diag(sqrt(sqSingValues))
+      # SigmaS=list()
+      # 
+      # SigmaS[[1]]=diag(2*m)
+      # SigmaS[[1]][1:m, (m+1):(2*m)] = Q
+      # SigmaS[[1]][(m+1):(2*m), 1:m] = t(Q)
+      # 
+      # SigmaS[[2]]=diag(2*m)
+      # SigmaS[[2]][1:m, (m+1):(2*m)] = -Q
+      # SigmaS[[2]][(m+1):(2*m), 1:m] = -t(Q)
+      # 
+      # SigmaS[[3]]=diag(2*m)
+      # SigmaS[[3]][1:m, (m+1):(2*m)] = rho*diag(m)
+      # SigmaS[[3]][(m+1):(2*m), 1:m] = rho*diag(m)
+      # 
+      # result = computeR(list(c(1:(2*m)),c(1:m,(2*m+1):(3*m)),c((m+1):(3*m))),
+      #                   SigmaS = SigmaS)
+      # 
+      # R_SV = c(R_SV, result$R)
+      
+      tmp = 0
+      for (j in 1:m){
+        cycle = list()
+        cycle[[1]] = diag(2)
+        cycle[[1]][1,2] = sqrt(sqSingValues[j]); cycle[[1]][2,1] = sqrt(sqSingValues[j])
+  
+        cycle[[2]] = diag(2)
+        cycle[[2]][1,2] = rho; cycle[[2]][2,1] = rho
+  
+        cycle[[3]] = diag(2)
+        cycle[[3]][1,2] = -sqrt(sqSingValues[j]); cycle[[3]][2,1] = -sqrt(sqSingValues[j])
+        
+        resultC = computeR(list(c(1,2), c(2,3), c(1,3)), SigmaS = cycle)
+        tmp = tmp + resultC$R/m
+        print("AAAAAAAA")
+        print(resultC$XS)
+      }
+      R_cycle = c(R_cycle, tmp)
+
+    # if (R_P[kkk]-R_P[kkk]>0.001){
+    #   break
+    # }
+      
+    # if ((R_P[kkk]-R_cycle[kkk]<0.001)&R_cycle[kkk]>0.001){
+    #     break
+    #   }
     }
     
-    if (abs(result$R - norm(P, type="2")^2 + (1-rho)/2)<0.001){
-      break
-    }
     
-    plot(normP, R_P, col="red", pch=19, cex=0.5,
+    plot(normP, R_P, col="red", pch=19, cex=0.2,
          main=paste("m = ", m, "; rho = ", rho), ylim=c(0,1))
+    points(normP, R_SV, col="blue", pch=19, cex=0.2)
+    points(normP, R_cycle, col="cyan", pch=19, cex=0.2)
     curve(x^1, add=T, col="green")
+    
+    # if (R_P[kkk]-R_P[kkk]>0.001){
+    #   break
+    # }
+    
 
   } 
+  
+  result$XS
+  resultC$XS
+  R_P[kkk]
+  R_cycle[kkk]
+  result$SigmaS
+  resultC$SigmaS
+  
+  
+  #### 3-cycle lower bound 
+  R_l = c()
+  rho = 0.55
+  for (l in seq(0,1,length.out=1000)){
+    SigmaS = list()
+    
+    SigmaS[[1]] = diag(2)
+    SigmaS[[1]][1,2] = l; SigmaS[[1]][2,1] = l
+    
+    SigmaS[[2]] = diag(2)
+    SigmaS[[2]][1,2] = -l; SigmaS[[2]][2,1] = -l
+    
+    SigmaS[[3]] = diag(2)
+    SigmaS[[3]][1,2] = rho; SigmaS[[3]][2,1] = rho
+    
+    result = computeR(list(c(1,2),c(2,3), c(1,3)), SigmaS = SigmaS)
+    
+    R_l = c(R_l, result$R)
+    
+  }
+  
+  plot(seq(0,1,length.out=1000), R_l, col="red", pch=19, cex=0.1,
+       main=paste("rho = ", rho), ylim=c(0,1))
+  curve(x^2-(1-rho)/2, add=T, col="green")
+  d = function(x){
+    return(acos(((1-rho)-sqrt(8*x*rho + rho^2-8*x-10*rho+9))/(4*(1-x))))
+  }
+  curve(1-(1-x)/(1+cos(d(x))), col="blue", add = T)
