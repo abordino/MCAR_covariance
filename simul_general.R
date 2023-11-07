@@ -238,6 +238,8 @@ result = computeR(patterns = list(c(2,3,4,5),c(1,3,4,5),c(1,2,4,5),c(1,2,3,5),c(
 AAA = result$SigmaS_prime
 computeR(patterns = list(c(2,3,4,5),c(1,3,4,5),c(1,2,4,5),c(1,2,3,5),c(1,2,3,4)), SigmaS = AAA)$R
 
+
+####################### EXAMPLES TO TEST THE FUNCTION ###########################################
 ############# test on 3-cycle ####################
 R_rho = c()
 d = 3
@@ -287,7 +289,37 @@ for (rho in seq(0, pi, length.out = 1000)){
 plot(seq(0, pi, length.out = 1000), R_rho, col="red", pch=19, cex=0.1)
 curve(abs((cos(x)-cos(theta_2)))/2, add=T)
 
-################## 1-Schatten + maximum modulus LOWER and UPPER BOUND. ########
+################ 3-cycle lower bound #################
+R_l = c()
+rho = 0.55
+for (l in seq(0,1,length.out=1000)){
+  SigmaS = list()
+  
+  SigmaS[[1]] = diag(2)
+  SigmaS[[1]][1,2] = l; SigmaS[[1]][2,1] = l
+  
+  SigmaS[[2]] = diag(2)
+  SigmaS[[2]][1,2] = -l; SigmaS[[2]][2,1] = -l
+  
+  SigmaS[[3]] = diag(2)
+  SigmaS[[3]][1,2] = rho; SigmaS[[3]][2,1] = rho
+  
+  result = computeR(list(c(1,2),c(2,3), c(1,3)), SigmaS = SigmaS)
+  
+  R_l = c(R_l, result$R)
+  
+}
+
+plot(seq(0,1,length.out=1000), R_l, col="red", pch=19, cex=0.1,
+     main=paste("rho = ", rho), ylim=c(0,1))
+curve(x^2-(1-rho)/2, add=T, col="green")
+d = function(x){
+  return(acos(((1-rho)-sqrt(8*x*rho + rho^2-8*x-10*rho+9))/(4*(1-x))))
+}
+curve(1-(1-x)/(1+cos(d(x))), col="blue", add = T)
+
+
+################## 1-Schatten + maximum modulus LOWER and UPPER BOUND ########
 
 m_k_plus_s_k = c()
 R_k = c()
@@ -320,8 +352,7 @@ for (kkk in 1:3000){
 plot(m_k_plus_s_k, R_k, col="red", pch=19, cex=0.1, main="d = 3, |x-y|/2")
 curve(x^1, add=T)
 
-##### EVEN FOR d=3, WHERE R=0 IFF |x-y|=0, THE LOWER BOUND SEEMS TO BE LOOSE. 
-####  WHAT ARE WE MISSING HERE? ANY Patterns? For varying y?
+##### FOR d=3, WHERE R=0 IFF |x-y|=0, THE LOWER BOUND SEEMS TO BE LOOSE. 
   R_y = c()
   for (y in seq(-1, 1, length.out=1000)){
     SigmaS[[1]][1,2] = y
@@ -336,7 +367,7 @@ curve(x^1, add=T)
   curve(1-(1-x)/(1-SigmaS[[2]][1,2]), add=T)
   curve(1-(1+x)/(1+SigmaS[[2]][1,2]), add=T)
   
- #### \mathbb{S} = {[d-2]U{d}, [d-1]} ###############
+#### \mathbb{S} = {[d-2]U{d}, [d-1]} ###############
   R_n = c()
   theta_n = c()
   ub_n = c()
@@ -373,10 +404,10 @@ curve(x^1, add=T)
   lines(ub_n[sort(R_n, index.return=TRUE)$ix], col="green")
 
   
-  ############## block 3-cycle ############
+############## block 3-cycle ############
   
   ######## SV lower bound
-  for (m in 2:7){
+  for (m in 2:11){
     R_P = c()
     R_SV = c()
     normP = c()
@@ -384,7 +415,7 @@ curve(x^1, add=T)
     
     rho = 0.8
     
-    for (kkk in 1:1000){
+    for (kkk in 1:100){
       
       P = 0.5*matrix(runif((m)^2)*2-1, ncol=m)
       
@@ -393,6 +424,7 @@ curve(x^1, add=T)
       }
       
       P = runif(1,0,1)*P
+      
       sqSingValues=eigen(t(P)%*%P)$values
       guess=(1/m)*sum(pmax(sqSingValues-(1-rho)/2,0))
       normP = c(normP, guess)
@@ -414,26 +446,26 @@ curve(x^1, add=T)
       result = computeR(list(c(1:(2*m)),c(1:m,(2*m+1):(3*m)),c((m+1):(3*m))),
                         SigmaS = SigmaS)
       R_P = c(R_P, result$R)
-      
-      # Q = diag(sqrt(sqSingValues))
-      # SigmaS=list()
-      # 
-      # SigmaS[[1]]=diag(2*m)
-      # SigmaS[[1]][1:m, (m+1):(2*m)] = Q
-      # SigmaS[[1]][(m+1):(2*m), 1:m] = t(Q)
-      # 
-      # SigmaS[[2]]=diag(2*m)
-      # SigmaS[[2]][1:m, (m+1):(2*m)] = -Q
-      # SigmaS[[2]][(m+1):(2*m), 1:m] = -t(Q)
-      # 
-      # SigmaS[[3]]=diag(2*m)
-      # SigmaS[[3]][1:m, (m+1):(2*m)] = rho*diag(m)
-      # SigmaS[[3]][(m+1):(2*m), 1:m] = rho*diag(m)
-      # 
-      # result = computeR(list(c(1:(2*m)),c(1:m,(2*m+1):(3*m)),c((m+1):(3*m))),
-      #                   SigmaS = SigmaS)
-      # 
-      # R_SV = c(R_SV, result$R)
+
+      Q = diag(sqrt(sqSingValues))
+      SigmaS=list()
+
+      SigmaS[[1]]=diag(2*m)
+      SigmaS[[1]][1:m, (m+1):(2*m)] = Q
+      SigmaS[[1]][(m+1):(2*m), 1:m] = t(Q)
+
+      SigmaS[[2]]=diag(2*m)
+      SigmaS[[2]][1:m, (m+1):(2*m)] = -Q
+      SigmaS[[2]][(m+1):(2*m), 1:m] = -t(Q)
+
+      SigmaS[[3]]=diag(2*m)
+      SigmaS[[3]][1:m, (m+1):(2*m)] = rho*diag(m)
+      SigmaS[[3]][(m+1):(2*m), 1:m] = rho*diag(m)
+
+      result = computeR(list(c(1:(2*m)),c(1:m,(2*m+1):(3*m)),c((m+1):(3*m))),
+                        SigmaS = SigmaS)
+
+      R_SV = c(R_SV, result$R)
       
       tmp = 0
       for (j in 1:m){
@@ -453,63 +485,12 @@ curve(x^1, add=T)
         print(resultC$XS)
       }
       R_cycle = c(R_cycle, tmp)
-
-    # if (R_P[kkk]-R_P[kkk]>0.001){
-    #   break
-    # }
-      
-    # if ((R_P[kkk]-R_cycle[kkk]<0.001)&R_cycle[kkk]>0.001){
-    #     break
-    #   }
     }
     
     
-    plot(normP, R_P, col="red", pch=19, cex=0.2,
+    plot(normP, 2*R_P, col="red", pch=19, cex=0.2,
          main=paste("m = ", m, "; rho = ", rho), ylim=c(0,1))
     points(normP, R_SV, col="blue", pch=19, cex=0.2)
-    points(normP, R_cycle, col="cyan", pch=19, cex=0.2)
     curve(x^1, add=T, col="green")
-    
-    # if (R_P[kkk]-R_P[kkk]>0.001){
-    #   break
-    # }
-    
-
+    curve(4*x^1, add=T, col="darkgreen")
   } 
-  
-  result$XS
-  resultC$XS
-  R_P[kkk]
-  R_cycle[kkk]
-  result$SigmaS
-  resultC$SigmaS
-  
-  
-  #### 3-cycle lower bound 
-  R_l = c()
-  rho = 0.55
-  for (l in seq(0,1,length.out=1000)){
-    SigmaS = list()
-    
-    SigmaS[[1]] = diag(2)
-    SigmaS[[1]][1,2] = l; SigmaS[[1]][2,1] = l
-    
-    SigmaS[[2]] = diag(2)
-    SigmaS[[2]][1,2] = -l; SigmaS[[2]][2,1] = -l
-    
-    SigmaS[[3]] = diag(2)
-    SigmaS[[3]][1,2] = rho; SigmaS[[3]][2,1] = rho
-    
-    result = computeR(list(c(1,2),c(2,3), c(1,3)), SigmaS = SigmaS)
-    
-    R_l = c(R_l, result$R)
-    
-  }
-  
-  plot(seq(0,1,length.out=1000), R_l, col="red", pch=19, cex=0.1,
-       main=paste("rho = ", rho), ylim=c(0,1))
-  curve(x^2-(1-rho)/2, add=T, col="green")
-  d = function(x){
-    return(acos(((1-rho)-sqrt(8*x*rho + rho^2-8*x-10*rho+9))/(4*(1-x))))
-  }
-  curve(1-(1-x)/(1+cos(d(x))), col="blue", add = T)
