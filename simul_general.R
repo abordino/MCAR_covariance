@@ -224,135 +224,134 @@ computeR = function(patterns=list(), SigmaS=list()) {
   
 }
 
-
-##### TESTING ON A SPECIFIC EXAMPLE (ALL d-1)
-d = 5
-SigmaS=list() 
-for(j in 1:d){
-  A = matrix(runif((d-1)^2)*2-1, ncol=d-1) 
-  tmp_0 = t(A) %*% A
-  SigmaS[[j]]=as.matrix(cov2cor(tmp_0))
-}
-result = computeR(patterns = list(c(2,3,4,5),c(1,3,4,5),c(1,2,4,5),c(1,2,3,5),c(1,2,3,4)), SigmaS = SigmaS)
-
-AAA = result$SigmaS_prime
-computeR(patterns = list(c(2,3,4,5),c(1,3,4,5),c(1,2,4,5),c(1,2,3,5),c(1,2,3,4)), SigmaS = AAA)$R
-
-
-####################### EXAMPLES TO TEST THE FUNCTION ###########################################
-############# test on 3-cycle ####################
-R_rho = c()
-d = 3
-SigmaS=list() #Random 2x2 correlation matrices (necessarily consistent)
-for(j in 1:d){
-  x=runif(2,min=-1,max=1); y=runif(2,min=-1,max=1); SigmaS[[j]]=cov2cor(x%*%t(x) + y%*%t(y))
-}
-
-SigmaS[[1]][1,2] = cos(0)
-SigmaS[[1]][2,1] = cos(0)
-SigmaS[[2]][1,2] = cos(0)
-SigmaS[[2]][2,1] = cos(0)
-
-for (rho in seq(0, pi, length.out = 1000)){
-  SigmaS[[3]][1,2] = cos(rho)
-  SigmaS[[3]][2,1] = cos(rho)
+if (sys.nframe() == 0){
   
-  result = computeR(list(c(1,2),c(2,3), c(1,3)), SigmaS = SigmaS)
-  R_rho = c(R_rho, result$R)
-}
-
-plot(seq(0, pi, length.out = 1000), R_rho, col="red", pch=19, cex=0.1)
-curve(sin(x/2)^2, add=T)
-
-
-R_rho = c()
-theta_2 = pi/4
-d = 3
-SigmaS=list() #Random 2x2 correlation matrices (necessarily consistent)
-for(j in 1:d){
-  x=runif(2,min=-1,max=1); y=runif(2,min=-1,max=1); SigmaS[[j]]=cov2cor(x%*%t(x) + y%*%t(y))
-}
-
-SigmaS[[1]][1,2] = cos(0)
-SigmaS[[1]][2,1] = cos(0)
-SigmaS[[2]][1,2] = cos(theta_2)
-SigmaS[[2]][2,1] = cos(theta_2)
-
-for (rho in seq(0, pi, length.out = 1000)){
-  SigmaS[[3]][1,2] = cos(rho)
-  SigmaS[[3]][2,1] = cos(rho)
-  
-  result = computeR(list(c(1,2),c(2,3), c(1,3)), SigmaS = SigmaS)
-  R_rho = c(R_rho, result$R)
-}
-
-plot(seq(0, pi, length.out = 1000), R_rho, col="red", pch=19, cex=0.1)
-curve(abs((cos(x)-cos(theta_2)))/2, add=T)
-
-################ 3-cycle lower bound #################
-R_l = c()
-rho = 0.55
-for (l in seq(0,1,length.out=1000)){
-  SigmaS = list()
-  
-  SigmaS[[1]] = diag(2)
-  SigmaS[[1]][1,2] = l; SigmaS[[1]][2,1] = l
-  
-  SigmaS[[2]] = diag(2)
-  SigmaS[[2]][1,2] = -l; SigmaS[[2]][2,1] = -l
-  
-  SigmaS[[3]] = diag(2)
-  SigmaS[[3]][1,2] = rho; SigmaS[[3]][2,1] = rho
-  
-  result = computeR(list(c(1,2),c(2,3), c(1,3)), SigmaS = SigmaS)
-  
-  R_l = c(R_l, result$R)
-  
-}
-
-plot(seq(0,1,length.out=1000), R_l, col="red", pch=19, cex=0.1,
-     main=paste("rho = ", rho), ylim=c(0,1))
-curve(x^2-(1-rho)/2, add=T, col="green")
-d = function(x){
-  return(acos(((1-rho)-sqrt(8*x*rho + rho^2-8*x-10*rho+9))/(4*(1-x))))
-}
-curve(1-(1-x)/(1+cos(d(x))), col="blue", add = T)
-
-
-################## 1-Schatten + maximum modulus LOWER and UPPER BOUND ########
-
-m_k_plus_s_k = c()
-R_k = c()
-d=3
-
-for (kkk in 1:3000){
-  SigmaS=list() 
-
-  a = matrix(runif((d)^2)*2-1, ncol=d)
-  tmp_0 = t(a) %*% a
-  SigmaS[[2]]=round(as.matrix(cov2cor(tmp_0)),10)
-  
-  a = matrix(runif((d-1)^2)*2-1, ncol=d-1)
-  tmp_0 = t(a) %*% a
-  SigmaS[[1]]=round(as.matrix(cov2cor(tmp_0)),10)
-  
-  if(is.positive.definite(SigmaS[[1]])==F || is.positive.definite(SigmaS[[2]])==F){
-    print("NOT PSD")
-    next
+  ####################### EXAMPLES TO TEST THE FUNCTION ###########################################
+  ############# test on 3-cycle ####################
+  R_rho = c()
+  d = 3
+  SigmaS=list() #Random 2x2 correlation matrices (necessarily consistent)
+  for(j in 1:d){
+    x=runif(2,min=-1,max=1); y=runif(2,min=-1,max=1); SigmaS[[j]]=cov2cor(x%*%t(x) + y%*%t(y))
   }
-  result = computeR(list(c(1,2),c(1,2,3)), SigmaS = SigmaS)
   
-  R_k = c(R_k, result$R)
+  SigmaS[[1]][1,2] = cos(0)
+  SigmaS[[1]][2,1] = cos(0)
+  SigmaS[[2]][1,2] = cos(0)
+  SigmaS[[2]][2,1] = cos(0)
   
-  tmp = abs(SigmaS[[1]][1,2]-SigmaS[[2]][1,2])/2
-  m_k_plus_s_k = c(m_k_plus_s_k, tmp)
+  for (rho in seq(0, pi, length.out = 1000)){
+    SigmaS[[3]][1,2] = cos(rho)
+    SigmaS[[3]][2,1] = cos(rho)
+    
+    result = computeR(list(c(1,2),c(2,3), c(1,3)), SigmaS = SigmaS)
+    R_rho = c(R_rho, result$R)
+  }
   
-}
-
-plot(m_k_plus_s_k, R_k, col="red", pch=19, cex=0.1, main="d = 3, |x-y|/2")
-curve(x^1, add=T)
-
-##### FOR d=3, WHERE R=0 IFF |x-y|=0, THE LOWER BOUND SEEMS TO BE LOOSE. 
+  plot(seq(0, pi, length.out = 1000), R_rho, col="red", pch=19, cex=0.1)
+  curve(sin(x/2)^2, add=T)
+  
+  
+  R_rho = c()
+  theta_2 = pi/4
+  d = 3
+  SigmaS=list() #Random 2x2 correlation matrices (necessarily consistent)
+  for(j in 1:d){
+    x=runif(2,min=-1,max=1); y=runif(2,min=-1,max=1); SigmaS[[j]]=cov2cor(x%*%t(x) + y%*%t(y))
+  }
+  
+  SigmaS[[1]][1,2] = cos(0)
+  SigmaS[[1]][2,1] = cos(0)
+  SigmaS[[2]][1,2] = cos(theta_2)
+  SigmaS[[2]][2,1] = cos(theta_2)
+  
+  for (rho in seq(0, pi, length.out = 1000)){
+    SigmaS[[3]][1,2] = cos(rho)
+    SigmaS[[3]][2,1] = cos(rho)
+    
+    result = computeR(list(c(1,2),c(2,3), c(1,3)), SigmaS = SigmaS)
+    R_rho = c(R_rho, result$R)
+  }
+  
+  plot(seq(0, pi, length.out = 1000), R_rho, col="red", pch=19, cex=0.1)
+  curve(abs((cos(x)-cos(theta_2)))/2, add=T)
+  
+  ################ 3-cycle lower bound #################
+  R_l = c()
+  rho = 0.55
+  for (l in seq(0,1,length.out=1000)){
+    SigmaS = list()
+    
+    SigmaS[[1]] = diag(2)
+    SigmaS[[1]][1,2] = l; SigmaS[[1]][2,1] = l
+    
+    SigmaS[[2]] = diag(2)
+    SigmaS[[2]][1,2] = -l; SigmaS[[2]][2,1] = -l
+    
+    SigmaS[[3]] = diag(2)
+    SigmaS[[3]][1,2] = rho; SigmaS[[3]][2,1] = rho
+    
+    result = computeR(list(c(1,2),c(2,3), c(1,3)), SigmaS = SigmaS)
+    
+    R_l = c(R_l, result$R)
+    
+  }
+  
+  plot(seq(0,1,length.out=1000), R_l, col="red", pch=19, cex=0.1,
+       main=paste("rho = ", rho), ylim=c(0,1))
+  curve(x^2-(1-rho)/2, add=T, col="green")
+  d = function(x){
+    return(acos(((1-rho)-sqrt(8*x*rho + rho^2-8*x-10*rho+9))/(4*(1-x))))
+  }
+  curve(1-(1-x)/(1+cos(d(x))), col="blue", add = T)
+  
+  ##### TESTING ON A SPECIFIC EXAMPLE (ALL d-1)
+  d = 5
+  SigmaS=list() 
+  for(j in 1:d){
+    A = matrix(runif((d-1)^2)*2-1, ncol=d-1) 
+    tmp_0 = t(A) %*% A
+    SigmaS[[j]]=as.matrix(cov2cor(tmp_0))
+  }
+  result = computeR(patterns = list(c(2,3,4,5),c(1,3,4,5),c(1,2,4,5),c(1,2,3,5),c(1,2,3,4)), SigmaS = SigmaS)
+  
+  AAA = result$SigmaS_prime
+  computeR(patterns = list(c(2,3,4,5),c(1,3,4,5),c(1,2,4,5),c(1,2,3,5),c(1,2,3,4)), SigmaS = AAA)$R
+  
+  ################## 1-Schatten + maximum modulus LOWER and UPPER BOUND ########
+  
+  m_k_plus_s_k = c()
+  R_k = c()
+  d=3
+  
+  for (kkk in 1:3000){
+    SigmaS=list() 
+    
+    a = matrix(runif((d)^2)*2-1, ncol=d)
+    tmp_0 = t(a) %*% a
+    SigmaS[[2]]=round(as.matrix(cov2cor(tmp_0)),10)
+    
+    a = matrix(runif((d-1)^2)*2-1, ncol=d-1)
+    tmp_0 = t(a) %*% a
+    SigmaS[[1]]=round(as.matrix(cov2cor(tmp_0)),10)
+    
+    if(is.positive.definite(SigmaS[[1]])==F || is.positive.definite(SigmaS[[2]])==F){
+      print("NOT PSD")
+      next
+    }
+    result = computeR(list(c(1,2),c(1,2,3)), SigmaS = SigmaS)
+    
+    R_k = c(R_k, result$R)
+    
+    tmp = abs(SigmaS[[1]][1,2]-SigmaS[[2]][1,2])/2
+    m_k_plus_s_k = c(m_k_plus_s_k, tmp)
+    
+  }
+  
+  plot(m_k_plus_s_k, R_k, col="red", pch=19, cex=0.1, main="d = 3, |x-y|/2")
+  curve(x^1, add=T)
+  
+  ##### FOR d=3, WHERE R=0 IFF |x-y|=0, THE LOWER BOUND SEEMS TO BE LOOSE. 
   R_y = c()
   for (y in seq(-1, 1, length.out=1000)){
     SigmaS[[1]][1,2] = y
@@ -367,44 +366,44 @@ curve(x^1, add=T)
   curve(1-(1-x)/(1-SigmaS[[2]][1,2]), add=T)
   curve(1-(1+x)/(1+SigmaS[[2]][1,2]), add=T)
   
-#### \mathbb{S} = {[d-2]U{d}, [d-1]} ###############
+  #### \mathbb{S} = {[d-2]U{d}, [d-1]} ###############
   R_n = c()
   theta_n = c()
   ub_n = c()
   d = 7
   
   for (i in 1:1000){
-
-  SigmaS=list() 
-  for(j in 1:2){
-    A = matrix(runif((d-1)^2)*2-1, ncol=d-1)
-    tmp_0 = t(A) %*% A
-    SigmaS[[j]]=round(as.matrix(cov2cor(tmp_0)),10)
+    
+    SigmaS=list() 
+    for(j in 1:2){
+      A = matrix(runif((d-1)^2)*2-1, ncol=d-1)
+      tmp_0 = t(A) %*% A
+      SigmaS[[j]]=round(as.matrix(cov2cor(tmp_0)),10)
+    }
+    
+    result = computeR(list(c(1,2,3,4,5,7),c(1,2,3,4,5,6)), SigmaS = SigmaS)
+    R_n = c(R_n, result$R)
+    
+    O = abs(SigmaS[[1]][1:(d-2),1:(d-2)] - SigmaS[[2]][1:(d-2),1:(d-2)])
+    i = which(O==max(O), arr.ind=T)[1,1]
+    j = which(O==max(O), arr.ind=T)[1,2]
+    
+    tmp = abs(SigmaS[[1]][i,j] - SigmaS[[2]][i,j])/2
+    theta_n = c(theta_n, tmp)
+    
+    tmp = 1 - min((1-min(SigmaS[[1]][i,j],SigmaS[[2]][i,j]))/(1-max(SigmaS[[1]][i,j],SigmaS[[2]][i,j])), 
+                  (1+min(SigmaS[[1]][i,j],SigmaS[[2]][i,j]))/(1+max(SigmaS[[1]][i,j],SigmaS[[2]][i,j])))
+    ub_n = c(ub_n, tmp)
+    
   }
-  
-  result = computeR(list(c(1,2,3,4,5,7),c(1,2,3,4,5,6)), SigmaS = SigmaS)
-  R_n = c(R_n, result$R)
-  
-  O = abs(SigmaS[[1]][1:(d-2),1:(d-2)] - SigmaS[[2]][1:(d-2),1:(d-2)])
-  i = which(O==max(O), arr.ind=T)[1,1]
-  j = which(O==max(O), arr.ind=T)[1,2]
-  
-  tmp = abs(SigmaS[[1]][i,j] - SigmaS[[2]][i,j])/2
-  theta_n = c(theta_n, tmp)
-  
-  tmp = 1 - min((1-min(SigmaS[[1]][i,j],SigmaS[[2]][i,j]))/(1-max(SigmaS[[1]][i,j],SigmaS[[2]][i,j])), 
-                (1+min(SigmaS[[1]][i,j],SigmaS[[2]][i,j]))/(1+max(SigmaS[[1]][i,j],SigmaS[[2]][i,j])))
-  ub_n = c(ub_n, tmp)
-  
-}
   
   plot(1:1000, sort(R_n), col="red", pch=19, cex=0.1, ylim = c(0,1), type="l",
        main=paste("d = 7, for varying y, and x = ", SigmaS[[1]][1,2]))
   lines(theta_n[sort(R_n, index.return=TRUE)$ix], col="blue")
   lines(ub_n[sort(R_n, index.return=TRUE)$ix], col="green")
-
   
-############## block 3-cycle ############
+  
+  ############## block 3-cycle ############
   
   ######## SV lower bound
   for (m in 2:11){
@@ -446,25 +445,25 @@ curve(x^1, add=T)
       result = computeR(list(c(1:(2*m)),c(1:m,(2*m+1):(3*m)),c((m+1):(3*m))),
                         SigmaS = SigmaS)
       R_P = c(R_P, result$R)
-
+      
       Q = diag(sqrt(sqSingValues))
       SigmaS=list()
-
+      
       SigmaS[[1]]=diag(2*m)
       SigmaS[[1]][1:m, (m+1):(2*m)] = Q
       SigmaS[[1]][(m+1):(2*m), 1:m] = t(Q)
-
+      
       SigmaS[[2]]=diag(2*m)
       SigmaS[[2]][1:m, (m+1):(2*m)] = -Q
       SigmaS[[2]][(m+1):(2*m), 1:m] = -t(Q)
-
+      
       SigmaS[[3]]=diag(2*m)
       SigmaS[[3]][1:m, (m+1):(2*m)] = rho*diag(m)
       SigmaS[[3]][(m+1):(2*m), 1:m] = rho*diag(m)
-
+      
       result = computeR(list(c(1:(2*m)),c(1:m,(2*m+1):(3*m)),c((m+1):(3*m))),
                         SigmaS = SigmaS)
-
+      
       R_SV = c(R_SV, result$R)
       
       tmp = 0
@@ -472,10 +471,10 @@ curve(x^1, add=T)
         cycle = list()
         cycle[[1]] = diag(2)
         cycle[[1]][1,2] = sqrt(sqSingValues[j]); cycle[[1]][2,1] = sqrt(sqSingValues[j])
-  
+        
         cycle[[2]] = diag(2)
         cycle[[2]][1,2] = rho; cycle[[2]][2,1] = rho
-  
+        
         cycle[[3]] = diag(2)
         cycle[[3]][1,2] = -sqrt(sqSingValues[j]); cycle[[3]][2,1] = -sqrt(sqSingValues[j])
         
@@ -494,3 +493,5 @@ curve(x^1, add=T)
     curve(x^1, add=T, col="green")
     curve(4*x^1, add=T, col="darkgreen")
   } 
+}
+
