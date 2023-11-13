@@ -19,10 +19,10 @@ which we believe to be minimax optimal, at least in a couple of examples. Furthe
 Create an R package to implement this test. 
 
 
-1. Find $`\hat{Q}_\mathbb{S}`$ from the dual decomposition $`\hat{\Sigma}_\mathbb{S} = (1-R(\hat{\Sigma}_\mathbb{S}))\hat{Q}_\mathbb{S} + R(\hat{\Sigma}_\mathbb{S})\hat{\Sigma}'_\mathbb{S}`$.At the same time, define $`R^{(0)} = R(\hat{\Sigma}_\mathbb{S})`$.
-2. Rotate the original data $`X_\mathbb{S}`$, i.e. for all $`S \in \mathbb{S}`$, for all $`i \in [n_S]`$ `\textbf{do} $\tilde{X}_{S,i} = \hat{Q}_S^{1/2}\hat{\Sigma}_S^{-1/2}X_{S,i}`$.
+1. **Find** $`\hat{Q}_\mathbb{S}`$ from the dual decomposition $`\hat{\Sigma}_\mathbb{S} = (1-R(\hat{\Sigma}_\mathbb{S}))\hat{Q}_\mathbb{S} + R(\hat{\Sigma}_\mathbb{S})\hat{\Sigma}'_\mathbb{S}`$. At the same time, **define** $`R^{(0)} = R(\hat{\Sigma}_\mathbb{S})`$.
+2. Rotate the original data $`X_\mathbb{S}`$, i.e. for all $`S \in \mathbb{S}`$, for all $`i \in [n_S]`$ **do** $`\tilde{X}_{S,i} = \hat{Q}_S^{1/2}\hat{\Sigma}_S^{-1/2}X_{S,i}`$.
 3. $`b \in [B]`$
-    4. \quad For all $`S \in \mathbb{S}`$, bootstrap from $`\tilde{X}_S`$. 
-    5. \quad Compute $`\Sigma_\mathbb{S}^{(b)} = (\Sigma_S^{(b)})_{S \in \mathbb{S}}`$, where $`\Sigma_S^{(b)} = \operatorname{Cor}(\tilde{X}_S^{(b)})`$.
-    6. \quad Compute $`R^{(b)} = R(\Sigma_\mathbb{S}^{(b)})`$.
-7. Reject $`H_0`$ if and only if $`1 + \sum_{i=1}^B \mathbbm{1}\{R^{(b)} \leq R^{(0)}\} \geq \alpha(1+B)`$.
+    4. \quad For all $`S \in \mathbb{S}`$, **bootstrap** from $`\tilde{X}_S`$. 
+    5. \quad **Compute** $`\Sigma_\mathbb{S}^{(b)} = (\Sigma_S^{(b)})_{S \in \mathbb{S}}`$, where $`\Sigma_S^{(b)} = \operatorname{Cor}(\tilde{X}_S^{(b)})`$.
+    6. \quad **Compute** $`R^{(b)} = R(\Sigma_\mathbb{S}^{(b)})`$.
+7. **Reject** $`H_0`$ if and only if $`1 + \sum_{i=1}^B \mathbbm{1}\{R^{(b)} \leq R^{(0)}\} \geq \alpha(1+B)`$.
