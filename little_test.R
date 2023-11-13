@@ -2,17 +2,24 @@ little_test = function(X, alpha){
   s = prelim.norm(as.matrix(X))
   thetahat = em.norm(s)
   mu_true = getparam.norm(s,thetahat,corr=TRUE)$mu
-  Sigma_true = getparam.norm(s,thetahat,corr=TRUE)$r     # possibly also right-multiply by diag(getparam.norm(s,thetahat,corr=TRUE)$sdv)%*%
+  Sigma_true = getparam.norm(s,thetahat,corr=TRUE)$r
   
-  d_squared = n*t((colMeans(X1) - mu_true[c(1,2)]))%*%solve(n*Sigma_true[c(1,2),c(1,2)]/(n-1))%*%t(t((colMeans(X1) - mu_true[c(1,2)]))) +
-    n*t((colMeans(X2) - mu_true[c(2,3)]))%*%solve(n*Sigma_true[c(2,3),c(2,3)]/(n-1))%*%t(t((colMeans(X2) - mu_true[c(2,3)]))) +
-    n*t((colMeans(X3) - mu_true[c(1,3)]))%*%solve(n*Sigma_true[c(1,3),c(1,3)]/(n-1))%*%t(t((colMeans(X3) - mu_true[c(1,3)])))
+  result = get_SigmaS(X)
+  SigmaS = result$SigmaS
+  patterns = result$pattern
+  n_pattern = result$n_pattern
+  data_pattern = result$data_pattern
   
-  d_cov = n*(sum(diag(cor(X1)%*%solve(Sigma_true[c(1,2),c(1,2)]))) - 2 - log(det(cor(X1))) + log(det(Sigma_true[c(1,2),c(1,2)]))) +
-    n*(sum(diag(cor(X2)%*%solve(Sigma_true[c(2,3),c(2,3)]))) - 2 - log(det(cor(X2))) + log(det(Sigma_true[c(2,3),c(2,3)]))) +
-    n*(sum(diag(cor(X3)%*%solve(Sigma_true[c(1,3),c(1,3)]))) - 2 - log(det(cor(X3))) + log(det(Sigma_true[c(1,3),c(1,3)])))
-  
-  d_aug = d_squared + d_cov
+  d_aug = 0
+  for (i in 1:n_pattern){
+    n_S = dim(data_pattern[[i]])[1]
+    x_S = colMeans(data_pattern[[i]]) - mu_true[patterns[[i]]]
+    L_S = Sigma_true[patterns[[i]],patterns[[i]]]
+    Sigma_S = cor(data_pattern[[i]])
+    d_aug = d_aug + n_S*t(x_S)%*%solve(n_S*L_S/(n_S-1))%*%t(t(x_S)) + 
+      n_S*(sum(diag(Sigma_S%*%solve(L_S))) - 2 - log(det(Sigma_S)) + log(det(L_S)))
+  }
+
   little_d = (d_aug > qchisq(1-alpha, 6))
   return(little_d)
 }

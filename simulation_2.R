@@ -8,32 +8,33 @@ library(MASS)
 library(norm)
 library(foreach)
 library(doParallel)
+library(copula)
+library(missMethods)
+library(misty)
+library(dplyr)
 
 ######### example 1 on 3-cycle ############
 alpha = 0.05
 n = 200
-M = 1000
-t3 = pi/6
-t2 = pi/4
+M = 50
 
 little_power = c()
 our_power = c()
 R = c()
 
-for(t1 in seq(t2-t3, pi - t3, length.out=20)){
+# Select the copula
+cp = claytonCopula(param = c(1), dim = 5)
 
-  #### POPULATION LEVEL ######
-  SigmaS=list() #Random 2x2 correlation matrices (necessarily consistent)
-  for(j in 1:3){
-    x=runif(2,min=-1,max=1); y=runif(2,min=-1,max=1); SigmaS[[j]]=cov2cor(x%*%t(x) + y%*%t(y))
-  }
+# Generate the multivariate distribution (in this case it is just bivariate) with normal and t marginals
+P = mvdc(copula = cp, margins = c("exp", "exp", "exp", "exp", "exp"),
+         paramMargins = list(list(1), list(1), list(1), list(1), list(1)))
+
+X = rMvdc(3*n, P)
+
+for(p in seq(0.03, 0.3, length.out=10)){
   
-  SigmaS[[1]][1,2] = cos(t1)
-  SigmaS[[1]][2,1] = cos(t1)
-  SigmaS[[2]][1,2] = cos(t2)
-  SigmaS[[2]][2,1] = cos(t2)
-  SigmaS[[3]][1,2] = cos(t3)
-  SigmaS[[3]][2,1] = cos(t3)
+
+  X = delete_MCAR(X, p, c(1,4,5))
   
   R = c(R, computeR(list(c(1,2),c(2,3), c(1,3)), SigmaS)$R)
   
@@ -42,26 +43,21 @@ for(t1 in seq(t2-t3, pi - t3, length.out=20)){
   little_decisions = c()
   our_decisions = c()
   for (i in 1:100){
-    
-    #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
     X1 = mvrnorm(n, c(0,0), SigmaS[[1]])
     X2 = mvrnorm(n, c(0,0), SigmaS[[2]])
     X3 = mvrnorm(n, c(0,0), SigmaS[[3]])
-  
+    
+    # create dataset with NA's
     columns = c("X1","X2","X3") 
     X = data.frame(matrix(nrow = 3*n, ncol = length(columns)))
     X[1:n, c("X1", "X2")] = X1
     X[(n+1):(2*n), c("X2", "X3")] = X2
     X[(2*n+1):(3*n), c("X1", "X3")] = X3
-    X = as.matrix(X)
     
-    ### run little's test
     little_decisions = c(little_decisions, little_test(X, alpha))
-    
-    ### run our tests
     our_decisions = c(our_decisions, MCAR_corr_test(X, alpha, B = 99))
   }
-    
+  
   little_power = c(little_power, mean(little_decisions))
   our_power = c(our_power, mean(our_decisions))
 }
@@ -69,4 +65,3 @@ for(t1 in seq(t2-t3, pi - t3, length.out=20)){
 plot(R, little_power, col="green", ylim = c(0,1), pch=18)
 points(R, our_power, col="blue", pch=19)
 abline(h = alpha, col="red")
-
