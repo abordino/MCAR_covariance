@@ -25,4 +25,6 @@ Create an R package to implement this test.
 4.  For all $`S \in \mathbb{S}`$, **bootstrap** from $`\tilde{X}_S`$. 
 5.  $`\quad`$ **Compute** $`\Sigma_\mathbb{S}^{(b)} = (\Sigma_S^{(b)})_{S \in \mathbb{S}}`$, where $`\Sigma_S^{(b)} = Corr(\tilde{X}_S^{(b)})`$.
 6.  $`\quad`$ **Compute** $`R^{(b)} = R(\Sigma_\mathbb{S}^{(b)})`$.
-7. **Reject** $`H_0`$ if and only if ```math 1 + \sum_{i=1}^B 1 \{R^{(b)} \leq R^{(0)}\} \geq \alpha(1+B). ```
+7. **Reject** $`H_0`$ if and only if ```math
+    1 + \sum_{i=1}^B 1 \{R^{(b)} \leq R^{(0)}\} \geq \alpha(1+B).
+ ```
