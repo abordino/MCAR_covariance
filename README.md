@@ -23,6 +23,6 @@ Create an R package to implement this test.
 2. Rotate the original data $`X_\mathbb{S}`$, i.e. for all $`S \in \mathbb{S}`$, for all $`i \in [n_S]`$ **do** $`\tilde{X}_{S,i} = \hat{Q}_S^{1/2}\hat{\Sigma}_S^{-1/2}X_{S,i}`$.
 3. For all $`b \in [B]`$
     4.  For all $`S \in \mathbb{S}`$, **bootstrap** from $`\tilde{X}_S`$. 
-    5.  **Compute** $`\Sigma_\mathbb{S}^{(b)} = (\Sigma_S^{(b)})_{S \in \mathbb{S}}`$, where $`\Sigma_S^{(b)} = \operatorname{Cor}(\tilde{X}_S^{(b)})`$.
+    5.  **Compute** $`\Sigma_\mathbb{S}^{(b)} = (\Sigma_S^{(b)})_{S \in \mathbb{S}}`$, where $`\Sigma_S^{(b)} = Corr(\tilde{X}_S^{(b)})`$.
     6. \quad **Compute** $`R^{(b)} = R(\Sigma_\mathbb{S}^{(b)})`$.
 7. **Reject** $`H_0`$ if and only if $`1 + \sum_{i=1}^B 1\{R^{(b)} \leq R^{(0)}\} \geq \alpha(1+B)`$.
