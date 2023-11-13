@@ -15,53 +15,41 @@ library(dplyr)
 
 ######### example 1 on 3-cycle ############
 alpha = 0.05
-n = 200
-M = 50
+n = 1000
+M = 1000
 
-little_power = c()
-our_power = c()
-R = c()
+little_errorI = c()
+our_errorI = c()
 
-# Select the copula
-cp = claytonCopula(param = c(1), dim = 5)
-
-# Generate the multivariate distribution (in this case it is just bivariate) with normal and t marginals
-P = mvdc(copula = cp, margins = c("exp", "exp", "exp", "exp", "exp"),
-         paramMargins = list(list(1), list(1), list(1), list(1), list(1)))
-
-X = rMvdc(3*n, P)
+d = 6
+A = matrix(runif(d^2)*2-1, ncol=d) 
+Sigma = cov2cor(t(A) %*% A)
+data = mvrnorm(n, rep(0,d), Sigma)
 
 for(p in seq(0.03, 0.3, length.out=10)){
   
-
-  X = delete_MCAR(X, p, c(1,4,5))
-  
-  R = c(R, computeR(list(c(1,2),c(2,3), c(1,3)), SigmaS)$R)
-  
-  
-  ###### SAMPLE LEVEL, REPEATING THE TEST M TIMES #######
   little_decisions = c()
   our_decisions = c()
-  for (i in 1:100){
-    X1 = mvrnorm(n, c(0,0), SigmaS[[1]])
-    X2 = mvrnorm(n, c(0,0), SigmaS[[2]])
-    X3 = mvrnorm(n, c(0,0), SigmaS[[3]])
-    
-    # create dataset with NA's
-    columns = c("X1","X2","X3") 
-    X = data.frame(matrix(nrow = 3*n, ncol = length(columns)))
-    X[1:n, c("X1", "X2")] = X1
-    X[(n+1):(2*n), c("X2", "X3")] = X2
-    X[(2*n+1):(3*n), c("X1", "X3")] = X3
-    
-    little_decisions = c(little_decisions, little_test(X, alpha))
-    our_decisions = c(our_decisions, MCAR_corr_test(X, alpha, B = 99))
-  }
   
-  little_power = c(little_power, mean(little_decisions))
-  our_power = c(our_power, mean(our_decisions))
+  for (i in 1:M){
+    X = delete_MCAR(data, p, c(1,5,6))
+    print("------------------------------------------------------------------")
+    print(i)
+    print("------------------------------------------------------------------")
+    
+    # if something is singular, skip iteration
+    skip_to_next = FALSE
+    try({
+      little_decisions = c(little_decisions, little_test(X, alpha))
+      our_decisions = c(our_decisions, MCAR_corr_test(X, alpha, B = 99))
+    }, 
+    silent = TRUE)
+  
+  little_errorI = c(little_errorI, mean(little_decisions))
+  our_errorI = c(our_errorI, mean(our_decisions))
+  }
 }
 
-plot(R, little_power, col="green", ylim = c(0,1), pch=18)
-points(R, our_power, col="blue", pch=19)
+plot(seq(0.03, 0.3, length.out=10), our_errorI, col="blue", ylim = c(0,1), pch=18)
+points(seq(0.03, 0.3, length.out=10), little_errorI, col="green", pch=19)
 abline(h = alpha, col="red")

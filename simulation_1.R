@@ -22,7 +22,7 @@ our_power = c()
 R = c()
 
 for(t1 in seq(t2-t3, pi - t3, length.out=20)){
-
+  
   #### POPULATION LEVEL ######
   SigmaS=list() #Random 2x2 correlation matrices (necessarily consistent)
   for(j in 1:3){
@@ -42,13 +42,13 @@ for(t1 in seq(t2-t3, pi - t3, length.out=20)){
   ###### SAMPLE LEVEL, REPEATING THE TEST M TIMES #######
   little_decisions = c()
   our_decisions = c()
-  for (i in 1:100){
+  for (i in 1:M){
     
     #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
     X1 = mvrnorm(n, c(0,0), SigmaS[[1]])
     X2 = mvrnorm(n, c(0,0), SigmaS[[2]])
     X3 = mvrnorm(n, c(0,0), SigmaS[[3]])
-  
+    
     columns = c("X1","X2","X3") 
     X = data.frame(matrix(nrow = 3*n, ncol = length(columns)))
     X[1:n, c("X1", "X2")] = X1
@@ -62,7 +62,7 @@ for(t1 in seq(t2-t3, pi - t3, length.out=20)){
     ### run our tests
     our_decisions = c(our_decisions, MCAR_corr_test(X, alpha, B = 99))
   }
-    
+  
   little_power = c(little_power, mean(little_decisions))
   our_power = c(our_power, mean(our_decisions))
 }
@@ -107,7 +107,7 @@ for(t1 in seq(t2-t3, pi - t3, length.out=20)){
   ###### SAMPLE LEVEL, REPEATING THE TEST M TIMES #######
   little_decisions = c()
   our_decisions = c()
-  for (i in 1:100){
+  for (i in 1:M){
     
     #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
     X1 = mvrnorm(n, c(0,0), SigmaS[[1]])
@@ -177,7 +177,7 @@ for(t1 in seq(t2-t3, pi - t3, length.out=20)){
   ###### SAMPLE LEVEL, REPEATING THE TEST M TIMES #######
   little_decisions = c()
   our_decisions = c()
-  for (i in 1:100){
+  for (i in 1:M){
     
     #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
     X1 = mvrnorm(n, c(0,0), SigmaS[[1]])
@@ -245,7 +245,7 @@ for(t1 in seq(t2-t3, pi - t3, length.out=20)){
   ###### SAMPLE LEVEL, REPEATING THE TEST M TIMES #######
   little_decisions = c()
   our_decisions = c()
-  for (i in 1:100){
+  for (i in 1:M){
     
     #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
     X1 = mvrnorm(n, c(0,0), SigmaS[[1]])

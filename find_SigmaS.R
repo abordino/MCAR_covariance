@@ -30,6 +30,20 @@ get_SigmaS = function(X){
     data_pattern[[i]] = apply(matrix(tmp[, patterns[[i]]], ncol = length(patterns[[i]])), c(1,2), as.numeric)
   }
   
+  deletion = c()
+  for (i in 1:n_pattern){
+    if (dim(data_pattern[[i]])[1] < 3){ # put 3 in order for Little's test to work
+      deletion = c(deletion, i)
+    }
+  }
+  
+  if (length(deletion) > 0){
+    data_pattern = data_pattern[-deletion]
+    patterns = patterns[-deletion]
+  }
+  
+  n_pattern = n_pattern - length(deletion)
+  
   SigmaS = list()
   for (i in 1:n_pattern){
     SigmaS[[i]] = cor(data_pattern[[i]])
@@ -48,6 +62,8 @@ if (sys.nframe() == 0){
   X = rMvdc(n, P)
   X = delete_MCAR(X, 0.1, c(1,4,5))
   
-  get_SigmaS(X)$SigmaS
-  get_SigmaS(X)$pattern
+  result = get_SigmaS(X)
+  print(result$data_pattern)
+  print(result$SigmaS)
+  print(result$pattern)
 }
