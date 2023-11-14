@@ -2,18 +2,15 @@ setwd("~/Documents/phd/MCAR_covariance/simulations")
 source("simul_general.R")
 source("little_test.R")
 source("bootstrap_test.R")
-library(naniar)
+source("find_SigmaS.R")
 library(missMethods)
 library(MASS)
 library(norm)
-library(foreach)
-library(doParallel)
-library(ggplot2)
 
 ######### 3-cycle: setting 1 ############
 alpha = 0.05
 n = 200
-M = 1000
+M = 200
 t3 = pi/6
 t2 = pi/4
 
@@ -78,7 +75,7 @@ legend("center",
 ######### 3-cycle: setting 2 ############
 alpha = 0.05
 n = 200
-M = 1000
+M = 200
 t3 = pi/6
 t2 = pi/6 + 0.001
 
@@ -148,7 +145,7 @@ legend("center",
 ######### 3-cycle: setting 3 ############
 alpha = 0.05
 n = 200
-M = 1000
+M = 200
 t3 = pi/6
 t2 = pi/3
 
@@ -216,7 +213,7 @@ legend("center",
 ######### 3-cycle: setting 4 ############
 alpha = 0.05
 n = 200
-M = 1000
+M = 200
 t3 = pi/6
 t2 = 5*pi/12
 
@@ -263,11 +260,11 @@ for(t1 in seq(t2-t3, pi - t3, length.out=20)){
     little_decisions = c(little_decisions, little_test(X, alpha))
     
     ### run our tests
-    our_decisions = c(our_decisions, MCAR_corr_test(X, alpha, B = 99))
+    # our_decisions = c(our_decisions, MCAR_corr_test(X, alpha, B = 99))
   }
   
   little_power = c(little_power, mean(little_decisions))
-  our_power = c(our_power, mean(our_decisions))
+  # our_power = c(our_power, mean(our_decisions))
 }
 
 plot(R, little_power, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "")

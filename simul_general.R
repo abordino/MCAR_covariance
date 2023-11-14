@@ -136,27 +136,27 @@ computeR = function(patterns=list(), SigmaS=list()) {
   R = 1-SDP$pobj
   
   #----------------------------------------------------------------------------------------
-  ####### THE FINAL OUTPUT
-  #----------------------------------------------------------------------------------------
-  print("------------------------------------------------")
-  print("COMPUTE R FOR A SEQUENCE OF CORRELATION MATRICES")
-  print("------------------------------------------------")
-  print(paste("The dimensionality of the problem is",d))
-  print(paste("There are", card_patterns, "patterns:"))
-  for (S in patterns){
-    print(S)
-  }
-  print("------------------------------------------------")
-  print("The sequence of correlation matrices is:")
-  print(SigmaS)
-  print("------------------------------------------------")
-  print(paste("R is equal to ", R))
-  is_compatibile = (R < 0.0001)
-  if (is_compatibile == T){
-    print("Hence, SigmaS is compatible")
-  } else{
-    print("Hence, SigmaS is not compatible")
-  }
+  # ####### THE FINAL OUTPUT
+  # #----------------------------------------------------------------------------------------
+  # print("------------------------------------------------")
+  # print("COMPUTE R FOR A SEQUENCE OF CORRELATION MATRICES")
+  # print("------------------------------------------------")
+  # print(paste("The dimensionality of the problem is",d))
+  # print(paste("There are", card_patterns, "patterns:"))
+  # for (S in patterns){
+  #   print(S)
+  # }
+  # print("------------------------------------------------")
+  # print("The sequence of correlation matrices is:")
+  # print(SigmaS)
+  # print("------------------------------------------------")
+  # print(paste("R is equal to ", R))
+  # is_compatibile = (R < 0.0001)
+  # if (is_compatibile == T){
+  #   print("Hence, SigmaS is compatible")
+  # } else{
+  #   print("Hence, SigmaS is not compatible")
+  # }
   
   #----------------------------------------------------------------------------------------
   # Optimal XS 

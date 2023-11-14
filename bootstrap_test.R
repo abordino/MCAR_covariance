@@ -8,6 +8,13 @@ MCAR_corr_test = function(X, alpha, B){
   n_pattern = result$n_pattern
   data_pattern = result$data_pattern
   
+  for (i in length(SigmaS)){
+    if (min(eigen(SigmaS[[i]])$values) < 10^-7){
+      print("SigmaS is singular!")
+      return(SigmaS)
+    }
+  }
+  
   tmp = computeR(patterns, SigmaS)
   
   R_hat_0 = tmp$R

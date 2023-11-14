@@ -4,7 +4,8 @@ library(missMethods)
 get_SigmaS = function(X){
   
   #### create vector with indicators of NA's
-  v = 1:dim(X)[2]
+  d = dim(X)[2]
+  v = 1:d
   pattern_indicator = unique(na.indicator(X))
   n_pattern = dim(pattern_indicator)[1]
   
@@ -32,7 +33,7 @@ get_SigmaS = function(X){
   
   deletion = c()
   for (i in 1:n_pattern){
-    if (dim(data_pattern[[i]])[1] < 3){ # put 3 in order for Little's test to work
+    if (dim(data_pattern[[i]])[1] < 10){ # put 3 in order for Little's test to work
       deletion = c(deletion, i)
     }
   }
@@ -50,7 +51,8 @@ get_SigmaS = function(X){
   }
   
   my_list = list("pattern" = patterns, "n_pattern" = n_pattern,
-                 "data_pattern" = data_pattern, "SigmaS" = SigmaS)
+                 "data_pattern" = data_pattern, "SigmaS" = SigmaS, 
+                 "ambient_dimension" = d)
   return(my_list)
 }
 
