@@ -1,5 +1,5 @@
 MCAR_corr_test = function(X, alpha, B){
-  source("simul_general.R")
+  source("computeR.R")
   source("find_SigmaS.R")
   
   result = get_SigmaS(X)
@@ -53,4 +53,3 @@ MCAR_corr_test = function(X, alpha, B){
   decision = p_hat < alpha
   return(decision)
 }
-
