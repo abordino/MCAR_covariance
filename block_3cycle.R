@@ -10,16 +10,18 @@ library(norm)
 ######### 3-cycle: setting 1 ############
 alpha = 0.05
 n = 200
-M = 100
+M = 5
 
 # definition of the block 3-cycle
-d = 3
+d = 10
+
+start.time = Sys.time()
 
 # definition of P
-P = 0.5*matrix(runif((d)^2)*2-1, ncol=d)
+P = matrix(runif((d)^2)*2-1, ncol=d)/d
 
 while(norm(P, type="2") > 0.75){
-  P = 0.5*matrix(runif((d)^2)*2-1, ncol=d)
+  P = matrix(runif((d)^2)*2-1, ncol=d)/d
 }
 
 normP = norm(P, type="2")

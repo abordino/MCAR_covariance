@@ -1,6 +1,6 @@
+source("computeR.R")
+source("find_SigmaS.R")
 MCAR_corr_test = function(X, alpha, B){
-  source("computeR.R")
-  source("find_SigmaS.R")
   
   result = get_SigmaS(X)
   SigmaS = result$SigmaS

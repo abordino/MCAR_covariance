@@ -49,7 +49,7 @@ little_test = function(X, alpha, type="mean&cov"){
     
     little_d = (d_cov > qchisq(1-alpha, df))
   }
-    
+  
   else{
     d_aug = 0
     df = -d*(d+3)/2
@@ -72,5 +72,5 @@ little_test = function(X, alpha, type="mean&cov"){
   }
   
   return(little_d)
-
+  
 }

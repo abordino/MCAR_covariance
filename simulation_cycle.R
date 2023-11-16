@@ -1,4 +1,4 @@
-setwd("~/MCAR-main/MCAR-main")
+setwd("~/Documents/phd/MCAR_covariance/MCAR/")
 source("computeR.R")
 source("little_test.R")
 source("bootstrap_test.R")
@@ -10,7 +10,7 @@ library(norm)
 ######### 3-cycle: setting 1 ############
 alpha = 0.05
 n = 200
-M = 2000
+M = 1000 # with 4000 I expect 4 hours
 t3 = pi/6
 t2 = pi/4
 
@@ -19,7 +19,9 @@ little_power_cov = c()
 our_power = c()
 R = c()
 
-for(t1 in seq(t2-t3, (pi - t3)/2, length.out = 20)){
+start.time = Sys.time()
+
+for(t1 in seq(0.1, pi - 0.1, length.out = 20)){
   
   #### POPULATION LEVEL ######
   SigmaS=list() #Random 2x2 correlation matrices (necessarily consistent)
@@ -67,6 +69,10 @@ for(t1 in seq(t2-t3, (pi - t3)/2, length.out = 20)){
   little_power_cov = c(little_power_cov, mean(little_decisions_cov))
   our_power = c(our_power, mean(our_decisions))
 }
+
+end.time = Sys.time()
+time.taken = round(end.time - start.time,2)
+time.taken
 
 plot(R, little_power, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "")
 points(R, little_power_cov, col="orange", pch=18)
