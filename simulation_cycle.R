@@ -82,3 +82,66 @@ legend("center",
        legend = c("Little's power", "Little's power cov", "Our power"),
        col = c("green", "orange", "blue"),
        pch = c(18, 18, 18))
+
+######### d-cycle: high-dimensional ############
+d = 20
+
+alpha = 0.05
+n = 200
+M = 50# with 4000 I expect 4 hours
+angle = pi/(2*(d-1))
+
+our_power = c()
+R = c()
+
+start.time = Sys.time()
+
+for(t1 in seq(pi/2, 3*pi/4, length.out = 10)){
+  
+  #### POPULATION LEVEL ######
+  SigmaS=list() #Random 2x2 correlation matrices (necessarily consistent)
+  for(j in 1:d){
+    x=runif(2,min=-1,max=1); y=runif(2,min=-1,max=1); SigmaS[[j]]=cov2cor(x%*%t(x) + y%*%t(y))
+    SigmaS[[j]][1,2] = cos(angle)
+    SigmaS[[j]][2,1] = cos(angle)
+  }
+  
+  SigmaS[[d]][1,2] = cos(t1)
+  SigmaS[[d]][2,1] = cos(t1)
+  
+  patterns = list()
+  v = 1:d
+  for (i in 1:(d-1)){
+    patterns[[i]] = c(v[i], v[i+1])
+  }
+  patterns[[d]] = c(1,d)
+  R = c(R, computeR(patterns, SigmaS)$R)
+  
+  
+  ###### SAMPLE LEVEL, REPEATING THE TEST M TIMES #######
+  our_decisions = c()
+  for (i in 1:M){
+    
+    #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
+    X = data.frame(matrix(nrow = d*n, ncol = d))
+    for (i in 1:d){
+      X[(1+(i-1)*n):(i*n), patterns[[i]]] = mvrnorm(n, rep(0, 2), SigmaS[[i]])
+    }
+    X = as.matrix(X)
+    
+    ### run our tests
+    our_decisions = c(our_decisions, MCAR_corr_test(X, alpha, B = 99))
+  }
+  
+  our_power = c(our_power, mean(our_decisions))
+}
+
+end.time = Sys.time()
+time.taken = round(end.time - start.time,2)
+time.taken
+
+plot(R, our_power, col="blue", ylim = c(0,1), pch=18, xlab = "", ylab = "")
+abline(h = alpha, col="red")
+legend("topleft", legend = "Our power", col = "blue", pch = 18)
+
+
