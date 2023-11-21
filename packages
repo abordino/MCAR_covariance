@@ -95,8 +95,8 @@ _ModuleTable061_        ZHVsZXMvQ29tcGlsZXIvR0NDY29yZS8xMS4zLjAvcGl4bWFuLzAuNDAu
 _ModuleTable062_        Y3RpdmUiLAp1c2VyTmFtZSA9ICJweWJpbmQxMS8yLjkuMiIsCndWID0gIjAwMDAwMDAwMi4wMDAwMDAwMDkuMDAwMDAwMDAyLip6ZmluYWwiLAp9LApbInV0aWwtbGludXgiXSA9IHsKZm4gPSAiL3NvZnR3YXJlL2Vhc3lidWlsZC9tb2R1bGVzL0NvbXBpbGVyL0dDQ2NvcmUvMTEuMy4wL3V0aWwtbGludXgvMi4zOC5sdWEiLApmdWxsTmFtZSA9ICJ1dGlsLWxpbnV4LzIuMzgiLApsb2FkT3JkZXIgPSAyOCwKcHJvcFQgPSB7fSwKc3RhY2tEZXB0aCA9IDMsCnN0YXR1cyA9ICJhY3RpdmUiLAp1c2VyTmFtZSA9ICJ1dGlsLWxpbnV4LzIuMzgiLAp3ViA9ICIwMDAwMDAwMDIuMDAwMDAwMDM4Lip6ZmluYWwiLAp9LApbInhvcmctbWFjcm9zIl0gPSB7CmZuID0gIi9zb2Z0d2FyZS9l
 _ModuleTable063_        YXN5YnVpbGQvbW9kdWxlcy9Db21waWxlci9HQ0Njb3JlLzExLjMuMC94b3JnLW1hY3Jvcy8xLjE5LjMubHVhIiwKZnVsbE5hbWUgPSAieG9yZy1tYWNyb3MvMS4xOS4zIiwKbG9hZE9yZGVyID0gMzAsCnByb3BUID0ge30sCnN0YWNrRGVwdGggPSAyLApzdGF0dXMgPSAiYWN0aXZlIiwKdXNlck5hbWUgPSAieG9yZy1tYWNyb3MvMS4xOS4zIiwKd1YgPSAiMDAwMDAwMDAxLjAwMDAwMDAxOS4wMDAwMDAwMDMuKnpmaW5hbCIsCn0sCnpsaWIgPSB7CmZuID0gIi9zb2Z0d2FyZS9lYXN5YnVpbGQvbW9kdWxlcy9Db21waWxlci9HQ0Njb3JlLzExLjMuMC96bGliLzEuMi4xMi5sdWEiLApmdWxsTmFtZSA9ICJ6bGliLzEuMi4xMiIsCmxvYWRPcmRlciA9IDIsCnByb3BUID0ge30sCnN0
 _ModuleTable064_        YWNrRGVwdGggPSAyLApzdGF0dXMgPSAiYWN0aXZlIiwKdXNlck5hbWUgPSAiemxpYi8xLjIuMTIiLAp3ViA9ICIwMDAwMDAwMDEuMDAwMDAwMDAyLjAwMDAwMDAxMi4qemZpbmFsIiwKfSwKenN0ZCA9IHsKZm4gPSAiL3NvZnR3YXJlL2Vhc3lidWlsZC9tb2R1bGVzL0NvbXBpbGVyL0dDQ2NvcmUvMTEuMy4wL3pzdGQvMS41LjIubHVhIiwKZnVsbE5hbWUgPSAienN0ZC8xLjUuMiIsCmxvYWRPcmRlciA9IDM0LApwcm9wVCA9IHt9LApzdGFja0RlcHRoID0gMiwKc3RhdHVzID0gImFjdGl2ZSIsCnVzZXJOYW1lID0gInpzdGQvMS41LjIiLAp3ViA9ICIwMDAwMDAwMDEuMDAwMDAwMDA1LjAwMDAwMDAwMi4qemZpbmFsIiwKfSwKfSwKbXBhdGhBID0gewoiL3NvZnR3YXJlL2Vhc3li
-_ModuleTable065_        dWlsZC9tb2R1bGVzL0NvbXBpbGVyL0xMVk0vMTQuMC4zIgosICIvc29mdHdhcmUvZWFzeWJ1aWxkL21vZHVsZXMvTVBJL0dDQy8xMS4zLjAvT3Blbk1QSS80LjEuNCIKLCAiL3NvZnR3YXJlL2Vhc3lidWlsZC9tb2R1bGVzL0NvbXBpbGVyL0dDQy8xMS4zLjAiCiwgIi9zb2Z0d2FyZS9lYXN5YnVpbGQvbW9kdWxlcy9Db21waWxlci9HQ0Njb3JlLzExLjMuMCIKLCAiL3NvZnR3YXJlL2Vhc3lidWlsZC9tb2R1bGVzL0NvcmUiLCAiL3NvZnR3YXJlL2FkaG9jL21vZHVsZXMiCiwgIi9ldGMvbW9kdWxlZmlsZXMiLCAiL3Vzci9zaGFyZS9tb2R1bGVmaWxlcyIsICIvdXNyL3NoYXJlL21vZHVsZWZpbGVzL0xpbnV4IgosICIvdXNyL3NoYXJlL21vZHVsZWZpbGVzL0NvcmUiLCAiL3Vz
-_ModuleTable066_        ci9zaGFyZS9sbW9kL2xtb2QvbW9kdWxlZmlsZXMvQ29yZSIsCn0sCnN5c3RlbUJhc2VNUEFUSCA9ICIvc29mdHdhcmUvZWFzeWJ1aWxkL21vZHVsZXMvQ29yZTovc29mdHdhcmUvYWRob2MvbW9kdWxlczovZXRjL21vZHVsZWZpbGVzOi91c3Ivc2hhcmUvbW9kdWxlZmlsZXM6L3Vzci9zaGFyZS9tb2R1bGVmaWxlcy9MaW51eDovdXNyL3NoYXJlL21vZHVsZWZpbGVzL0NvcmU6L3Vzci9zaGFyZS9sbW9kL2xtb2QvbW9kdWxlZmlsZXMvQ29yZSIsCn0K
+_ModuleTable065_        dWlsZC9tb2R1bGVzL0NvbXBpbGVyL0xMVk0vMTQuMC4zIiwgIi9zb2Z0d2FyZS9lYXN5YnVpbGQvbW9kdWxlcy9NUEkvR0NDLzExLjMuMC9PcGVuTVBJLzQuMS40IiwgIi9zb2Z0d2FyZS9lYXN5YnVpbGQvbW9kdWxlcy9Db21waWxlci9HQ0MvMTEuMy4wIiwgIi9zb2Z0d2FyZS9lYXN5YnVpbGQvbW9kdWxlcy9Db21waWxlci9HQ0Njb3JlLzExLjMuMCIKLCAiL3NvZnR3YXJlL2Vhc3lidWlsZC9tb2R1bGVzL0NvcmUiLCAiL3NvZnR3YXJlL2FkaG9jL21vZHVsZXMiLCAiL2V0Yy9tb2R1bGVmaWxlcyIsICIvdXNyL3NoYXJlL21vZHVsZWZpbGVzIiwgIi91c3Ivc2hhcmUvbW9kdWxlZmlsZXMvTGludXgiLCAiL3Vzci9zaGFyZS9tb2R1bGVmaWxlcy9Db3JlIiwgIi91c3Ivc2hh
+_ModuleTable066_        cmUvbG1vZC9sbW9kL21vZHVsZWZpbGVzL0NvcmUiLAp9LApzeXN0ZW1CYXNlTVBBVEggPSAiL3NvZnR3YXJlL2Vhc3lidWlsZC9tb2R1bGVzL0NvcmU6L3NvZnR3YXJlL2FkaG9jL21vZHVsZXM6L2V0Yy9tb2R1bGVmaWxlczovdXNyL3NoYXJlL21vZHVsZWZpbGVzOi91c3Ivc2hhcmUvbW9kdWxlZmlsZXMvTGludXg6L3Vzci9zaGFyZS9tb2R1bGVmaWxlcy9Db3JlOi91c3Ivc2hhcmUvbG1vZC9sbW9kL21vZHVsZWZpbGVzL0NvcmUiLAp9Cg==
 ACLOCAL_PATH            /software/easybuild/software/GTK2/2.24.33-GCCcore-11.3.0/share/aclocal:/software/easybuild/software/GSL/2.7-GCC-11.3.0/share/aclocal:/software/easybuild/software/libopus/1.3.1-GCCcore-11.3.0/share/aclocal:/software/easybuild/software/libvorbis/1.3.7-GCCcore-11.3.0/share/aclocal:/software/easybuild/software/FLAC/1.3.4-GCCcore-11.3.0/share/aclocal:/software/easybuild/software/libogg/1.3.5-GCCcore-11.3.0/share/aclocal:/software/easybuild/software/cURL/7.83.0-GCCcore-11.3.0/share/aclocal:/software/easybuild/software/GLib/2.72.1-GCCcore-11.3.0/share/aclocal:/software/easybuild/software/gettext/0.21-GCCcore-11.3.0/share/aclocal:/software/easybuild/software/X11/20220504-GCCcore-11.3.0/share/aclocal:/software/easybuild/software/xorg-macros/1.19.3-GCCcore-11.3.0/share/aclocal:/software/easybuild/software/freetype/2.12.1-GCCcore-11.3.0/share/aclocal:/software/easybuild/software/libxml2/2.9.13-GCCcore-11.3.0/share/aclocal
 BASH_ENV                /usr/share/lmod/lmod/init/bash
 BASH_FUNC_ml%%          () { eval "$($LMOD_DIR/ml_cmd "$@")" }
@@ -424,7 +424,6 @@ EBVERSIONXZ             5.2.5
 EBVERSIONZLIB           1.2.12
 EBVERSIONZSTD           1.5.2
 EDITOR                  vim
-ENVIRONMENT             BATCH
 ftp_proxy               http://137.205.124.72:3128
 FTP_PROXY               http://137.205.124.72:3128
 GI_TYPELIB_PATH         /software/easybuild/software/GTK2/2.24.33-GCCcore-11.3.0/lib/girepository-1.0:/software/easybuild/software/Pango/1.50.7-GCCcore-11.3.0/lib/girepository-1.0:/software/easybuild/software/HarfBuzz/4.2.1-GCCcore-11.3.0/lib/girepository-1.0:/software/easybuild/software/Gdk-Pixbuf/2.42.8-GCCcore-11.3.0/lib/girepository-1.0:/software/easybuild/software/ATK/2.38.0-GCCcore-11.3.0/lib/girepository-1.0
@@ -433,7 +432,7 @@ HISTCONTROL             ignorespace:erasedups
 HISTSIZE                1000
 HISTTIMEFORMAT          %FT%T%t
 HOME                    /home/stats/strtng
-HOSTNAME                stats163
+HOSTNAME                godzilla.csc.warwick.ac.uk
 http_proxy              http://137.205.124.72:3128
 HTTP_PROXY              http://137.205.124.72:3128
 https_proxy             http://137.205.124.72:3128
@@ -493,7 +492,7 @@ R_PDFVIEWER             /usr/bin/xdg-open
 R_PLATFORM              x86_64-pc-linux-gnu
 R_PRINTCMD              lpr
 R_RD4PDF                times,hyper
-R_SESSION_TMPDIR        /tmp/Rtmprzxl2n
+R_SESSION_TMPDIR        /tmp/RtmpDqsSRo
 R_SHARE_DIR             /software/easybuild/software/R/4.2.1-foss-2022a/lib64/R/share
 R_STRIP_SHARED_LIB      strip --strip-unneeded
 R_STRIP_STATIC_LIB      strip --strip-debug
@@ -504,52 +503,14 @@ R_ZIPCMD                /usr/bin/zip
 RETICULATE_PYTHON       /software/easybuild/software/Python/3.10.4-GCCcore-11.3.0/bin/python
 SED                     /usr/bin/sed
 SHELL                   /bin/bash
-SHLVL                   2
-SLURM_CLUSTER_NAME      (null)
-SLURM_CONF              /var/spool/slurmd/conf-cache/slurm.conf
-SLURM_CPUS_ON_NODE      1
-SLURM_GTIDS             0
-SLURM_JOB_ACCOUNT       compute
-SLURM_JOB_CPUS_PER_NODE
-                        1
-SLURM_JOB_END_TIME      1700586050
-SLURM_JOB_GID           17411
-SLURM_JOB_ID            1364069
-SLURM_JOB_NAME          d_cycle.slm
-SLURM_JOB_NODELIST      stats163
-SLURM_JOB_NUM_NODES     1
-SLURM_JOB_PARTITION     stats
-SLURM_JOB_QOS           normal
-SLURM_JOB_START_TIME    1700568050
-SLURM_JOB_UID           17411
-SLURM_JOB_USER          strtng
-SLURM_JOBID             1364069
-SLURM_LOCALID           0
-SLURM_MEM_PER_CPU       4000
+SHLVL                   1
 SLURM_MPI_TYPE          pmix
-SLURM_NNODES            1
-SLURM_NODE_ALIASES      (null)
-SLURM_NODEID            0
-SLURM_NODELIST          stats163
-SLURM_NTASKS_PER_NODE   1
-SLURM_PRIO_PROCESS      0
-SLURM_PROCID            0
-SLURM_SUBMIT_DIR        /storage/stats/strtng
-SLURM_SUBMIT_HOST       godzilla.csc.warwick.ac.uk
-SLURM_TASK_PID          795337
-SLURM_TASKS_PER_NODE    1
-SLURM_TOPOLOGY_ADDR     stats163
-SLURM_TOPOLOGY_ADDR_PATTERN
-                        node
-SLURM_WORKING_CLUSTER   (null):slurm1.scrtp.warwick.ac.uk:6817:9984:101
-SLURMD_NODENAME         stats163
 SSH_CLIENT              45.11.80.18 51013 22
 SSH_CONNECTION          45.11.80.18 51013 137.205.63.1 22
 SSH_TTY                 /dev/pts/51
 SYSTEMD_PAGER           cat
 TAR                     /usr/bin/gtar
 TERM                    xterm-256color
-TMPDIR                  /tmp
 USER                    strtng
 which_declare           declare -f
 XDG_DATA_DIRS           /software/easybuild/software/R/4.2.1-foss-2022a/share:/software/easybuild/software/MPFR/4.1.0-GCCcore-11.3.0/share:/software/easybuild/software/GDAL/3.5.0-foss-2022a/share:/software/easybuild/software/HDF/4.2.15-GCCcore-11.3.0/share:/software/easybuild/software/libtirpc/1.3.2-GCCcore-11.3.0/share:/software/easybuild/software/pybind11/2.9.2-GCCcore-11.3.0/share:/software/easybuild/software/libgeotiff/1.7.1-GCCcore-11.3.0/share:/software/easybuild/software/PROJ/9.0.0-GCCcore-11.3.0/share:/software/easybuild/software/netCDF/4.9.0-gompi-2022a/share:/software/easybuild/software/Python/3.10.4-GCCcore-11.3.0/share:/software/easybuild/software/nodejs/16.15.1-GCCcore-11.3.0/share:/software/easybuild/software/ImageMagick/7.1.0-37-GCCcore-11.3.0/share:/software/easybuild/software/LittleCMS/2.13.1-GCCcore-11.3.0/share:/software/easybuild/software/JasPer/2.0.33-GCCcore-11.3.0/share:/software/easybuild/software/Ghostscript/9.56.1-GCCcore-11.3.0/share:/software/easybuild/software/GTK2/2.24.33-GCCcore-11.3.0/share:/software/easybuild/software/Pango/1.50.7-GCCcore-11.3.0/share:/software/easybuild/software/FriBidi/1.0.12-GCCcore-11.3.0/share:/software/easybuild/software/HarfBuzz/4.2.1-GCCcore-11.3.0/share:/software/easybuild/software/Gdk-Pixbuf/2.42.8-GCCcore-11.3.0/share:/software/easybuild/software/ATK/2.38.0-GCCcore-11.3.0/share:/software/easybuild/software/GSL/2.7-GCC-11.3.0/share:/software/easybuild/software/UDUNITS/2.2.28-GCCcore-11.3.0/share:/software/easybuild/software/HDF5/1.12.2-gompi-2022a/share:/software/easybuild/software/ICU/71.1-GCCcore-11.3.0/share:/software/easybuild/software/libsndfile/1.1.0-GCCcore-11.3.0/share:/software/easybuild/software/LAME/3.100-GCCcore-11.3.0/share:/software/easybuild/software/libopus/1.3.1-GCCcore-11.3.0/share:/software/easybuild/software/libvorbis/1.3.7-GCCcore-11.3.0/share:/software/easybuild/software/FLAC/1.3.4-GCCcore-11.3.0/share:/software/easybuild/software/libogg/1.3.5-GCCcore-11.3.0/share:/software/easybuild/software/NLopt/2.7.1-GCCcore-11.3.0/share:/software/easybuild/software/GMP/6.2.1-GCCcore-11.3.0/share:/software/easybuild/software/cURL/7.83.0-GCCcore-11.3.0/share:/software/easybuild/software/LibTIFF/4.3.0-GCCcore-11.3.0/share:/software/easybuild/software/libjpeg-turbo/2.1.3-GCCcore-11.3.0/share:/software/easybuild/software/NASM/2.15.05-GCCcore-11.3.0/share:/software/easybuild/software/PCRE2/10.40-GCCcore-11.3.0/share:/software/easybuild/software/SQLite/3.38.3-GCCcore-11.3.0/share:/software/easybuild/software/Tcl/8.6.12-GCCcore-11.3.0/share:/software/easybuild/software/libreadline/8.1.2-GCCcore-11.3.0/share:/software/easybuild/software/cairo/1.17.4-GCCcore-11.3.0/share:/software/easybuild/software/GLib/2.72.1-GCCcore-11.3.0/share:/software/easybuild/software/PCRE/8.45-GCCcore-11.3.0/share:/software/easybuild/software/gettext/0.21-GCCcore-11.3.0/share:/software/easybuild/software/libffi/3.4.2-GCCcore-11.3.0/share:/software/easybuild/software/Mesa/22.0.3-GCCcore-11.3.0/share:/software/easybuild/software/LLVM/14.0.3-GCCcore-11.3.0/share:/software/easybuild/software/libdrm/2.4.110-GCCcore-11.3.0/share:/software/easybuild/software/zstd/1.5.2-GCCcore-11.3.0/share:/software/easybuild/software/lz4/1.9.3-GCCcore-11.3.0/share:/software/easybuild/software/gzip/1.12-GCCcore-11.3.0/share:/software/easybuild/software/X11/20220504-GCCcore-11.3.0/share:/software/easybuild/software/xorg-macros/1.19.3-GCCcore-11.3.0/share:/software/easybuild/software/fontconfig/2.14.0-GCCcore-11.3.0/share:/software/easybuild/software/util-linux/2.38-GCCcore-11.3.0/share:/software/easybuild/software/ncurses/6.3-GCCcore-11.3.0/share:/software/easybuild/software/freetype/2.12.1-GCCcore-11.3.0/share:/software/easybuild/software/libpng/1.6.37-GCCcore-11.3.0/share:/software/easybuild/software/expat/2.4.8-GCCcore-11.3.0/share:/software/easybuild/software/FFTW/3.3.10-GCC-11.3.0/share:/software/easybuild/software/FlexiBLAS/3.2.0-GCC-11.3.0/share:/software/easybuild/software/OpenMPI/4.1.4-GCC-11.3.0/share:/software/easybuild/software/PMIx/4.1.2-GCCcore-11.3.0/share:/software/easybuild/software/libfabric/1.15.1-GCCcore-11.3.0/share:/software/easybuild/software/UCX/1.12.1-GCCcore-11.3.0/share:/software/easybuild/software/OpenSSL/1.1/share:/software/easybuild/software/hwloc/2.7.1-GCCcore-11.3.0/share:/software/easybuild/software/libxml2/2.9.13-GCCcore-11.3.0/share:/software/easybuild/software/XZ/5.2.5-GCCcore-11.3.0/share:/software/easybuild/software/numactl/2.0.14-GCCcore-11.3.0/share:/software/easybuild/software/binutils/2.38-GCCcore-11.3.0/share:/software/easybuild/software/zlib/1.2.12-GCCcore-11.3.0/share:/software/easybuild/software/GCCcore/11.3.0/share:/usr/local/share:/usr/share
