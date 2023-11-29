@@ -7,19 +7,17 @@ library(pracma)
 
 ############ FUNCTION ###############
 computeR = function(patterns=list(), SigmaS=list()) {
-  library(Rcsdp)
-  library(Matrix)
   
   #----------------------------------------------------------------------------------------
   ##### DEFINE PATTERN IF NOT SPECIFIED
   #----------------------------------------------------------------------------------------
-  add_pattern = T
+  add_pattern = TRUE
   if (length(patterns) > 0){
-    add_pattern = F
+    add_pattern = FALSE
   }
   
   i = 1
-  while(add_pattern == T){
+  while(add_pattern == TRUE){
     prompt1 = "Enter variable numbers (space-separated list): \n"
     tmp = as.vector(as.integer(strsplit(readline(prompt1), " ")[[1]]))
     patterns[[i]] = tmp
@@ -57,7 +55,7 @@ computeR = function(patterns=list(), SigmaS=list()) {
         tmp_0 = t(A) %*% A
         SigmaS[[j]]=as.matrix(cov2cor(tmp_0))
       }
-    } else if(comp ==2){
+    } else if(comp == 2){
       SigmaS=list()
       A = matrix(runif(d^2)*2-1, ncol=d)
       Sigma = cov2cor(t(A) %*% A)
@@ -123,40 +121,20 @@ computeR = function(patterns=list(), SigmaS=list()) {
     A[[m-i]][[1]][2+i,2+i]=-1
   }
   
-  sizes = c(d)
+  sizes = numeric(length = 1+card_patterns)
+  sizes[1] = d; ind = 2
   for (S in patterns){
-    card_S = length(S)
-    sizes = c(sizes, card_S)
+    sizes[ind] = length(S)
+    ind = ind+1
   }
-  K = list(type=rep("s",card_patterns+1),size=sizes) # Variables are the PSD matrices Sigma,Z_{1,2},...,Z_{d,1}
+  
+  K = list(type=rep("s",1+card_patterns),size=sizes) # Variables are the PSD matrices Sigma,Z_{1,2},...,Z_{d,1}
   
   #----------------------------------------------------------------------------------------
-  echo=F
+  echo=FALSE
   SDP=csdp(C, A, b, K) #Running the function
   R = 1-SDP$pobj
-  
-  #----------------------------------------------------------------------------------------
-  # ####### THE FINAL OUTPUT
-  # #----------------------------------------------------------------------------------------
-  # print("------------------------------------------------")
-  # print("COMPUTE R FOR A SEQUENCE OF CORRELATION MATRICES")
-  # print("------------------------------------------------")
-  # print(paste("The dimensionality of the problem is",d))
-  # print(paste("There are", card_patterns, "patterns:"))
-  # for (S in patterns){
-  #   print(S)
-  # }
-  # print("------------------------------------------------")
-  # print("The sequence of correlation matrices is:")
-  # print(SigmaS)
-  # print("------------------------------------------------")
-  # print(paste("R is equal to ", R))
-  # is_compatibile = (R < 0.0001)
-  # if (is_compatibile == T){
-  #   print("Hence, SigmaS is compatible")
-  # } else{
-  #   print("Hence, SigmaS is not compatible")
-  # }
+
   
   #----------------------------------------------------------------------------------------
   # Optimal XS 

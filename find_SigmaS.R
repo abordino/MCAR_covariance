@@ -17,10 +17,10 @@ get_SigmaS = function(X){
   }
   
   ### add a column to X, corresponding to the pattern of missingness
-  extra_col = c()
   tmp = na.indicator(X)
+  extra_col = numeric(length = dim(tmp)[1])
   for (row in 1:dim(tmp)[1]){
-    extra_col = c(extra_col, paste(v[as.logical(tmp[row,])], collapse = ""))
+    extra_col[row] = paste(v[as.logical(tmp[row,])], collapse = "")
   }
   
   X = cbind(X, extra_col)
