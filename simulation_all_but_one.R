@@ -5,27 +5,43 @@ source("find_SigmaS.R")
 library(missMethods)
 library(MASS)
 library(norm)
+library(missMethods)
+library(MASS)
+library(norm)
+library(foreach)
+library(doSNOW)
+library(doParallel)
+library(future)
+library(parallel)
+library(foreach)
+library(doRNG) 
+library(doFuture)
+library(future.apply)
 
 ######### 3-cycle: setting 1 ############
 alpha = 0.05
 n = 200
-M = 100
-d = 10
+M = 40
+d = 5
 
 ##### easy part
 computeR_kkk = function(t1){
   #### POPULATION LEVEL ######
-  SigmaS=list() 
-  for(j in 1:d){
-    A = matrix(runif((d-1)^2)*2-1, ncol=d-1) 
-    tmp_0 = t(A) %*% A
-    SigmaS[[j]]=as.matrix(cov2cor(tmp_0))
-  }
-  
   v = 1:d
   pattern = list()
   for (i in 1:d){
     pattern[[i]] = v[-i]
+  }
+  
+  card_patterns = length(pattern)
+  
+  SigmaS=list()
+  A = matrix(runif(d^2)*2-1, ncol=d)
+  Sigma = cov2cor(t(A) %*% A)
+  for(j in 1:card_patterns){
+    yyy = matrix(runif((d-1)^2)*2-1, ncol=d-1)
+    SigmaS[[j]]= (10-t1)*as.matrix(Sigma[pattern[[j]],pattern[[j]]])/10 +
+            t1*cov2cor(t(yyy) %*% yyy)/10
   }
   
   return(computeR(patterns = pattern, SigmaS = SigmaS)$R)
@@ -33,17 +49,21 @@ computeR_kkk = function(t1){
 
 little_power = function(t1){
   #### POPULATION LEVEL ######
-  SigmaS=list() 
-  for(j in 1:d){
-    A = matrix(runif((d-1)^2)*2-1, ncol=d-1) 
-    tmp_0 = t(A) %*% A
-    SigmaS[[j]]=as.matrix(cov2cor(tmp_0))
-  }
-  
   v = 1:d
   pattern = list()
   for (i in 1:d){
     pattern[[i]] = v[-i]
+  }
+  
+  card_patterns = length(pattern)
+  
+  SigmaS=list()
+  A = matrix(runif(d^2)*2-1, ncol=d)
+  Sigma = cov2cor(t(A) %*% A)
+  for(j in 1:card_patterns){
+    yyy = matrix(runif((d-1)^2)*2-1, ncol=d-1)
+    SigmaS[[j]]= (d-t1)*as.matrix(Sigma[pattern[[j]],pattern[[j]]])/d +
+      t1*cov2cor(t(yyy) %*% yyy)/d
   }
   
   little_decisions = logical(length = M)
@@ -64,18 +84,21 @@ little_power = function(t1){
 }
 
 little_power_cov = function(t1){
-  #### POPULATION LEVEL ######
-  SigmaS=list() 
-  for(j in 1:d){
-    A = matrix(runif((d-1)^2)*2-1, ncol=d-1) 
-    tmp_0 = t(A) %*% A
-    SigmaS[[j]]=as.matrix(cov2cor(tmp_0))
-  }
-  
   v = 1:d
   pattern = list()
   for (i in 1:d){
     pattern[[i]] = v[-i]
+  }
+  
+  card_patterns = length(pattern)
+  
+  SigmaS=list()
+  A = matrix(runif(d^2)*2-1, ncol=d)
+  Sigma = cov2cor(t(A) %*% A)
+  for(j in 1:card_patterns){
+    yyy = matrix(runif((d-1)^2)*2-1, ncol=d-1)
+    SigmaS[[j]]= (d-t1)*as.matrix(Sigma[pattern[[j]],pattern[[j]]])/d +
+      t1*cov2cor(t(yyy) %*% yyy)/d
   }
   
   little_decisions = logical(length = M)
@@ -97,12 +120,6 @@ little_power_cov = function(t1){
 #### parallel using parallel
 bootstrap_power = function(t1){
   #### POPULATION LEVEL ######
-  SigmaS=list() 
-  for(j in 1:d){
-    A = matrix(runif((d-1)^2)*2-1, ncol=d-1) 
-    tmp_0 = t(A) %*% A
-    SigmaS[[j]]=as.matrix(cov2cor(tmp_0))
-  }
   
   v = 1:d
   pattern = list()
@@ -110,7 +127,18 @@ bootstrap_power = function(t1){
     pattern[[i]] = v[-i]
   }
   
-  little_decisions = logical(length = M)
+  card_patterns = length(pattern)
+  
+  SigmaS=list()
+  A = matrix(runif(d^2)*2-1, ncol=d)
+  Sigma = cov2cor(t(A) %*% A)
+  for(j in 1:card_patterns){
+    yyy = matrix(runif((d-1)^2)*2-1, ncol=d-1)
+    SigmaS[[j]]= (d-t1)*as.matrix(Sigma[pattern[[j]],pattern[[j]]])/d +
+      t1*cov2cor(t(yyy) %*% yyy)/d
+  }
+  
+  our_decisions = logical(length = M)
   for (i in 1:M){
     
     #### generate dataset
@@ -121,14 +149,14 @@ bootstrap_power = function(t1){
     X = as.matrix(X)
     
     ### run our tests
-    our_decisions[i] = MCAR_corr_test(X, alpha = 0.05, B = 99)
+    our_decisions[i] = MCAR_corr_test(X, alpha = 0.05, B = 99, type = "p")
   }
   
   return(mean(our_decisions))
 }
 
 
-xxx = 1:6
+xxx = (0:7)/2
 
 ### work in parallel
 registerDoFuture()
@@ -144,11 +172,11 @@ little_power_cov = foreach(kkk = xxx, .combine = 'c') %dorng% little_power_cov(k
 our_power = foreach(kkk = xxx, .combine = 'c') %dorng% bootstrap_power(kkk)
 
 end.time = Sys.time()
-time.taken = round(end.time - start.time,2)
+time.taken = round(end.time - start.time, 2)
 time.taken
 
 # plot the simulation
-png(paste("all_but_one-", d, ".png"))
+png(paste("pictures/all_but_one-",d, ".png"))
 plot(R, little_power, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "", type = "b")
 lines(R, little_power_cov, col="orange", pch=18, type = "b")
 lines(R, our_power, col="blue", pch=18, type = "b")

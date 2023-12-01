@@ -9,8 +9,8 @@ library(norm)
 ######### 3-cycle: setting 1 ############
 alpha = 0.05
 n = 1000
-M = 100
-d = 10
+M = 40
+d = 4
 
 computeR_kkk = function(beta){
   #### POPULATION LEVEL ######
@@ -123,7 +123,7 @@ bootstrap_power = function(beta){
   SigmaS[[3]][1:d, (d+1):(2*d)] = beta*diag(d)
   SigmaS[[3]][(d+1):(2*d), 1:d] = beta*diag(d)
   
-  little_decisions = logical(length = M)
+  our_decisions = logical(length = M)
   for (i in 1:M){
     
     #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
@@ -138,7 +138,7 @@ bootstrap_power = function(beta){
     X = as.matrix(X)
     
     ### run our tests
-    our_decisions[i] = MCAR_corr_test(X, alpha = 0.05, B = 99)
+    our_decisions[i] = MCAR_corr_test(X, alpha = 0.05, B = 99, type = "p")
   }
   
   return(mean(our_decisions))
@@ -179,12 +179,12 @@ time.taken
 
 ### plot the simulation
 
-png(paste("block_3_cycle-", d, ".png"))
+png(paste("pictures/block_3_cycle-",d, "P.png"))
 plot(R, little_power, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "", type = "b")
 lines(R, little_power_cov, col="orange", pch=18, type = "b")
 lines(R, our_power, col="blue", pch=18, type = "b")
 abline(h = alpha, col="red")
-legend("center",
+legend("bottomright",
        legend = c("Little's power", "Little's power cov", "Our power"),
        col = c("green", "orange", "blue"),
        pch = c(18, 18, 18))

@@ -10,6 +10,7 @@ library(foreach)
 library(doSNOW)
 library(doParallel)
 library(future)
+library(parallel)
 library(foreach)
 library(doRNG) 
 library(doFuture)
@@ -18,9 +19,9 @@ library(future.apply)
 ######### 3-cycle: setting 1 ############
 alpha = 0.05
 n = 200
-M = 100
+M = 20
 t3 = pi/6
-t2 = pi/4
+t2 = pi/3
 
 
 ##### easy part
@@ -127,13 +128,73 @@ bootstrap_power_t1 = function(t1){
     X = as.matrix(X)
     
     ### run our tests
-    our_decisions[i] = MCAR_corr_test(X, alpha = 0.05, B = 99)
+    our_decisions[i] = MCAR_corr_test(X, alpha = 0.05, B = 99, type = "p")
   }
-
+  
+  print(t1)
   return(mean(our_decisions))
 }
 
-xxx = seq(t2+t3, (pi+t2+t3)/2, length.out = 7)
+# ######## USING FOREACH AND DORNG
+# xxx = seq(t2+t3, (pi+t2+t3)/2, length.out = 7)
+# 
+# n_cores = detectCores()-1
+# 
+# cl = makeCluster(n_cores) 
+# registerDoSNOW(cl)
+# 
+# start.time = Sys.time()
+# 
+# R = foreach(t1 = xxx, .combine = 'c', 
+#             .packages=c("Rcsdp","misty", "norm", "MASS", "misty", "pracma",
+#                         "matrixcalc", "npmr", "Matrix")
+#             ) %dopar% computeR_t1(t1)
+# little_power = foreach(t1 = xxx, .combine = 'c',
+#                        .packages=c("Rcsdp","misty", "norm", "MASS", "misty", "pracma",
+#                                    "matrixcalc", "npmr", "Matrix")
+#                        )  %dopar% little_power_t1(t1)
+# little_power_cov = foreach(t1 = xxx, .combine = 'c', 
+#                            .packages=c("Rcsdp","misty", "norm", "MASS", "misty", "pracma",
+#                                        "matrixcalc", "npmr", "Matrix")
+#                            ) %dopar% little_power_cov_t1(t1)
+# our_power = foreach(t1 = xxx, .combine = 'c', 
+#                     .packages=c("Rcsdp","misty", "norm", "MASS", "misty", "pracma",
+#                                 "matrixcalc", "npmr", "Matrix") 
+#                     ) %dopar% bootstrap_power_t1(t1)
+# 
+# print(R)
+# print(little_power)
+# print(little_power_cov)
+# print(our_power)
+# 
+# end.time = Sys.time()
+# time.taken = round(end.time - start.time, 2)
+# time.taken
+
+
+
+# ########## USING PARALLEL 
+# 
+# xxx = seq(t2+t3, (pi+t2+t3)/2, length.out = 7)
+# 
+# n_cores = detectCores()-1
+# 
+# start.time = Sys.time()
+# 
+# R = unlist(mclapply(xxx, computeR_t1, mc.cores = n_cores))
+# little_power = unlist(mclapply(xxx, little_power_t1, mc.cores = n_cores))
+# little_power_cov = unlist(mclapply(xxx, little_power_cov_t1, mc.cores = n_cores))
+# our_power = unlist(mclapply(xxx, bootstrap_power_t1, mc.cores = n_cores))
+# 
+# print(R)
+# print(little_power)
+# print(little_power_cov)
+# print(our_power)
+# 
+# end.time = Sys.time()
+# time.taken = round(end.time - start.time, 2)
+# time.taken
+
 
 ######## USING FOREACH AND DORNG
 registerDoFuture()
@@ -142,6 +203,8 @@ RNGkind("L'Ecuyer-CMRG")
 set.seed(232)
 
 start.time = Sys.time()
+
+xxx = seq(t2+t3, (pi+t2+t3)/2, length.out = 7)
 
 R = foreach(t1 = xxx, .combine = 'c') %dorng% computeR_t1(t1)
 little_power = foreach(t1 = xxx, .combine = 'c') %dorng% little_power_t1(t1)
@@ -157,7 +220,7 @@ time.taken
 # start.time = Sys.time()
 # 
 # # (hosts = system("srun hostname | cut -f 1 -d '.'", intern = TRUE))
-# # (cl = parallel::makeCluster(hosts))  
+# # (cl = parallel::makeCluster(hosts))
 # # plan(cluster, workers = cl)
 # plan(multicore)
 # set.seed(0xBEEF)
@@ -172,7 +235,7 @@ time.taken
 # time.taken = round(end.time - start.time, 2)
 # time.taken
 
-
+png("pictures/3_cycle_simul_2.png")
 plot(R, little_power, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "", type = "b")
 lines(R, little_power_cov, col="orange", pch=18, type = "b")
 lines(R, our_power, col="blue", pch=18, type = "b")
@@ -181,3 +244,100 @@ legend("center",
        legend = c("Little's power", "Little's power cov", "Our power"),
        col = c("green", "orange", "blue"),
        pch = c(18, 18, 18))
+dev.off()
+
+
+######### d-cycle: high-dimensional ############
+d = 50
+
+alpha = 0.05
+n = 200
+M = 10 # with 4000 I expect 4 hours
+angle = pi/(2*(d-1))
+
+
+##### easy part
+computeR_t1 = function(t1){
+  SigmaS=list() #Random 2x2 correlation matrices (necessarily consistent)
+  for(j in 1:d){
+    x=runif(2,min=-1,max=1); y=runif(2,min=-1,max=1); SigmaS[[j]]=cov2cor(x%*%t(x) + y%*%t(y))
+    SigmaS[[j]][1,2] = cos(angle)
+    SigmaS[[j]][2,1] = cos(angle)
+  }
+  
+  SigmaS[[d]][1,2] = cos(t1)
+  SigmaS[[d]][2,1] = cos(t1)
+  
+  patterns = list()
+  v = 1:d
+  for (i in 1:(d-1)){
+    patterns[[i]] = c(v[i], v[i+1])
+  }
+  patterns[[d]] = c(1,d)
+  
+  return(computeR(patterns, SigmaS)$R)
+}
+
+#### parallel using parallel
+bootstrap_power_t1 = function(t1){
+  SigmaS=list() #Random 2x2 correlation matrices (necessarily consistent)
+  for(j in 1:d){
+    x=runif(2,min=-1,max=1); y=runif(2,min=-1,max=1); SigmaS[[j]]=cov2cor(x%*%t(x) + y%*%t(y))
+    SigmaS[[j]][1,2] = cos(angle)
+    SigmaS[[j]][2,1] = cos(angle)
+  }
+  
+  SigmaS[[d]][1,2] = cos(t1)
+  SigmaS[[d]][2,1] = cos(t1)
+  
+  patterns = list()
+  v = 1:d
+  for (i in 1:(d-1)){
+    patterns[[i]] = c(v[i], v[i+1])
+  }
+  patterns[[d]] = c(1,d)
+  
+  ###### SAMPLE LEVEL, REPEATING THE TEST M TIMES #######
+  our_decisions = logical(length = M)
+  for (i in 1:M){
+    
+    #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
+    #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
+    X = data.frame(matrix(nrow = d*n, ncol = d))
+    for (i in 1:d){
+      X[(1+(i-1)*n):(i*n), patterns[[i]]] = mvrnorm(n, rep(0, 2), SigmaS[[i]])
+    }
+    X = as.matrix(X)
+    
+    ### run our tests
+    our_decisions[i] = MCAR_corr_test(X, alpha = 0.05, B = 99)
+  }
+  
+  return(mean(our_decisions))
+}
+
+xxx = seq(pi/2, 5*pi/8, length.out = 8)
+
+######## USING FOREACH AND DORNG
+registerDoFuture()
+plan(multicore)
+RNGkind("L'Ecuyer-CMRG")
+set.seed(232)
+
+start.time = Sys.time()
+
+R = foreach(t1 = xxx, .combine = 'c') %dorng% computeR_t1(t1)
+our_power = foreach(t1 = xxx, .combine = 'c') %dorng% bootstrap_power_t1(t1)
+
+end.time = Sys.time()
+time.taken = round(end.time - start.time,2)
+time.taken
+
+
+png("pictures/200_cycle.png")
+plot(R, our_power, col="blue", ylim = c(0,1), pch=18, xlab = "", ylab = "", type = "b")
+abline(h = alpha, col="red")
+legend("topleft", legend = "Our power", col = "blue", pch = 18)
+dev.off()
+
+
