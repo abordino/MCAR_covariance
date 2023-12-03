@@ -42,7 +42,8 @@ little_test = function(X, alpha, type="mean&cov"){
       L_S = Sigma_true[patterns[[i]],patterns[[i]]]
       Sigma_S = cor(data_pattern[[i]])
       
-      d_cov = d_cov + n_S*(sum(diag(Sigma_S%*%solve(L_S))) - card_S - log(det(Sigma_S)) + log(det(L_S)))
+      d_cov = d_cov + n_S*(sum(diag(Sigma_S%*%solve(L_S))) - card_S - log(abs(det(as.matrix(Sigma_S)))) +
+                             log(det(as.matrix(L_S))))
       df = df + card_S*(card_S+1)/2
       print(df)
     }
@@ -63,7 +64,8 @@ little_test = function(X, alpha, type="mean&cov"){
       Sigma_S = cor(data_pattern[[i]])
       
       d_aug = d_aug + n_S*t(x_S)%*%solve(n_S*L_S/(n_S-1))%*%t(t(x_S)) + 
-        n_S*(sum(diag(Sigma_S%*%solve(L_S))) - card_S - log(det(Sigma_S)) + log(det(L_S)))
+        n_S*(sum(diag(Sigma_S%*%solve(L_S))) - card_S - log(abs(det(as.matrix(Sigma_S)))) + 
+               log(det(as.matrix(L_S))))
       df = df + card_S*(card_S+3)/2
       print(df)
     }

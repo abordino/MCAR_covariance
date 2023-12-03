@@ -70,6 +70,7 @@ computeR = function(patterns=list(), SigmaS=list()) {
   #----------------------------------------------------------------------------------------
   ########## WRITING THE SDP PROBLEM ##########################
   #----------------------------------------------------------------------------------------
+  
   # Matrix giving objective function (1/d)*tr(Sigma)
   C = c(list((1/d)*diag(d)))
   for(j in 1:card_patterns){

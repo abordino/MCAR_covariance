@@ -1,4 +1,3 @@
-setwd("~/Documents/phd/MCAR_covariance/MCAR")
 source("computeR.R")
 source("little_test.R")
 source("bootstrap_test.R")

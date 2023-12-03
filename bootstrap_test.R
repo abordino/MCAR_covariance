@@ -39,7 +39,10 @@ MCAR_corr_test = function(X, alpha, B, type="np"){
       for (i in 1:n_pattern){
         n_S = dim(rot_data_pattern[[i]])[1]
         tmp_data = rot_data_pattern[[i]][sample(1:n_S, n_S, replace = T),]
-        SigmaS_b[[i]] = cor(tmp_data)
+        if(dim(unique(tmp_data))[1] < 2){
+          tmp_data = rot_data_pattern[[i]][sample(1:n_S, n_S, replace = T),]
+        }
+        SigmaS_b[[i]] = cov2cor(var(tmp_data))
       }
       
       R_hat_b = computeR(patterns, SigmaS_b)$R
@@ -58,7 +61,7 @@ else if (type=="p"){
       n_S = dim(data_pattern[[i]])[1]
       card_S = dim(QS_hat[[i]])[1]
       tmp_data = mvrnorm(n_S, rep(0, card_S), QS_hat[[i]])
-      SigmaS_b[[i]] = cor(tmp_data)
+      SigmaS_b[[i]] = cov2cor(var(tmp_data))
     }
     
     R_hat_b = computeR(patterns, SigmaS_b)$R
@@ -80,23 +83,151 @@ else {
   return(decision)
 }
 
-
-# #### create bootstrap samples, and compute R^(b)
-# bootstrap_decision = function(b){
-#   SigmaS_b = list()
-#   for (i in 1:n_pattern){
-#     n_S = dim(rot_data_pattern[[i]])[1]
-#     tmp_data = rot_data_pattern[[i]][sample(1:n_S, n_S, replace = T),]
-#     SigmaS_b[[i]] = cor(tmp_data)
-#   }
-# 
-#   R_hat_b = computeR(patterns, SigmaS_b)$R
-#   return(R_hat_b >= R_hat_0)
-# }
-# 
-# registerDoFuture()
-# plan(multicore)
-# bootstrap_decisions = foreach(b = 1:B, .combine = 'c') %dorng% bootstrap_decision(b)
-# 
-# p_hat = (1+sum(bootstrap_decisions))/(B+1)
-
+MCAR_meancovTest = function(X, alpha, B, type="np"){
+  
+  result = get_SigmaS(X)
+  d = result$ambient_dimension
+  av_sigma = compute_av("var", X)
+  
+  for (j in 1:d){
+    X[,j] = X[,j]/sqrt(av_sigma[j])
+  }
+  
+  result = get_SigmaS(X)
+  
+  av_mu = compute_av("mean", X)
+  
+  muS = result$muS
+  C_S = result$C_S
+  sigma_squared_S = result$sigma_squared_S
+  SigmaS = result$SigmaS
+  
+  patterns = result$pattern
+  n_pattern = result$n_pattern
+  data_pattern = result$data_pattern
+  
+  for (i in length(SigmaS)){
+    if (min(eigen(SigmaS[[i]])$values) < 10^-7){
+      print("SigmaS is singular!")
+      return(SigmaS)
+    }
+  }
+  
+  tmp = computeR(patterns, SigmaS)
+  
+  T_hat_0 = tmp$R + M(muS, patterns) + V(sigma_squared_S, patterns)
+  
+  
+  ##### transform the data so that the look like they come from H0
+  
+  Q_hat = tmp$Sigma/(1-tmp$R)
+  QS_hat = list()
+  for (i in 1:n_pattern){
+    QS_hat[[i]] = Q_hat[patterns[[i]], patterns[[i]]]
+  }
+  
+  if (type=="np"){
+    #### rotate X, to make it look like it's from H0
+    rot_data_pattern = list()
+    for (i in 1:n_pattern){
+      rot_data_pattern[[i]] = t((sqrtm(QS_hat[[i]])$B)%*%(solve(sqrtm(C_S[[i]])$B))%*%
+                                  t(data_pattern[[i]] - muS[[i]] +  av_mu[patterns[[i]]]))
+    }
+    
+    
+    #### create bootstrap samples, and compute R^(b)
+    sum_indicator = 0
+    
+    for (b in 1:B){
+      
+      r_ind = 0
+      X = data.frame(matrix(nrow = d*n, ncol = d))
+      for (i in 1:n_pattern){
+        n_S = dim(rot_data_pattern[[i]])[1]
+        tmp_data = rot_data_pattern[[i]][sample(1:n_S, n_S, replace = T),]
+        if(dim(unique(tmp_data))[1] < 2){
+          tmp_data = rot_data_pattern[[i]][sample(1:n_S, n_S, replace = T),]
+        }
+        X[(1+r_ind):(n_S+r_ind), patterns[[i]]] = tmp_data
+        r_ind = r_ind + n_S
+      }
+      X = as.matrix(X[1:r_ind,])
+        
+        
+      result = get_SigmaS(X)
+      av_sigma = compute_av("var", X)
+        
+      for (j in 1:d){
+        X[,j] = X[,j]/sqrt(av_sigma[j])
+      }
+      
+      result = get_SigmaS(X)
+      
+      patterns = result$pattern
+      n_pattern = result$n_pattern
+      data_pattern = result$data_pattern
+      
+      muS_b = result$muS
+      C_S_b = result$C_S
+      sigma_squared_S_b = result$sigma_squared_S
+      SigmaS_b = result$SigmaS
+      
+      T_hat_b = computeR(patterns, SigmaS_b)$R + M(muS_b, patterns) + V(sigma_squared_S_b, patterns) 
+      
+      if (T_hat_b >= T_hat_0){
+        sum_indicator = sum_indicator + 1
+      }
+    }
+  }
+  else if (type=="p"){
+    #### create bootstrap samples, and compute R^(b)
+    sum_indicator = 0
+    
+    for (b in 1:B){
+      
+      r_ind = 0
+      X = data.frame(matrix(nrow = d*n, ncol = d))
+      for (i in 1:n_pattern){
+        n_S = dim(data_pattern[[i]])[1]
+        tmp_data = mvrnorm(n_S, av_mu[patterns[[i]]], QS_hat[[i]])
+        X[(1+r_ind):(n_S+r_ind), patterns[[i]]] = tmp_data
+        r_ind = r_ind + n_S
+      }
+      X = as.matrix(X[1:r_ind,])
+      
+      result = get_SigmaS(X)
+      av_sigma = compute_av("var", X)
+      
+      for (j in 1:d){
+        X[,j] = X[,j]/sqrt(av_sigma[j])
+      }
+      
+      result = get_SigmaS(X)
+      
+      patterns = result$pattern
+      n_pattern = result$n_pattern
+      data_pattern = result$data_pattern
+      
+      muS_b = result$muS
+      C_S_b = result$C_S
+      sigma_squared_S_b = result$sigma_squared_S
+      SigmaS_b = result$SigmaS
+      
+      T_hat_b = computeR(patterns, SigmaS_b)$R + M(muS_b, patterns) + V(sigma_squared_S_b, patterns) 
+      
+      if (T_hat_b >= T_hat_0){
+        sum_indicator = sum_indicator + 1
+      }
+    }
+  }
+  else {
+    print("An error occured")
+  }
+  
+  
+  p_hat = (1+sum_indicator)/(B+1)
+  
+  ### take the decision
+  decision = p_hat < alpha
+  return(decision)
+}

@@ -34,26 +34,33 @@ get_SigmaS = function(X){
   
   deletion = c()
   for (i in 1:n_pattern){
-    if (dim(data_pattern[[i]])[1] < 10){ # put 3 in order for Little's test to work
+    if (dim(data_pattern[[i]])[1] < 5){ ####### remove pattern with sample size too small (< 10 in this case)
       deletion = c(deletion, i)
     }
   }
-  
+
   if (length(deletion) > 0){
     data_pattern = data_pattern[-deletion]
     patterns = patterns[-deletion]
   }
-  
+
   n_pattern = n_pattern - length(deletion)
   
+  muS = list()
+  C_S = list()
+  sigma_squared_S = list()
   SigmaS = list()
   for (i in 1:n_pattern){
-    SigmaS[[i]] = cor(data_pattern[[i]])
+    muS[[i]] = colMeans(data_pattern[[i]])
+    C_S[[i]] = var(data_pattern[[i]])
+    sigma_squared_S[[i]] = diag(C_S[[i]])
+    SigmaS[[i]] = cov2cor(C_S[[i]])
   }
   
-  my_list = list("pattern" = patterns, "n_pattern" = n_pattern,
-                 "data_pattern" = data_pattern, "SigmaS" = SigmaS, 
-                 "ambient_dimension" = d)
+  my_list = list("patterns" = patterns, "n_pattern" = n_pattern,
+                 "data_pattern" = data_pattern, "muS" = muS,
+                 "C_S" = C_S, "sigma_squared_S" = sigma_squared_S, 
+                 "SigmaS" = SigmaS, "ambient_dimension" = d)
   return(my_list)
 }
 
@@ -65,8 +72,5 @@ if (sys.nframe() == 0){
   X = rMvdc(n, P)
   X = delete_MCAR(X, 0.1, c(1,4,5))
   
-  result = get_SigmaS(X)
-  print(result$data_pattern)
-  print(result$SigmaS)
-  print(result$pattern)
+  get_SigmaS(X)
 }

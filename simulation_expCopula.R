@@ -1,100 +1,172 @@
-setwd("~/Documents/phd/MCAR_covariance/simulations")
-source("simul_general.R")
+setwd("~/Documents/GitHub/MCAR")
+source("computeR.R")
 source("little_test.R")
 source("bootstrap_test.R")
 source("find_SigmaS.R")
+source("indexConsistency.R")
 library(missMethods)
 library(MASS)
 library(norm)
-library(copula)
-library(missMethods)
+library(foreach)
+library(doSNOW)
+library(doParallel)
+library(future)
+library(parallel)
+library(foreach)
+library(doRNG) 
+library(doFuture)
+library(future.apply)
 
 ######### example 1 on 3-cycle ############
 alpha = 0.05
-n = 1000
-M = 100
+n = 200
+MC = 30
+d = 5
 
-little_errorI = c()
-our_errorI = c()
-
-d = 10
 # Select the copula
 cp = claytonCopula(param = c(1), dim = d)
 # Generate the multivariate distribution (in this case it is just bivariate) with normal and t marginals
-P = mvdc(copula = cp, margins = c(rep("exp",d)),
+P = mvdc(copula = cp, margins = c(rep("lnorm",d)),
          paramMargins = rep(list(1),d) )
 data = rMvdc(n, P)
 
 
-######## simulation of type I error, if data are MCAR 
-for(p in seq(0.03, 0.3, length.out=10)){
-  
-  little_decisions = c()
-  our_decisions = c()
-  
-  for (i in 1:M){
-    X = delete_MCAR(data, p, c(1,3,5,7,9))
+bootstrap_power = function(p){
+  ###### SAMPLE LEVEL, REPEATING THE TEST MC TIMES #######
+  our_decisions = logical(length = MC)
+  for (i in 1:MC){
+
+    #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
+    X = delete_MCAR(data, p, c(1,2))
     print("------------------------------------------------------------------")
     print(i)
     print("------------------------------------------------------------------")
-    
-    little_decisions = c(little_decisions, little_test(X, alpha))
-    our_decisions = c(our_decisions, MCAR_corr_test(X, alpha, B = 99))
-    
+
+    ### run our tests
+    our_decisions[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "np")
   }
-  
-  little_errorI = c(little_errorI, mean(little_decisions))
-  our_errorI = c(our_errorI, mean(our_decisions))
+  return(mean(our_decisions))
 }
 
-plot(seq(0.03, 0.3, length.out=10), little_errorI, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "")
-points(seq(0.03, 0.3, length.out=10), our_errorI, col="blue", pch=18)
+little_power = function(p){
+  little_decisions = logical(length = MC)
+  for (i in 1:MC){
+
+    #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
+    X = delete_MCAR(data, p, c(1,2))
+    print("------------------------------------------------------------------")
+    print(i)
+    print("------------------------------------------------------------------")
+
+    ### run little's tests
+    little_decisions[i] = little_test(X, alpha = 0.05)
+  }
+
+  return(mean(little_decisions))
+}
+
+######## USING FOREACH AND DORNG
+registerDoFuture()
+plan(multicore)
+RNGkind("L'Ecuyer-CMRG")
+set.seed(232)
+
+start.time = Sys.time()
+
+xxx = seq(0.03, 0.3, length.out=7)
+
+little_errorI = foreach(p = xxx, .combine = 'c') %dorng% little_power(p)
+our_errorI = foreach(p = xxx, .combine = 'c') %dorng% bootstrap_power(p)
+
+end.time = Sys.time()
+time.taken = round(end.time - start.time,2)
+time.taken
+
+png("pictures/MCARlnorm_3X2Y.png")
+plot(seq(0.03, 0.3, length.out=7), little_errorI, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "", type="b")
+lines(seq(0.03, 0.3, length.out=7), our_errorI, col="blue", pch=18, type = "b")
 abline(h = alpha, col="red")
 legend("center",
        legend = c("Little's type I error", "Our type I error"),
        col = c("green", "blue"),
        pch = c(18, 18))
+dev.off()
 
-
-
-######## simulation of power, if data are MAR with censoring 
-little_power = c()
-our_power = c()
-
+######### MAR
+######### example 1 on 3-cycle ############
+alpha = 0.05
+n = 200
+MC = 30
 d = 5
+
 # Select the copula
 cp = claytonCopula(param = c(1), dim = d)
 # Generate the multivariate distribution (in this case it is just bivariate) with normal and t marginals
-P = mvdc(copula = cp, margins = c(rep("exp",d)),
+P = mvdc(copula = cp, margins = c(rep("lnorm",d)),
          paramMargins = rep(list(1),d) )
 data = rMvdc(n, P)
 
-for(p in seq(0.03, 0.3, length.out=10)){
-  
-  little_decisions = c()
-  our_decisions = c()
-  
-  for (i in 1:M){
-    X = delete_MAR_1_to_x(data, p, c(1,3,5,7,9), 1+c(1,3,5,7,9), x = 9)
+
+bootstrap_power = function(p){
+  ###### SAMPLE LEVEL, REPEATING THE TEST MC TIMES #######
+  our_decisions = logical(length = MC)
+  for (i in 1:MC){
+    
+    #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
+    X = delete_MAR_1_to_x(data, p, c(1,2), cols_ctrl = c(3,4), x = 9)
     print("------------------------------------------------------------------")
     print(i)
     print("------------------------------------------------------------------")
     
-    little_decisions = c(little_decisions, little_test(X, alpha))
-    our_decisions = c(our_decisions, MCAR_corr_test(X, alpha, B = 99))
-    
+    ### run our tests
+    our_decisions[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "np")
   }
-  
-  little_power = c(little_power, mean(little_decisions))
-  our_power = c(our_power, mean(our_decisions))
+  return(mean(our_decisions))
 }
 
-plot(seq(0.03, 0.3, length.out=10), little_power, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "")
-points(seq(0.03, 0.3, length.out=10), our_power, col="blue", pch=18)
+little_power = function(p){
+  little_decisions = logical(length = MC)
+  for (i in 1:MC){
+    
+    #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
+    X = delete_MAR_1_to_x(data, p, c(1,2), cols_ctrl = c(3,4), x = 9)
+    print("------------------------------------------------------------------")
+    print(i)
+    print("------------------------------------------------------------------")
+    
+    ### run little's tests
+    little_decisions[i] = little_test(X, alpha = 0.05)
+  }
+  
+  return(mean(little_decisions))
+}
+
+######## USING FOREACH AND DORNG
+registerDoFuture()
+plan(multicore)
+RNGkind("L'Ecuyer-CMRG")
+set.seed(232)
+
+start.time = Sys.time()
+
+xxx = seq(0.03, 0.3, length.out=7)
+
+little_errorI = foreach(p = xxx, .combine = 'c') %dorng% little_power(p)
+our_errorI = foreach(p = xxx, .combine = 'c') %dorng% bootstrap_power(p)
+
+end.time = Sys.time()
+time.taken = round(end.time - start.time,2)
+time.taken
+
+png("pictures/MAR_lnorm_3X2Y.png")
+plot(seq(0.03, 0.3, length.out=7), little_errorI, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "", type="b")
+lines(seq(0.03, 0.3, length.out=7), our_errorI, col="blue", pch=18, type = "b")
 abline(h = alpha, col="red")
-legend("center",
-       legend = c("Little's power", "Our power"),
+legend("bottomright",
+       legend = c("Little's power", "Our type power"),
        col = c("green", "blue"),
        pch = c(18, 18))
+dev.off()
+
 
 
