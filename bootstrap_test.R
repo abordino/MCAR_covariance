@@ -1,3 +1,12 @@
+setwd("~/Documents/GitHub/MCAR")
+source("computeR.R")
+source("little_test.R")
+source("find_SigmaS.R")
+source("indexConsistency.R")
+library(missMethods)
+library(MASS)
+library(norm)
+
 MCAR_corr_test = function(X, alpha, B, type="np"){
   
   result = get_SigmaS(X)

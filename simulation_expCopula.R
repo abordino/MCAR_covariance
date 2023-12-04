@@ -65,10 +65,6 @@ little_power = function(p){
 
     #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
     X = delete_MCAR(data, p, c(1,2))
-    print("------------------------------------------------------------------")
-    print(i)
-    print("------------------------------------------------------------------")
-
     ### run little's tests
     little_decisions[i] = little_test(X, alpha = 0.05)
   }
@@ -127,10 +123,6 @@ bootstrap_power = function(p){
     
     #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
     X = delete_MAR_1_to_x(data, p, c(1,2), cols_ctrl = c(3,4), x = 9)
-    print("------------------------------------------------------------------")
-    print(i)
-    print("------------------------------------------------------------------")
-    
     ### run our tests
     our_decisions[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "np")
   }
@@ -144,10 +136,6 @@ bootstrap_power_P = function(p){
     
     #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
     X = delete_MAR_1_to_x(data, p, c(1,2), cols_ctrl = c(3,4), x = 9)
-    print("------------------------------------------------------------------")
-    print(i)
-    print("------------------------------------------------------------------")
-    
     ### run our tests
     our_decisions[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "p")
   }
@@ -160,10 +148,6 @@ little_power = function(p){
     
     #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
     X = delete_MAR_1_to_x(data, p, c(1,2), cols_ctrl = c(3,4), x = 9)
-    print("------------------------------------------------------------------")
-    print(i)
-    print("------------------------------------------------------------------")
-    
     ### run little's tests
     little_decisions[i] = little_test(X, alpha = 0.05)
   }
@@ -200,6 +184,8 @@ legend("bottomright",
        col = c("green", "blue", "cyan"),
        pch = c(18, 18, 18))
 dev.off()
+
+
 
 
 

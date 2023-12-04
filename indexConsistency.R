@@ -54,22 +54,24 @@ M = function(mu_S, patterns){
   n_pattern = length(mu_S)
   
   max = 0
-  couples = t(combn(1:n_pattern, 2))
-  n_couples = dim(t(combn(1:n_pattern, 2)))[1]
-  couples = as.list(data.frame(t(combn(1:n_pattern, 2))))
-  
-  for (j in 1:d){
-    for (i in 1:n_couples){
-      if ((j %in% patterns[[ couples$X1[i] ]])&(j %in% patterns[[ couples$X2[i] ]])) {
-        candidate = abs(mu_S[[ couples$X1[i] ]][which(patterns[[couples$X1[i]]] == j)[[1]]] 
-                        - mu_S[[ couples$X2[i] ]][which(patterns[[couples$X2[i]]] == j)[[1]]])
-        if (candidate > max){
-          max = candidate
+  if(n_pattern > 1){
+    couples = t(combn(1:n_pattern, 2))
+    n_couples = dim(t(combn(1:n_pattern, 2)))[1]
+    couples = as.list(data.frame(t(combn(1:n_pattern, 2))))
+    
+    for (j in 1:d){
+      for (i in 1:n_couples){
+        if ((j %in% patterns[[ couples$X1[i] ]])&(j %in% patterns[[ couples$X2[i] ]])) {
+          candidate = abs(mu_S[[ couples$X1[i] ]][which(patterns[[couples$X1[i]]] == j)[[1]]] 
+                          - mu_S[[ couples$X2[i] ]][which(patterns[[couples$X2[i]]] == j)[[1]]])
+          if (candidate > max){
+            max = candidate
+          }
         }
       }
     }
   }
-  
+
   return(max)
 }
 
