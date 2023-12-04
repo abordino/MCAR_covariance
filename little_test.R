@@ -1,14 +1,10 @@
 little_test = function(X, alpha, type="mean&cov"){
   s = prelim.norm(as.matrix(X))
   thetahat = em.norm(s)
-  mu_true = getparam.norm(s,thetahat,corr=TRUE)$mu
-  Sigma_true = getparam.norm(s,thetahat,corr=TRUE)$r
+  mu_true = getparam.norm(s,thetahat,corr=TRUE)$mu; Sigma_true = getparam.norm(s,thetahat,corr=TRUE)$r
   
   result = get_SigmaS(X)
-  SigmaS = result$SigmaS
-  patterns = result$pattern
-  n_pattern = result$n_pattern
-  data_pattern = result$data_pattern
+  SigmaS = result$SigmaS; patterns = result$pattern; n_pattern = result$n_pattern; data_pattern = result$data_pattern
   d = result$ambient_dimension
   
   if(type == "mean"){
@@ -31,6 +27,14 @@ little_test = function(X, alpha, type="mean&cov"){
   }
   
   else if(type == "cov"){
+    
+    for (i in length(SigmaS)){
+      if (min(eigen(SigmaS[[i]])$values) < 10^-7){
+        print("SigmaS is singular!")
+        return(NA)
+      }
+    }
+    
     d_cov = 0
     df = -d*(d+1)/2
     
@@ -52,6 +56,14 @@ little_test = function(X, alpha, type="mean&cov"){
   }
   
   else{
+    
+    for (i in length(SigmaS)){
+      if (min(eigen(SigmaS[[i]])$values) < 10^-7){
+        print("SigmaS is singular!")
+        return(NA)
+      }
+    }
+    
     d_aug = 0
     df = -d*(d+3)/2
     

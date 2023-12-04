@@ -1,22 +1,17 @@
 MCAR_corr_test = function(X, alpha, B, type="np"){
   
   result = get_SigmaS(X)
-  SigmaS = result$SigmaS
-  patterns = result$pattern
-  n_pattern = result$n_pattern
-  data_pattern = result$data_pattern
+  SigmaS = result$SigmaS; patterns = result$pattern; n_pattern = result$n_pattern; data_pattern = result$data_pattern
   
   for (i in length(SigmaS)){
     if (min(eigen(SigmaS[[i]])$values) < 10^-7){
       print("SigmaS is singular!")
-      return(SigmaS)
+      return(NA)
     }
   }
   
   tmp = computeR(patterns, SigmaS)
-  
   R_hat_0 = tmp$R
-  
   Q_hat = tmp$Sigma/(1-tmp$R)
   QS_hat = list()
   for (i in 1:n_pattern){
@@ -24,16 +19,15 @@ MCAR_corr_test = function(X, alpha, B, type="np"){
   }
   
   if (type=="np"){
+    
     #### rotate X, to make it look like it's from H0
     rot_data_pattern = list()
     for (i in 1:n_pattern){
       rot_data_pattern[[i]] = t((sqrtm(QS_hat[[i]])$B)%*%(solve(sqrtm(SigmaS[[i]])$B))%*%
                                   t(scale(data_pattern[[i]])))
     }
-    
-    #### create bootstrap samples, and compute R^(b)
+
     sum_indicator = 0
-    
     for (b in 1:B){
       SigmaS_b = list()
       for (i in 1:n_pattern){
@@ -74,52 +68,34 @@ else if (type=="p"){
 else {
   print("An error occured")
 }
-  
 
   p_hat = (1+sum_indicator)/(B+1)
-  
-  ### take the decision
   decision = p_hat < alpha
   return(decision)
 }
 
 MCAR_meancovTest = function(X, alpha, B, type="np"){
   
-  result = get_SigmaS(X)
-  d = result$ambient_dimension
-  av_sigma = compute_av("var", X)
+  result = get_SigmaS(X); d = result$ambient_dimension; av_sigma = compute_av("var", X)
   
   for (j in 1:d){
     X[,j] = X[,j]/sqrt(av_sigma[j])
   }
   
   result = get_SigmaS(X)
-  
   av_mu = compute_av("mean", X)
-  
-  muS = result$muS
-  C_S = result$C_S
-  sigma_squared_S = result$sigma_squared_S
-  SigmaS = result$SigmaS
-  
-  patterns = result$pattern
-  n_pattern = result$n_pattern
-  data_pattern = result$data_pattern
+  muS = result$muS; C_S = result$C_S; sigma_squared_S = result$sigma_squared_S; SigmaS = result$SigmaS
+  patterns = result$pattern; n_pattern = result$n_pattern; data_pattern = result$data_pattern
   
   for (i in length(SigmaS)){
     if (min(eigen(SigmaS[[i]])$values) < 10^-7){
       print("SigmaS is singular!")
-      return(SigmaS)
+      return(NA)
     }
   }
   
   tmp = computeR(patterns, SigmaS)
-  
   T_hat_0 = tmp$R + M(muS, patterns) + V(sigma_squared_S, patterns)
-  
-  
-  ##### transform the data so that the look like they come from H0
-  
   Q_hat = tmp$Sigma/(1-tmp$R)
   QS_hat = list()
   for (i in 1:n_pattern){
@@ -127,6 +103,7 @@ MCAR_meancovTest = function(X, alpha, B, type="np"){
   }
   
   if (type=="np"){
+    
     #### rotate X, to make it look like it's from H0
     rot_data_pattern = list()
     for (i in 1:n_pattern){
@@ -134,10 +111,7 @@ MCAR_meancovTest = function(X, alpha, B, type="np"){
                                   t(data_pattern[[i]] - muS[[i]] +  av_mu[patterns[[i]]]))
     }
     
-    
-    #### create bootstrap samples, and compute R^(b)
     sum_indicator = 0
-    
     for (b in 1:B){
       
       r_ind = 0
@@ -153,24 +127,15 @@ MCAR_meancovTest = function(X, alpha, B, type="np"){
       }
       X = as.matrix(X[1:r_ind,])
         
-        
-      result = get_SigmaS(X)
-      av_sigma = compute_av("var", X)
+      result = get_SigmaS(X); av_sigma = compute_av("var", X)
         
       for (j in 1:d){
         X[,j] = X[,j]/sqrt(av_sigma[j])
       }
       
       result = get_SigmaS(X)
-      
-      patterns = result$pattern
-      n_pattern = result$n_pattern
-      data_pattern = result$data_pattern
-      
-      muS_b = result$muS
-      C_S_b = result$C_S
-      sigma_squared_S_b = result$sigma_squared_S
-      SigmaS_b = result$SigmaS
+      patterns = result$pattern; n_pattern = result$n_pattern; data_pattern = result$data_pattern
+      muS_b = result$muS; C_S_b = result$C_S; sigma_squared_S_b = result$sigma_squared_S; SigmaS_b = result$SigmaS
       
       T_hat_b = computeR(patterns, SigmaS_b)$R + M(muS_b, patterns) + V(sigma_squared_S_b, patterns) 
       
@@ -180,38 +145,29 @@ MCAR_meancovTest = function(X, alpha, B, type="np"){
     }
   }
   else if (type=="p"){
-    #### create bootstrap samples, and compute R^(b)
+
     sum_indicator = 0
-    
     for (b in 1:B){
       
       r_ind = 0
       X = data.frame(matrix(nrow = d*n, ncol = d))
       for (i in 1:n_pattern){
         n_S = dim(data_pattern[[i]])[1]
-        tmp_data = mvrnorm(n_S, av_mu[patterns[[i]]], QS_hat[[i]])
+        tmp_data = mvrnorm(n_S, av_mu[patterns[[i]]], as.matrix(QS_hat[[i]]))
         X[(1+r_ind):(n_S+r_ind), patterns[[i]]] = tmp_data
         r_ind = r_ind + n_S
       }
       X = as.matrix(X[1:r_ind,])
       
-      result = get_SigmaS(X)
-      av_sigma = compute_av("var", X)
+      result = get_SigmaS(X); av_sigma = compute_av("var", X)
       
       for (j in 1:d){
         X[,j] = X[,j]/sqrt(av_sigma[j])
       }
       
       result = get_SigmaS(X)
-      
-      patterns = result$pattern
-      n_pattern = result$n_pattern
-      data_pattern = result$data_pattern
-      
-      muS_b = result$muS
-      C_S_b = result$C_S
-      sigma_squared_S_b = result$sigma_squared_S
-      SigmaS_b = result$SigmaS
+      patterns = result$pattern; n_pattern = result$n_pattern; data_pattern = result$data_pattern
+      muS_b = result$muS; C_S_b = result$C_S; sigma_squared_S_b = result$sigma_squared_S; SigmaS_b = result$SigmaS
       
       T_hat_b = computeR(patterns, SigmaS_b)$R + M(muS_b, patterns) + V(sigma_squared_S_b, patterns) 
       
@@ -224,10 +180,7 @@ MCAR_meancovTest = function(X, alpha, B, type="np"){
     print("An error occured")
   }
   
-  
   p_hat = (1+sum_indicator)/(B+1)
-  
-  ### take the decision
   decision = p_hat < alpha
   return(decision)
 }

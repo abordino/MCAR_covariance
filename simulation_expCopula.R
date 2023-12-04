@@ -38,12 +38,23 @@ bootstrap_power = function(p){
 
     #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
     X = delete_MCAR(data, p, c(1,2))
-    print("------------------------------------------------------------------")
-    print(i)
-    print("------------------------------------------------------------------")
 
     ### run our tests
     our_decisions[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "np")
+  }
+  return(mean(our_decisions))
+}
+
+bootstrap_power_P = function(p){
+  ###### SAMPLE LEVEL, REPEATING THE TEST MC TIMES #######
+  our_decisions = logical(length = MC)
+  for (i in 1:MC){
+    
+    #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
+    X = delete_MCAR(data, p, c(1,2))
+    
+    ### run our tests
+    our_decisions[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "p")
   }
   return(mean(our_decisions))
 }
@@ -77,6 +88,7 @@ xxx = seq(0.03, 0.3, length.out=7)
 
 little_errorI = foreach(p = xxx, .combine = 'c') %dorng% little_power(p)
 our_errorI = foreach(p = xxx, .combine = 'c') %dorng% bootstrap_power(p)
+our_errorI_P = foreach(p = xxx, .combine = 'c') %dorng% bootstrap_power_P(p)
 
 end.time = Sys.time()
 time.taken = round(end.time - start.time,2)
@@ -85,11 +97,12 @@ time.taken
 png("pictures/MCARlnorm_3X2Y.png")
 plot(seq(0.03, 0.3, length.out=7), little_errorI, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "", type="b")
 lines(seq(0.03, 0.3, length.out=7), our_errorI, col="blue", pch=18, type = "b")
+lines(seq(0.03, 0.3, length.out=7), our_errorI_P, col="cyan", pch=18, type = "b")
 abline(h = alpha, col="red")
 legend("center",
-       legend = c("Little's type I error", "Our type I error"),
-       col = c("green", "blue"),
-       pch = c(18, 18))
+       legend = c("Little's type I error", "Our type I error", "Our type I error P"),
+       col = c("green", "blue", "cyan"),
+       pch = c(18, 18, 18))
 dev.off()
 
 ######### MAR
@@ -124,6 +137,23 @@ bootstrap_power = function(p){
   return(mean(our_decisions))
 }
 
+bootstrap_power_P = function(p){
+  ###### SAMPLE LEVEL, REPEATING THE TEST MC TIMES #######
+  our_decisions = logical(length = MC)
+  for (i in 1:MC){
+    
+    #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
+    X = delete_MAR_1_to_x(data, p, c(1,2), cols_ctrl = c(3,4), x = 9)
+    print("------------------------------------------------------------------")
+    print(i)
+    print("------------------------------------------------------------------")
+    
+    ### run our tests
+    our_decisions[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "p")
+  }
+  return(mean(our_decisions))
+}
+
 little_power = function(p){
   little_decisions = logical(length = MC)
   for (i in 1:MC){
@@ -151,21 +181,24 @@ start.time = Sys.time()
 
 xxx = seq(0.03, 0.3, length.out=7)
 
-little_errorI = foreach(p = xxx, .combine = 'c') %dorng% little_power(p)
-our_errorI = foreach(p = xxx, .combine = 'c') %dorng% bootstrap_power(p)
+little_power = foreach(p = xxx, .combine = 'c') %dorng% little_power(p)
+our_power = foreach(p = xxx, .combine = 'c') %dorng% bootstrap_power(p)
+our_power_P = foreach(p = xxx, .combine = 'c') %dorng% bootstrap_power_P(p)
+
 
 end.time = Sys.time()
 time.taken = round(end.time - start.time,2)
 time.taken
 
 png("pictures/MAR_lnorm_3X2Y.png")
-plot(seq(0.03, 0.3, length.out=7), little_errorI, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "", type="b")
-lines(seq(0.03, 0.3, length.out=7), our_errorI, col="blue", pch=18, type = "b")
+plot(seq(0.03, 0.3, length.out=7), little_power, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "", type="b")
+lines(seq(0.03, 0.3, length.out=7), our_power, col="blue", pch=18, type = "b")
+lines(seq(0.03, 0.3, length.out=7), our_power_P, col="cyan", pch=18, type = "b")
 abline(h = alpha, col="red")
 legend("bottomright",
-       legend = c("Little's power", "Our type power"),
-       col = c("green", "blue"),
-       pch = c(18, 18))
+       legend = c("Little's power", "Our power", "Our power P"),
+       col = c("green", "blue", "cyan"),
+       pch = c(18, 18, 18))
 dev.off()
 
 
