@@ -173,9 +173,13 @@ computeR = function(patterns=list(), SigmaS=list()) {
   }
   
   for (k in 1:card_patterns){
-    card_S = length(patterns[[k]])
     pattern = patterns[[k]]
-    XS0[[k]] = diag(1/count[pattern])
+    if (length(pattern) == 1){
+      XS0[[k]] = as.matrix(1/count[pattern])
+    } else{
+      XS0[[k]] = diag(1/count[pattern])
+    }
+    
   }
   
   XS = c(list())
