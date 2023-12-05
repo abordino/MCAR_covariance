@@ -20,7 +20,7 @@ library(future.apply)
 ######### MCAR ############
 alpha = 0.05
 n = 200
-MC = 100
+MC = 10
 d = 3
 
 # Select the copula
@@ -30,70 +30,34 @@ P = mvdc(copula = cp, margins = c(rep("lnorm",d)),  #chisq #exp
          paramMargins = rep(list(1),d) )
 data = rMvdc(n, P)
 
-
-bootstrap_power = function(p){
-  ###### SAMPLE LEVEL, REPEATING THE TEST MC TIMES #######
-  our_decisions = logical(length = MC)
-  for (i in 1:MC){
-
-    #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
-    X = delete_MCAR(data, p, c(1,2))
-
-    ### run our tests
-    our_decisions[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "np")
-  }
-  return(mean(our_decisions))
-}
-
-bootstrap_power_P = function(p){
-  ###### SAMPLE LEVEL, REPEATING THE TEST MC TIMES #######
-  our_decisions = logical(length = MC)
-  for (i in 1:MC){
-    
-    #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
-    X = delete_MCAR(data, p, c(1,2))
-    
-    ### run our tests
-    our_decisions[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "p")
-  }
-  return(mean(our_decisions))
-}
-
-little_power = function(p){
-  little_decisions = logical(length = MC)
-  for (i in 1:MC){
-
-    #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
-    X = delete_MCAR(data, p, c(1,2))
-    ### run little's tests
-    little_decisions[i] = little_test(X, alpha = 0.05)
-  }
-
-  return(mean(little_decisions))
-}
-
-######## USING FOREACH AND DORNG
-registerDoFuture()
-plan(multicore)
-RNGkind("L'Ecuyer-CMRG")
-set.seed(232)
-
-start.time = Sys.time()
-
 xxx = seq(0.03, 0.3, length.out=7)
 
-little_errorI = foreach(p = xxx, .combine = 'c') %dorng% little_power(p)
-our_errorI = foreach(p = xxx, .combine = 'c') %dorng% bootstrap_power(p)
-our_errorI_P = foreach(p = xxx, .combine = 'c') %dorng% bootstrap_power_P(p)
-
-end.time = Sys.time()
-time.taken = round(end.time - start.time,2)
-time.taken
+little_power = numeric(length = 7)
+our_power = numeric(length = 7)
+our_power_P = numeric(length = 7)
+ind = 1
+for (p in xxx){
+  little_decision = logical(length = MC)
+  our_decision = logical(length = MC)
+  our_decision_P = logical(length = MC)
+  for (i in 1:MC){
+    X = delete_MCAR(data, p, c(1,2))
+    
+    little_decision[i] = little_test(X, alpha = 0.05)
+    our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "np")
+    our_decision_P[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "p")
+  }
+  
+  little_power[ind] = mean(little_decision)
+  our_power[ind] = mean(our_decision)
+  our_power_P[ind] = mean(our_decision_P)
+  ind = ind+1
+}
 
 png("pictures/MCARlnorm_1X2Y.png")
-plot(seq(0.03, 0.3, length.out=7), little_errorI, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "", type="b")
-lines(seq(0.03, 0.3, length.out=7), our_errorI, col="blue", pch=18, type = "b")
-lines(seq(0.03, 0.3, length.out=7), our_errorI_P, col="cyan", pch=18, type = "b")
+plot(seq(0.03, 0.3, length.out=7), little_power, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "", type="b")
+lines(seq(0.03, 0.3, length.out=7), our_power, col="blue", pch=18, type = "b")
+lines(seq(0.03, 0.3, length.out=7), our_power_P, col="cyan", pch=18, type = "b")
 abline(h = alpha, col="red")
 legend("center",
        legend = c("Little's type I error", "Our type I error", "Our type I error P"),
@@ -104,7 +68,7 @@ dev.off()
 ######### MAR ##############################
 alpha = 0.05
 n = 200
-MC = 100
+MC = 50
 d = 3
 
 # Select the copula
@@ -114,64 +78,29 @@ P = mvdc(copula = cp, margins = c(rep("lnorm",d)),
          paramMargins = rep(list(1),d) )
 data = rMvdc(n, P)
 
-
-bootstrap_power = function(p){
-  ###### SAMPLE LEVEL, REPEATING THE TEST MC TIMES #######
-  our_decisions = logical(length = MC)
-  for (i in 1:MC){
-    
-    #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
-    X = delete_MAR_1_to_x(data, p, c(1,2), cols_ctrl = c(3,3), x = 9)
-    ### run our tests
-    our_decisions[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "np")
-  }
-  return(mean(our_decisions))
-}
-
-bootstrap_power_P = function(p){
-  ###### SAMPLE LEVEL, REPEATING THE TEST MC TIMES #######
-  our_decisions = logical(length = MC)
-  for (i in 1:MC){
-    
-    #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
-    X = delete_MAR_1_to_x(data, p, c(1,2), cols_ctrl = c(3,3), x = 9)
-    ### run our tests
-    our_decisions[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "p")
-  }
-  return(mean(our_decisions))
-}
-
-little_power = function(p){
-  little_decisions = logical(length = MC)
-  for (i in 1:MC){
-    
-    #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
-    X = delete_MAR_1_to_x(data, p, c(1,2), cols_ctrl = c(3,3), x = 9)
-    ### run little's tests
-    little_decisions[i] = little_test(X, alpha = 0.05)
-  }
-  
-  return(mean(little_decisions))
-}
-
-######## USING FOREACH AND DORNG
-registerDoFuture()
-plan(multicore)
-RNGkind("L'Ecuyer-CMRG")
-set.seed(232)
-
-start.time = Sys.time()
-
 xxx = seq(0.03, 0.3, length.out=7)
 
-little_power = foreach(p = xxx, .combine = 'c') %dorng% little_power(p)
-our_power = foreach(p = xxx, .combine = 'c') %dorng% bootstrap_power(p)
-our_power_P = foreach(p = xxx, .combine = 'c') %dorng% bootstrap_power_P(p)
-
-
-end.time = Sys.time()
-time.taken = round(end.time - start.time,2)
-time.taken
+little_power = numeric(length = 7)
+our_power = numeric(length = 7)
+our_power_P = numeric(length = 7)
+ind = 1
+for (p in xxx){
+  little_decision = logical(length = MC)
+  our_decision = logical(length = MC)
+  our_decision_P = logical(length = MC)
+  for (i in 1:MC){
+    X = delete_MAR_1_to_x(data, p, c(1,2), cols_ctrl = c(3,3), x = 9)
+    
+    little_decision[i] = little_test(X, alpha = 0.05)
+    our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "np")
+    our_decision_P[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "p")
+  }
+  
+  little_power[ind] = mean(little_decision)
+  our_power[ind] = mean(our_decision)
+  our_power_P[ind] = mean(our_decision_P)
+  ind = ind+1
+}
 
 png("pictures/MAR_lnorm_1X2Y.png")
 plot(seq(0.03, 0.3, length.out=7), little_power, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "", type="b")
