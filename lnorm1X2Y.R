@@ -1,4 +1,3 @@
-setwd("~/Documents/GitHub/MCAR")
 source("computeR.R")
 source("little_test.R")
 source("bootstrap_test.R")
@@ -20,12 +19,12 @@ library(future.apply)
 ######### MCAR ############
 alpha = 0.05
 n = 200
-MC = 10
+MC = 500
 d = 3
 
 # Select the copula
 cp = claytonCopula(param = c(1), dim = d)
-# Generate the multivariate distribution (in this case it is just bivariate) with normal and t marginals
+# Generate the multivariate distribution (in this case it is just bivariate) with lnormal and t marginals
 P = mvdc(copula = cp, margins = c(rep("lnorm",d)),  #chisq #exp
          paramMargins = rep(list(1),d) )
 data = rMvdc(n, P)
@@ -34,46 +33,42 @@ xxx = seq(0.03, 0.3, length.out=7)
 
 little_power = numeric(length = 7)
 our_power = numeric(length = 7)
-our_power_P = numeric(length = 7)
 ind = 1
 for (p in xxx){
   little_decision = logical(length = MC)
   our_decision = logical(length = MC)
-  our_decision_P = logical(length = MC)
   for (i in 1:MC){
     X = delete_MCAR(data, p, c(1,2))
     
     little_decision[i] = little_test(X, alpha = 0.05)
     our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "np")
-    our_decision_P[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "p")
   }
   
   little_power[ind] = mean(little_decision)
   our_power[ind] = mean(our_decision)
-  our_power_P[ind] = mean(our_decision_P)
   ind = ind+1
 }
 
-png("pictures/MCARlnorm_1X2Y.png")
+png("MCARlnorm_1X2Y.png")
 plot(seq(0.03, 0.3, length.out=7), little_power, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "", type="b")
 lines(seq(0.03, 0.3, length.out=7), our_power, col="blue", pch=18, type = "b")
-lines(seq(0.03, 0.3, length.out=7), our_power_P, col="cyan", pch=18, type = "b")
 abline(h = alpha, col="red")
 legend("center",
-       legend = c("Little's type I error", "Our type I error", "Our type I error P"),
-       col = c("green", "blue", "cyan"),
-       pch = c(18, 18, 18))
+       legend = c("Little's type I error", "Our type I error"),
+       col = c("green", "blue"),
+       pch = c(18, 18))
 dev.off()
+
 
 ######### MAR ##############################
 alpha = 0.05
 n = 200
-MC = 50
+MC = 500
 d = 3
 
 # Select the copula
 cp = claytonCopula(param = c(1), dim = d)
-# Generate the multivariate distribution (in this case it is just bivariate) with normal and t marginals
+# Generate the multivariate distribution (in this case it is just bivariate) with lnormal and t marginals
 P = mvdc(copula = cp, margins = c(rep("lnorm",d)),
          paramMargins = rep(list(1),d) )
 data = rMvdc(n, P)
@@ -82,33 +77,71 @@ xxx = seq(0.03, 0.3, length.out=7)
 
 little_power = numeric(length = 7)
 our_power = numeric(length = 7)
-our_power_P = numeric(length = 7)
 ind = 1
 for (p in xxx){
   little_decision = logical(length = MC)
   our_decision = logical(length = MC)
-  our_decision_P = logical(length = MC)
   for (i in 1:MC){
     X = delete_MAR_1_to_x(data, p, c(1,2), cols_ctrl = c(3,3), x = 9)
     
     little_decision[i] = little_test(X, alpha = 0.05)
     our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "np")
-    our_decision_P[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "p")
   }
   
   little_power[ind] = mean(little_decision)
   our_power[ind] = mean(our_decision)
-  our_power_P[ind] = mean(our_decision_P)
   ind = ind+1
 }
 
-png("pictures/MAR_lnorm_1X2Y.png")
+png("MAR_lnorm_1X2Y.png")
 plot(seq(0.03, 0.3, length.out=7), little_power, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "", type="b")
 lines(seq(0.03, 0.3, length.out=7), our_power, col="blue", pch=18, type = "b")
-lines(seq(0.03, 0.3, length.out=7), our_power_P, col="cyan", pch=18, type = "b")
 abline(h = alpha, col="red")
 legend("bottomright",
-       legend = c("Little's power", "Our power", "Our power P"),
-       col = c("green", "blue", "cyan"),
-       pch = c(18, 18, 18))
+       legend = c("Little's power", "Our power"),
+       col = c("green", "blue"),
+       pch = c(18, 18))
+dev.off()
+
+######### MAR ##############################
+alpha = 0.05
+n = 200
+MC = 500
+d = 3
+
+# Select the copula
+cp = claytonCopula(param = c(1), dim = d)
+# Generate the multivariate distribution (in this case it is just bivariate) with lnormal and t marginals
+P = mvdc(copula = cp, margins = c(rep("lnorm",d)),
+         paramMargins = rep(list(1),d) )
+data = rMvdc(n, P)
+
+xxx = seq(0.03, 0.3, length.out=7)
+
+little_power = numeric(length = 7)
+our_power = numeric(length = 7)
+ind = 1
+for (p in xxx){
+  little_decision = logical(length = MC)
+  our_decision = logical(length = MC)
+  for (i in 1:MC){
+    X = delete_MAR_rank(data, p, c(1,2), cols_ctrl = c(3,3))
+    
+    little_decision[i] = little_test(X, alpha = 0.05)
+    our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "np")
+  }
+  
+  little_power[ind] = mean(little_decision)
+  our_power[ind] = mean(our_decision)
+  ind = ind+1
+}
+
+png("MAR_lnorm_rank_1X2Y.png")
+plot(seq(0.03, 0.3, length.out=7), little_power, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "", type="b")
+lines(seq(0.03, 0.3, length.out=7), our_power, col="blue", pch=18, type = "b")
+abline(h = alpha, col="red")
+legend("bottomright",
+       legend = c("Little's power", "Our power"),
+       col = c("green", "blue"),
+       pch = c(18, 18))
 dev.off()

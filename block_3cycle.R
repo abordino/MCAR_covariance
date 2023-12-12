@@ -8,9 +8,9 @@ library(norm)
 
 ######### 3-cycle: setting 1 ############
 alpha = 0.05
-n = 1000
-M = 40
-d = 4
+n = 500
+M = 50
+d = 50
 
 computeR_kkk = function(beta){
   #### POPULATION LEVEL ######

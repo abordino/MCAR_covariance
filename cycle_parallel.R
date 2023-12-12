@@ -4,6 +4,7 @@ source("bootstrap_test.R")
 source("find_SigmaS.R")
 library(missMethods)
 library(MASS)
+library(compositions)
 library(norm)
 library(foreach)
 library(doSNOW)
@@ -16,11 +17,12 @@ library(doFuture)
 library(future.apply)
 
 ######### 3-cycle: setting 1 ############
+# rlnorm.rplus
 alpha = 0.05
 n = 200
-M = 100
-t3 = pi/6
-t2 = 5*pi/12
+M = 50
+t3 = pi/4
+t2 = pi/4
 
 
 ##### easy part
@@ -127,7 +129,7 @@ bootstrap_power_t1 = function(t1){
     X = as.matrix(X)
     
     ### run our tests
-    our_decisions[i] = MCAR_corr_test(X, alpha = 0.05, B = 99, type = "p")
+    our_decisions[i] = MCAR_corr_test(X, alpha = 0.05, B = 99, type = "np")
   }
   
   print(t1)
@@ -143,7 +145,7 @@ set.seed(232)
 
 start.time = Sys.time()
 
-xxx = seq(t2+t3, (pi+t2+t3)/2, length.out = 7)
+xxx = seq(t2+t3, (pi+t2+t3)/2, length.out = 15)
 
 R = foreach(t1 = xxx, .combine = 'c') %dorng% computeR_t1(t1)
 little_power = foreach(t1 = xxx, .combine = 'c') %dorng% little_power_t1(t1)
@@ -154,12 +156,12 @@ end.time = Sys.time()
 time.taken = round(end.time - start.time,2)
 time.taken
 
-png("pictures/3_cycle_simul_3.png")
+png("pictures/3_cycle_3.png")
 plot(R, little_power, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "", type = "b")
 lines(R, little_power_cov, col="orange", pch=18, type = "b")
 lines(R, our_power, col="blue", pch=18, type = "b")
 abline(h = alpha, col="red")
-legend("center",
+legend("bottomright",
        legend = c("Little's power", "Little's power cov", "Our power"),
        col = c("green", "orange", "blue"),
        pch = c(18, 18, 18))
@@ -260,3 +262,4 @@ dev.off()
 # dev.off()
 # 
 # 
+
