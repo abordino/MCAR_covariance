@@ -4,7 +4,7 @@
 ```math
      R(\Sigma_{\mathbb{S}})  = \inf \{ \epsilon \in [0,1] : \Sigma_\mathbb{S} \in (1-\epsilon) \mathcal{P}_\mathbb{S}^0 + \epsilon \mathcal{P}_\mathbb{S} \},
 ```
-    where $`\mathcal{P}_\mathbb{S}^0`$ is the space of compatible sequences of correlation matrices, and $`\mathcal{P}_\mathbb{S}`$ is the space of all sequences of correlation matrices. We estimate this measure by the natural plug-in estimator and study its concentration properties to introduce suitable critical values. This results in an oracle test under the extra hypothesis of non-singularity of the sequence of correlation matrices, which relies on a novel concentration inequality for the spectral norm of the difference between the Pearson sample correlation matrix and its population version. This leads to a testing procedure whose separation rate is of the order of 
+where $`\mathcal{P}_\mathbb{S}^0`$ is the space of compatible sequences of correlation matrices, and $`\mathcal{P}_\mathbb{S}`$ is the space of all sequences of correlation matrices. We estimate this measure by the natural plug-in estimator and study its concentration properties to introduce suitable critical values. This results in an oracle test under the extra hypothesis of non-singularity of the sequence of correlation matrices, which relies on a novel concentration inequality for the spectral norm of the difference between the Pearson sample correlation matrix and its population version. This leads to a testing procedure whose separation rate is of the order of 
 ```math
 \max_{S \in \mathbb{S}}\sqrt{\frac{|S|\log(|S\|\mathbb{S}|/\alpha)}{ n_S}}.
 ```
