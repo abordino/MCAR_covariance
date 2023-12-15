@@ -18,9 +18,9 @@ library(future.apply)
 
 ######### MCAR ############
 alpha = 0.05
-n = 1000
+n = 200
 MC = 100
-d = 5
+d = 8
 
 # Select the copula
 cp = claytonCopula(param = c(1), dim = d)
@@ -32,21 +32,21 @@ data = rMvdc(n, P)
 little_power = function(p){
   little_decision = logical(length = MC)
   for (i in 1:MC){
-    X = delete_MCAR(data, p, c(1,2))
+    X = delete_MCAR(data, p, c(1,2,3,4,5))
     little_decision[i] = little_test(X, alpha = 0.05)
   }
   
-  return(mean(little_decision))
+  return(mean(little_decision, na.rm=TRUE))
 }
 
 bootstrap_power = function(p){
   our_decision = logical(length = MC)
   for (i in 1:MC){
-    X = delete_MCAR(data, p, c(1,2))
+    X = delete_MCAR(data, p, c(1,2,3,4,5))
     our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "np")
   }
   
-  return(mean(our_decision))
+  return(mean(our_decision, na.rm=TRUE))
 }
 
 
@@ -67,7 +67,7 @@ end.time = Sys.time()
 time.taken = round(end.time - start.time,2)
 time.taken
 
-png("Pictures/MCARlnorm_3X2Y.png")
+png("Pictures/MCARlnorm_3X5Y.png")
 plot(seq(0.03, 0.3, length.out=7), little_power, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "", type="b")
 lines(seq(0.03, 0.3, length.out=7), our_power, col="blue", pch=18, type = "b")
 abline(h = alpha, col="red")
@@ -80,9 +80,9 @@ dev.off()
 
 ######### MAR ##############################
 alpha = 0.05
-n = 1000
-MC = 200
-d = 5
+n = 200
+MC = 100
+d = 8
 
 # Select the copula
 cp = claytonCopula(param = c(1), dim = d)
@@ -94,7 +94,7 @@ data = rMvdc(n, P)
 little_power = function(p){
   little_decision = logical(length = MC)
   for (i in 1:MC){
-    X = delete_MAR_1_to_x(data, p, c(1,2), cols_ctrl = c(3,4), x=9)
+    X = delete_MAR_1_to_x(data, p, c(1,2,3,4,5), cols_ctrl = c(6,6,7,8,8), x=9)
     little_decision[i] = little_test(X, alpha = 0.05)
   }
   
@@ -104,7 +104,7 @@ little_power = function(p){
 bootstrap_power = function(p){
   our_decision = logical(length = MC)
   for (i in 1:MC){
-    X = delete_MAR_1_to_x(data, p, c(1,2), cols_ctrl = c(3,4), x=9)
+    X = delete_MAR_1_to_x(data, p, c(1,2,3,4,5), cols_ctrl = c(6,6,7,8,8), x=9)
     our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "np")
   }
   
@@ -129,7 +129,7 @@ end.time = Sys.time()
 time.taken = round(end.time - start.time,2)
 time.taken
 
-png("Pictures/MAR_lnorm_3X2Y.png")
+png("Pictures/MAR_lnorm_3X5Y.png")
 plot(seq(0.03, 0.3, length.out=7), little_power, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "", type="b")
 lines(seq(0.03, 0.3, length.out=7), our_power, col="blue", pch=18, type = "b")
 abline(h = alpha, col="red")
@@ -141,9 +141,9 @@ dev.off()
 
 ######### MAR ##############################
 alpha = 0.05
-n = 1000
-MC = 200
-d = 5
+n = 200
+MC = 100
+d = 8
 
 # Select the copula
 cp = claytonCopula(param = c(1), dim = d)
@@ -155,7 +155,7 @@ data = rMvdc(n, P)
 little_power = function(p){
   little_decision = logical(length = MC)
   for (i in 1:MC){
-    X = delete_MAR_rank(data, p, c(1,2), cols_ctrl = c(3,4))
+    X = delete_MAR_rank(data, p, c(1,2,3,4,5), cols_ctrl = c(6,6,7,8,8))
     little_decision[i] = little_test(X, alpha = 0.05)
   }
   
@@ -165,7 +165,7 @@ little_power = function(p){
 bootstrap_power = function(p){
   our_decision = logical(length = MC)
   for (i in 1:MC){
-    X = delete_MAR_rank(data, p, c(1,2), cols_ctrl = c(3,4))
+    X = delete_MAR_rank(data, p, c(1,2,3,4,5), cols_ctrl = c(6,6,7,8,8))
     our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99, type = "np")
   }
   
@@ -190,7 +190,7 @@ end.time = Sys.time()
 time.taken = round(end.time - start.time,2)
 time.taken
 
-png("Pictures/MAR_lnorm_rank_3X2Y.png")
+png("Pictures/MAR_lnorm_rank_3X5Y.png")
 plot(seq(0.03, 0.3, length.out=7), little_power, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "", type="b")
 lines(seq(0.03, 0.3, length.out=7), our_power, col="blue", pch=18, type = "b")
 abline(h = alpha, col="red")

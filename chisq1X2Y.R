@@ -18,8 +18,8 @@ library(future.apply)
 
 ######### MCAR ############
 alpha = 0.05
-n = 200
-MC = 500
+n = 1000
+MC = 100
 d = 3
 
 # Select the copula
@@ -62,8 +62,8 @@ dev.off()
 
 ######### MAR ##############################
 alpha = 0.05
-n = 200
-MC = 500
+n = 1000
+MC = 100
 d = 3
 
 # Select the copula
@@ -105,8 +105,8 @@ dev.off()
 
 ######### MAR ##############################
 alpha = 0.05
-n = 200
-MC = 500
+n = 1000
+MC = 100
 d = 3
 
 # Select the copula

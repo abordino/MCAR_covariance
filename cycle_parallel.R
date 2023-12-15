@@ -20,9 +20,9 @@ library(future.apply)
 # rlnorm.rplus
 alpha = 0.05
 n = 200
-M = 50
-t3 = pi/4
-t2 = pi/4
+M = 400
+t3 = pi/6
+t2 = pi/3
 
 
 ##### easy part
@@ -62,16 +62,16 @@ little_power_t1 = function(t1){
     #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
     X = data.frame(matrix(nrow = 3*n, ncol = 3))
     colnames(X) = c("a","b","c")
-    X[1:n, c("a", "b")] = mvrnorm(n, c(0,0), SigmaS[[1]])
-    X[(n+1):(2*n), c("b", "c")] = mvrnorm(n, c(0,0), SigmaS[[2]])
-    X[(2*n+1):(3*n), c("a", "c")] = mvrnorm(n, c(0,0), SigmaS[[3]])
+    X[1:n, c("a", "b")] = rlnorm.rplus(n, c(0,0), SigmaS[[1]])
+    X[(n+1):(2*n), c("b", "c")] = rlnorm.rplus(n, c(0,0), SigmaS[[2]])
+    X[(2*n+1):(3*n), c("a", "c")] = rlnorm.rplus(n, c(0,0), SigmaS[[3]])
     X = as.matrix(X)
     
     ### run little's test
     little_decisions[i] = little_test(X, alpha = 0.05)
   }
   
-  return(mean(little_decisions))
+  return(mean(little_decisions, na.rm=TRUE))
 }
 
 little_power_cov_t1 = function(t1){
@@ -94,9 +94,9 @@ little_power_cov_t1 = function(t1){
     #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
     X = data.frame(matrix(nrow = 3*n, ncol = 3))
     colnames(X) = c("a","b","c")
-    X[1:n, c("a", "b")] = mvrnorm(n, c(0,0), SigmaS[[1]])
-    X[(n+1):(2*n), c("b", "c")] = mvrnorm(n, c(0,0), SigmaS[[2]])
-    X[(2*n+1):(3*n), c("a", "c")] = mvrnorm(n, c(0,0), SigmaS[[3]])
+    X[1:n, c("a", "b")] = rlnorm.rplus(n, c(0,0), SigmaS[[1]])
+    X[(n+1):(2*n), c("b", "c")] = rlnorm.rplus(n, c(0,0), SigmaS[[2]])
+    X[(2*n+1):(3*n), c("a", "c")] = rlnorm.rplus(n, c(0,0), SigmaS[[3]])
     X = as.matrix(X)
     
     ### run little's test
@@ -123,9 +123,9 @@ bootstrap_power_t1 = function(t1){
     #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
     X = data.frame(matrix(nrow = 3*n, ncol = 3))
     colnames(X) = c("a","b","c")
-    X[1:n, c("a", "b")] = mvrnorm(n, c(0,0), SigmaS[[1]])
-    X[(n+1):(2*n), c("b", "c")] = mvrnorm(n, c(0,0), SigmaS[[2]])
-    X[(2*n+1):(3*n), c("a", "c")] = mvrnorm(n, c(0,0), SigmaS[[3]])
+    X[1:n, c("a", "b")] = rlnorm.rplus(n, c(0,0), SigmaS[[1]])
+    X[(n+1):(2*n), c("b", "c")] = rlnorm.rplus(n, c(0,0), SigmaS[[2]])
+    X[(2*n+1):(3*n), c("a", "c")] = rlnorm.rplus(n, c(0,0), SigmaS[[3]])
     X = as.matrix(X)
     
     ### run our tests
@@ -156,12 +156,12 @@ end.time = Sys.time()
 time.taken = round(end.time - start.time,2)
 time.taken
 
-png("pictures/3_cycle_3.png")
+png("pictures/3_cycle_lnorm_2.png")
 plot(R, little_power, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "", type = "b")
 lines(R, little_power_cov, col="orange", pch=18, type = "b")
 lines(R, our_power, col="blue", pch=18, type = "b")
 abline(h = alpha, col="red")
-legend("bottomright",
+legend("topleft",
        legend = c("Little's power", "Little's power cov", "Our power"),
        col = c("green", "orange", "blue"),
        pch = c(18, 18, 18))
@@ -173,7 +173,7 @@ dev.off()
 # 
 # alpha = 0.05
 # n = 200
-# M = 10 # with 4000 I expect 4 hours
+# M = 4000 # with 4000 I expect 4 hours
 # angle = pi/(2*(d-1))
 # 
 # 
@@ -262,4 +262,155 @@ dev.off()
 # dev.off()
 # 
 # 
+
+######### 3-cycle: setting 1 ############
+# rlnorm.rplus
+alpha = 0.05
+n = 200
+M = 400
+t3 = pi/4
+t2 = pi/4
+
+
+##### easy part
+computeR_t1 = function(t1){
+  SigmaS=list() #Random 2x2 correlation matrices (necessarily consistent)
+  for(j in 1:3){
+    x=runif(2,min=-1,max=1); y=runif(2,min=-1,max=1); SigmaS[[j]]=cov2cor(x%*%t(x) + y%*%t(y))
+  }
+  
+  SigmaS[[1]][1,2] = cos(t1)
+  SigmaS[[1]][2,1] = cos(t1)
+  SigmaS[[2]][1,2] = cos(t2)
+  SigmaS[[2]][2,1] = cos(t2)
+  SigmaS[[3]][1,2] = cos(t3)
+  SigmaS[[3]][2,1] = cos(t3)
+  
+  return(computeR(list(c(1,2),c(2,3), c(1,3)), SigmaS)$R)
+}
+
+little_power_t1 = function(t1){
+  #### POPULATION LEVEL ######
+  SigmaS=list() #Random 2x2 correlation matrices (necessarily consistent)
+  for(j in 1:3){
+    x=runif(2,min=-1,max=1); y=runif(2,min=-1,max=1); SigmaS[[j]]=cov2cor(x%*%t(x) + y%*%t(y))
+  }
+  
+  SigmaS[[1]][1,2] = cos(t1)
+  SigmaS[[1]][2,1] = cos(t1)
+  SigmaS[[2]][1,2] = cos(t2)
+  SigmaS[[2]][2,1] = cos(t2)
+  SigmaS[[3]][1,2] = cos(t3)
+  SigmaS[[3]][2,1] = cos(t3)
+  
+  little_decisions = logical(length = M)
+  for (i in 1:M){
+    
+    #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
+    X = data.frame(matrix(nrow = 3*n, ncol = 3))
+    colnames(X) = c("a","b","c")
+    X[1:n, c("a", "b")] = rlnorm.rplus(n, c(0,0), SigmaS[[1]])
+    X[(n+1):(2*n), c("b", "c")] = rlnorm.rplus(n, c(0,0), SigmaS[[2]])
+    X[(2*n+1):(3*n), c("a", "c")] = rlnorm.rplus(n, c(0,0), SigmaS[[3]])
+    X = as.matrix(X)
+    
+    ### run little's test
+    little_decisions[i] = little_test(X, alpha = 0.05)
+  }
+  
+  return(mean(little_decisions, na.rm=TRUE))
+}
+
+little_power_cov_t1 = function(t1){
+  #### POPULATION LEVEL ######
+  SigmaS=list() #Random 2x2 correlation matrices (necessarily consistent)
+  for(j in 1:3){
+    x=runif(2,min=-1,max=1); y=runif(2,min=-1,max=1); SigmaS[[j]]=cov2cor(x%*%t(x) + y%*%t(y))
+  }
+  
+  SigmaS[[1]][1,2] = cos(t1)
+  SigmaS[[1]][2,1] = cos(t1)
+  SigmaS[[2]][1,2] = cos(t2)
+  SigmaS[[2]][2,1] = cos(t2)
+  SigmaS[[3]][1,2] = cos(t3)
+  SigmaS[[3]][2,1] = cos(t3)
+  
+  little_decisions = logical(length = M)
+  for (i in 1:M){
+    
+    #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
+    X = data.frame(matrix(nrow = 3*n, ncol = 3))
+    colnames(X) = c("a","b","c")
+    X[1:n, c("a", "b")] = rlnorm.rplus(n, c(0,0), SigmaS[[1]])
+    X[(n+1):(2*n), c("b", "c")] = rlnorm.rplus(n, c(0,0), SigmaS[[2]])
+    X[(2*n+1):(3*n), c("a", "c")] = rlnorm.rplus(n, c(0,0), SigmaS[[3]])
+    X = as.matrix(X)
+    
+    ### run little's test
+    little_decisions[i] = little_test(X, alpha = 0.05, type = "cov")
+  }
+  return(mean(little_decisions))
+}
+
+#### parallel using parallel
+bootstrap_power_t1 = function(t1){
+  SigmaS=list() #Random 2x2 correlation matrices (necessarily consistent)
+  for(j in 1:3){
+    x=runif(2,min=-1,max=1); y=runif(2,min=-1,max=1); SigmaS[[j]]=cov2cor(x%*%t(x) + y%*%t(y))
+  }
+  
+  SigmaS[[1]][1,2] = cos(t1); SigmaS[[1]][2,1] = cos(t1)
+  SigmaS[[2]][1,2] = cos(t2); SigmaS[[2]][2,1] = cos(t2)
+  SigmaS[[3]][1,2] = cos(t3); SigmaS[[3]][2,1] = cos(t3)
+  
+  ###### SAMPLE LEVEL, REPEATING THE TEST M TIMES #######
+  our_decisions = logical(length = M)
+  for (i in 1:M){
+    
+    #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
+    X = data.frame(matrix(nrow = 3*n, ncol = 3))
+    colnames(X) = c("a","b","c")
+    X[1:n, c("a", "b")] = rlnorm.rplus(n, c(0,0), SigmaS[[1]])
+    X[(n+1):(2*n), c("b", "c")] = rlnorm.rplus(n, c(0,0), SigmaS[[2]])
+    X[(2*n+1):(3*n), c("a", "c")] = rlnorm.rplus(n, c(0,0), SigmaS[[3]])
+    X = as.matrix(X)
+    
+    ### run our tests
+    our_decisions[i] = MCAR_corr_test(X, alpha = 0.05, B = 99, type = "np")
+  }
+  
+  print(t1)
+  return(mean(our_decisions))
+}
+
+
+######## USING FOREACH AND DORNG
+registerDoFuture()
+plan(multicore)
+RNGkind("L'Ecuyer-CMRG")
+set.seed(232)
+
+start.time = Sys.time()
+
+xxx = seq(t2+t3, (pi+t2+t3)/2, length.out = 15)
+
+R = foreach(t1 = xxx, .combine = 'c') %dorng% computeR_t1(t1)
+little_power = foreach(t1 = xxx, .combine = 'c') %dorng% little_power_t1(t1)
+little_power_cov = foreach(t1 = xxx, .combine = 'c') %dorng% little_power_cov_t1(t1)
+our_power = foreach(t1 = xxx, .combine = 'c') %dorng% bootstrap_power_t1(t1)
+
+end.time = Sys.time()
+time.taken = round(end.time - start.time,2)
+time.taken
+
+png("pictures/3_cycle_lnorm_3.png")
+plot(R, little_power, col="green", ylim = c(0,1), pch=18, xlab = "", ylab = "", type = "b")
+lines(R, little_power_cov, col="orange", pch=18, type = "b")
+lines(R, our_power, col="blue", pch=18, type = "b")
+abline(h = alpha, col="red")
+legend("topleft",
+       legend = c("Little's power", "Little's power cov", "Our power"),
+       col = c("green", "orange", "blue"),
+       pch = c(18, 18, 18))
+dev.off()
 
