@@ -1,4 +1,4 @@
-# Testing Missing Completely at Random (MCAR) using correlation matrices. 
+# Testing Missing Completely at Random (MCAR) using covariance matrices. 
  ## Abstract
  We study the problem of testing whether the missing values of a potentially high-dimensional dataset are Missing Completely at Random (MCAR). We reduce the problem of testing MCAR to the problem of testing the compatibility of the sequence of covariance matrices associated to the missingness patterns, motivated by the fact that this procedure is feasible also in high-dimensional settings. We check the compatibility of covariance matrices by checking the consistency of variances and compatibility of correlation matrices. Our first contribution is to define a sensible measure of incompatibility for a sequence of correlation matrices, which can be characterised as the optimal value of a Semi-definite Programming (SDP) problem. More precisely, we define our measure of incompatibility for a sequence $\Sigma_{\mathbb{S}}$ of correlation matrices, where $\mathbb{S}$ is the set of all missingness patterns, as 
 ```math
