@@ -23,9 +23,9 @@ Develop an R package to implement a bootstrap version of this test. We will use 
 3. Compute $`T^{(0)} = R(\hat{\Sigma}_\mathbb{S}) + V(\hat{\sigma}_{\mathbb{S}}^2) + M(\hat{\mu}_{\mathbb{S}})`$, and compute at the same time the dual decomposition $`\hat{\Sigma}_\mathbb{S} = (1-R(\hat{\Sigma}_\mathbb{S}))\hat{Q}_\mathbb{S} + R(\hat{\Sigma}_\mathbb{S})\hat{\Sigma}'_\mathbb{S}`$.
 4. Rotate the original data $`X_\mathbb{S}`$, i.e. for all $`S \in \mathbb{S}`$, for all $`i \in [n_S]`$ do $`\tilde{X}_{S,i} = \hat{Q}_S^{1/2}\hat{M}_S^{-1/2}(X_{S,i}-\hat{\mu}_S + \hat{\mu}_{|S})`$, where $`\hat{\mu}_j = |\mathbb{S}_j|^{-1}\sum_{S\in \mathbb{S}_j} \mu_{S,j}`$.
 5. for $`b \in [B]`$:
-5.1. For all $`S \in \mathbb{S}`$, let $`\tilde{X}_{S,i}^{(b)}`$ be a nonparametric bootstrap sample from $`\tilde{X}_{S,i}`$, for $`i \in [n_S]`$. 
-5.2. Compute $`\hat{\mu}_{\mathbb{S},b} = \mathbb{E}X_\mathbb{S}^{(b)}`$, $`\hat{M}_{\mathbb{S},b} = CovX_\mathbb{S}^{(b)} = diag( \hat{\sigma}_{\mathbb{S},b}^2)^{1/2} \cdot \hat{\Sigma}_{\mathbb{S},b} \cdot diag( \hat{\sigma}_{\mathbb{S},b}^2)^{1/2}`$.
-5.3. Compute $`T^{(b)} = R(\hat{\Sigma}_{\mathbb{S},b}) + V(\hat{\sigma}_{\mathbb{S},b}^{2}) + M(\hat{\mu}_{\mathbb{S},b})`$.
+    5.1. For all $`S \in \mathbb{S}`$, let $`\tilde{X}_{S,i}^{(b)}`$ be a nonparametric bootstrap sample from $`\tilde{X}_{S,i}`$, for $`i \in [n_S]`$. 
+    5.2. Compute $`\hat{\mu}_{\mathbb{S},b} = \mathbb{E}X_\mathbb{S}^{(b)}`$, $`\hat{M}_{\mathbb{S},b} = CovX_\mathbb{S}^{(b)} = diag( \hat{\sigma}_{\mathbb{S},b}^2)^{1/2} \cdot \hat{\Sigma}_{\mathbb{S},b} \cdot diag( \hat{\sigma}_{\mathbb{S},b}^2)^{1/2}`$.
+    5.3. Compute $`T^{(b)} = R(\hat{\Sigma}_{\mathbb{S},b}) + V(\hat{\sigma}_{\mathbb{S},b}^{2}) + M(\hat{\mu}_{\mathbb{S},b})`$.
 6. Reject $`H_0`$ if and only if
  ```math
 1 + \sum_{i=1}^B 1\{T^{(b)} \geq T^{(0)}\} \geq \alpha(1+B).
