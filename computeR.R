@@ -194,7 +194,7 @@ computeR = function(patterns=list(), SigmaS=list()) {
   
   SigmaSprime = list()
   for (i in 1:card_patterns){
-    SigmaSprime[[1]] = SDP$X[[i+1]]
+    SigmaSprime[[i]] = SDP$X[[i+1]]
   }
   
   
