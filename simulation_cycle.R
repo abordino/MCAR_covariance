@@ -2,6 +2,7 @@ source("computeR.R")
 source("little_test.R")
 source("bootstrap_test.R")
 source("find_SigmaS.R")
+source("indexConsistency.R")
 library(missMethods)
 library(MASS)
 library(norm)
@@ -12,7 +13,7 @@ library(compositions)
 ######### 3-cycle: setting 1 ############
 alpha = 0.05
 n = 200
-M = 100
+MC = 100
 t3 = pi/4
 t2 = pi/4
 
@@ -20,10 +21,6 @@ little_power_mean = c()
 little_power = c()
 little_power_cov = c()
 our_power = c()
-
-little_sd = c()
-little_cov_sd = c()
-our_sd = c()
 
 R = c()
 
@@ -47,13 +44,13 @@ for(t1 in seq(t2+t3, (pi + t2 + t3)/2, length.out = 8)){
   R = c(R, computeR(list(c(1,2),c(2,3), c(1,3)), SigmaS)$R)
 
 
-  ###### SAMPLE LEVEL, REPEATING THE TEST M TIMES #######
+  ###### SAMPLE LEVEL, REPEATING THE TEST MC TIMES #######
   little_decisions_mean = c()
   little_decisions = c()
   little_decisions_cov = c()
   our_decisions = c()
 
-  for (i in 1:M){
+  for (i in 1:MC){
 
     #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
     X1 = mvrnorm(n, c(0,0), SigmaS[[1]])
@@ -73,7 +70,7 @@ for(t1 in seq(t2+t3, (pi + t2 + t3)/2, length.out = 8)){
     little_decisions_cov = c(little_decisions_cov, little_test(X, alpha, "cov"))
 
     ### run our tests
-    our_decisions = c(our_decisions, MCAR_corr_test(X, alpha, B = 99, type = "p"))
+    our_decisions = c(our_decisions, MCAR_meancovTest(X, alpha, B = 99, type = "np"))
   }
   
   little_power_mean = c(little_power_mean, mean(little_decisions_mean))
@@ -93,7 +90,7 @@ lines(R, little_power_cov, col="orange", pch=18, type = "b")
 lines(R, our_power, col="blue", pch=18, type = "b")
 abline(h = alpha, col="red")
 legend("right",
-       legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), TeX(r'($d^2_{aug}$)'), "P bootstrap"),
+       legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), TeX(r'($d^2_{aug}$)'), "NP bootstrap"),
        col = c("green", "brown", "orange", "blue"),
        pch = c(18, 18, 18, 18))
 # dev.off()
@@ -102,7 +99,6 @@ legend("right",
 ######### 3-cycle: lognormal ############
 alpha = 0.05
 n = 200
-M = 1000
 MC = 1000
 t3 = pi/4
 t2 = pi/4
@@ -133,7 +129,7 @@ for(t1 in seq(t2+t3, pi-0.01, length.out = 8)){
   SigmaS[[3]][2,1] = cos(t3)
   
   tmp = 0
-  for (i in 1:M){
+  for (i in 1:MC){
     
     #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
     X1 = rlnorm.rplus(n, c(0,0), SigmaS[[1]])
@@ -165,13 +161,13 @@ for(t1 in seq(t2+t3, pi-0.01, length.out = 8)){
   SigmaS[[3]][1,2] = cos(t3)
   SigmaS[[3]][2,1] = cos(t3)
   
-  ###### SAMPLE LEVEL, REPEATING THE TEST M TIMES #######
+  ###### SAMPLE LEVEL, REPEATING THE TEST MC TIMES #######
   little_decisions_mean = c()
   little_decisions = c()
   little_decisions_cov = c()
   our_decisions = c()
   
-  for (i in 1:M){
+  for (i in 1:MC){
     
     #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
     X1 = rlnorm.rplus(n, c(0,0), SigmaS[[1]])
@@ -191,7 +187,7 @@ for(t1 in seq(t2+t3, pi-0.01, length.out = 8)){
     little_decisions_cov = c(little_decisions_cov, little_test(X, alpha, "cov"))
     
     ### run our tests
-    our_decisions = c(our_decisions, MCAR_corr_test(X, alpha, B = 99, type = "p"))
+    our_decisions = c(our_decisions, MCAR_meancovTest(X, alpha, B = 99, type = "np"))
   }
   
   little_power_mean = c(little_power_mean, mean(little_decisions_mean))
@@ -211,7 +207,7 @@ lines(R, little_power_cov, col="orange", pch=18, type = "b")
 lines(R, our_power, col="blue", pch=18, type = "b")
 abline(h = alpha, col="red")
 legend("topleft",
-       legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), TeX(r'($d^2_{aug}$)'), "P bootstrap"),
+       legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), TeX(r'($d^2_{aug}$)'), "NP bootstrap"),
        col = c("green", "brown", "orange", "blue"),
        pch = c(18, 18, 18, 18))
 # dev.off()
@@ -221,7 +217,7 @@ d = 200
 
 alpha = 0.05
 n = 200
-M = 50 # with 4000 I expect 4 hours
+MC = 50 # with 4000 I expect 4 hours
 angle = pi/(2*(d-1))
 
 our_power = c()
@@ -251,9 +247,9 @@ for(t1 in seq(pi/2, 5*pi/8, length.out = 8)){
   R = c(R, computeR(patterns, SigmaS)$R)
 
 
-  ###### SAMPLE LEVEL, REPEATING THE TEST M TIMES #######
+  ###### SAMPLE LEVEL, REPEATING THE TEST MC TIMES #######
   our_decisions = c()
-  for (i in 1:M){
+  for (i in 1:MC){
 
     #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
     X = data.frame(matrix(nrow = d*n, ncol = d))
@@ -278,5 +274,3 @@ plot(R, our_power, col="blue", ylim = c(0,1), pch=18, xlab = "", ylab = "", type
 abline(h = alpha, col="red")
 legend("topleft", legend = "Our power", col = "blue", pch = 18)
 dev.off()
-
-
