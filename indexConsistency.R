@@ -53,7 +53,7 @@ compute_av = function(type, X){
 M = function(mu_S, patterns){
   n_pattern = length(mu_S)
   
-  max = 0
+  sum = 0
   if(n_pattern > 1){
     couples = t(combn(1:n_pattern, 2))
     n_couples = dim(t(combn(1:n_pattern, 2)))[1]
@@ -64,15 +64,13 @@ M = function(mu_S, patterns){
         if ((j %in% patterns[[ couples$X1[i] ]])&(j %in% patterns[[ couples$X2[i] ]])) {
           candidate = abs(mu_S[[ couples$X1[i] ]][which(patterns[[couples$X1[i]]] == j)[[1]]] 
                           - mu_S[[ couples$X2[i] ]][which(patterns[[couples$X2[i]]] == j)[[1]]])
-          if (candidate > max){
-            max = candidate
-          }
+          sum = sum + candidate^2
         }
       }
     }
   }
 
-  return(max)
+  return(sum)
 }
 
 V = function(sigma_squared_S, patterns){
@@ -139,65 +137,3 @@ if (sys.nframe() == 0){
   
   V(get_SigmaS(X_new)$sigma_squared_S, xxx)
 }
-
-
-# 
-# alpha = 0.05
-# n = 200
-# MC = 10
-# d = 5
-# 
-# # Select the copula
-# cp = claytonCopula(param = c(1), dim = d)
-# # Generate the multivariate distribution (in this case it is just bivariate) with normal and t marginals
-# P = mvdc(copula = cp, margins = c(rep("exp",d)),
-#          paramMargins = rep(list(1),d) )
-# data = rMvdc(n, P)
-# 
-# X = delete_MCAR(data, 0.03, c(1,3,5))
-# 
-# X
-# patterns = get_SigmaS(X)$patterns
-# 
-# mu_S = get_SigmaS(X)$muS
-# 
-# n_pattern = length(mu_S)
-# 
-# max = 0
-# couples = t(combn(1:n_pattern, 2))
-# n_couples = dim(t(combn(1:n_pattern, 2)))[1]
-# couples = as.list(data.frame(t(combn(1:n_pattern, 2))))
-# 
-# for (j in 1:d){
-#   for (i in 1:n_couples){
-#     print(paste("j = ", j))
-#     print(paste("couple number ", i))
-#     print(couples$X1[i])
-#     print(couples$X2[i])
-#     print(patterns[[ couples$X1[i] ]])
-#     print(patterns[[ couples$X2[i] ]])
-#     if ((j %in% patterns[[ couples$X1[i] ]])&(j %in% patterns[[ couples$X2[i] ]])) {
-#       candidate = abs(mu_S[[ couples$X1[i] ]][which(patterns[[couples$X1[i]]] == j)[[1]]] 
-#                       - mu_S[[ couples$X2[i] ]][which(patterns[[couples$X2[i]]] == j)[[1]]])
-#       if (candidate > max){
-#         max = candidate
-#       }
-#     }
-#   }
-# }
-# 
-# M(get_SigmaS(X)$muS, xxx)
-# av_mu = compute_av("mean", X)
-# 
-# av_sigma = compute_av("var", X); av_sigma
-# 
-# X_new = X
-# for (j in 1:3){
-#   X_new[,j] = X[,j]/sqrt(av_sigma[j])
-# }
-# 
-# X_new
-# get_SigmaS(X_new)$sigma_squared_S
-# compute_av("var", X_new)
-# 
-# V(get_SigmaS(X_new)$sigma_squared_S, xxx)
