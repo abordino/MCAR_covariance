@@ -13,25 +13,10 @@ library(doFuture)
 library(future.apply)
 
 #### compute av_\mu and av_\sigma
-compute_av = function(type, X){
+compute_av = function(value_S, patterns){
   
-  result = get_SigmaS(X)
-  d = result$ambient_dimension
-  
-  if (type=="mean"){
-    value_S = result$muS
-  }
-  else if (type=="var"){
-    value_S = result$sigma_squared_S
-  }
-  else {
-    print("An error occured")
-  }
-  
-  patterns = result$pattern
-  card_patterns = length(patterns)
-  n_pattern = result$n_pattern
-  data_pattern = result$data_pattern
+  n_pattern = length(patterns)
+  d = max(unlist(patterns))
   
   res = numeric(length = d)
   for (j in 1:d){
@@ -50,31 +35,26 @@ compute_av = function(type, X){
   return(res)
 }
 
-M = function(mu_S, patterns){
-  n_pattern = length(mu_S)
+M = function(mu_S, patterns, MahS){
+  
+  av_mu = compute_av(mu_S, patterns)
+  n_pattern = length(patterns)
+  d = max(unlist(patterns))
   
   sum = 0
-  if(n_pattern > 1){
-    couples = t(combn(1:n_pattern, 2))
-    n_couples = dim(t(combn(1:n_pattern, 2)))[1]
-    couples = as.list(data.frame(t(combn(1:n_pattern, 2))))
-    
-    for (j in 1:d){
-      for (i in 1:n_couples){
-        if ((j %in% patterns[[ couples$X1[i] ]])&(j %in% patterns[[ couples$X2[i] ]])) {
-          candidate = abs(mu_S[[ couples$X1[i] ]][which(patterns[[couples$X1[i]]] == j)[[1]]] 
-                          - mu_S[[ couples$X2[i] ]][which(patterns[[couples$X2[i]]] == j)[[1]]])
-          sum = sum + candidate^2
-        }
-      }
-    }
+  for(i in 1:n_pattern){
+    # sum = sum + sum(abs(mu_S[[i]] - av_mu[patterns[[i]]])) l1-norm
+    sum = sum + (mu_S[[i]] - av_mu[patterns[[i]]])%*%solve(MahS[[i]])%*%
+      (mu_S[[i]] - av_mu[patterns[[i]]])
   }
 
   return(sum)
 }
 
 V = function(sigma_squared_S, patterns){
-  n_pattern = length(sigma_squared_S)
+  
+  n_pattern = length(patterns)
+  d = max(unlist(patterns))
   
   min = 1
   
@@ -96,7 +76,7 @@ V = function(sigma_squared_S, patterns){
 
 #### test this function
 if (sys.nframe() == 0){
-  n = 2
+  n = 100000
   t1 = pi/2
   t3 = pi/4
   t2 = pi/3
@@ -119,6 +99,7 @@ if (sys.nframe() == 0){
   
   X
   xxx = get_SigmaS(X)$patterns
+  M(get_SigmaS(X)$muS, get_SigmaS(X)$patterns)
   
   get_SigmaS(X)$muS
   M(get_SigmaS(X)$muS, xxx)
@@ -136,4 +117,71 @@ if (sys.nframe() == 0){
   compute_av("var", X_new)
   
   V(get_SigmaS(X_new)$sigma_squared_S, xxx)
+  
+  
+  #another example
+  
+  alpha = 0.05
+  n = 200
+  MC = 10
+  d = 5
+  
+  # Select the copula
+  cp = claytonCopula(param = c(1), dim = d)
+  # Generate the multivariate distribution (in this case it is just bivariate) with normal and t marginals
+  P = mvdc(copula = cp, margins = c(rep("exp",d)),
+           paramMargins = rep(list(1),d) )
+  data = rMvdc(n, P)
+  
+  X = delete_MCAR(data, 0.03, c(1,3,5))
+  
+  X
+  patterns = get_SigmaS(X)$patterns
+  
+  mu_S = get_SigmaS(X)$muS
+  
+  n_pattern = length(mu_S)
+  
+  max = 0
+  couples = t(combn(1:n_pattern, 2))
+  n_couples = dim(t(combn(1:n_pattern, 2)))[1]
+  couples = as.list(data.frame(t(combn(1:n_pattern, 2))))
+  
+  for (j in 1:d){
+    for (i in 1:n_couples){
+      print(paste("j = ", j))
+      print(paste("couple number ", i))
+      print(couples$X1[i])
+      print(couples$X2[i])
+      print(patterns[[ couples$X1[i] ]])
+      print(patterns[[ couples$X2[i] ]])
+      if ((j %in% patterns[[ couples$X1[i] ]])&(j %in% patterns[[ couples$X2[i] ]])) {
+        candidate = abs(mu_S[[ couples$X1[i] ]][which(patterns[[couples$X1[i]]] == j)[[1]]]
+                        - mu_S[[ couples$X2[i] ]][which(patterns[[couples$X2[i]]] == j)[[1]]])
+        if (candidate > max){
+          max = candidate
+        }
+      }
+    }
+  }
+  
+  M(get_SigmaS(X)$muS, xxx)
+  av_mu = compute_av("mean", X)
+  
+  av_sigma = compute_av("var", X); av_sigma
+  
+  X_new = X
+  for (j in 1:3){
+    X_new[,j] = X[,j]/sqrt(av_sigma[j])
+  }
+  
+  X_new
+  get_SigmaS(X_new)$sigma_squared_S
+  compute_av("var", X_new)
+  
+  V(get_SigmaS(X_new)$sigma_squared_S, xxx)
 }
+
+
+
+
