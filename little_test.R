@@ -28,13 +28,6 @@ little_test = function(X, alpha, type="mean&cov"){
   
   else if(type == "cov"){
     
-    for (i in length(SigmaS)){
-      if (min(eigen(SigmaS[[i]])$values) < 10^-7){
-        print("SigmaS is singular!")
-        return(NA)
-      }
-    }
-    
     d_cov = 0
     df = -d*(d+1)/2
     
@@ -56,13 +49,6 @@ little_test = function(X, alpha, type="mean&cov"){
   }
   
   else{
-    
-    for (i in length(SigmaS)){
-      if (min(eigen(SigmaS[[i]])$values) < 10^-7){
-        print("SigmaS is singular!")
-        return(NA)
-      }
-    }
     
     d_aug = 0
     df = -d*(d+3)/2
