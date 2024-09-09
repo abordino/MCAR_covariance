@@ -55,8 +55,6 @@ for(yyy in c("exp")){
   little_power_cov = numeric(length = 7)
   little_power_aug = numeric(length = 7)
   our_power = numeric(length = 7)
-  our_power_corr = numeric(length = 7)
-  our_power_mean = numeric(length = 7)
   
   ind = 1
   for (p in xxx){
@@ -64,8 +62,6 @@ for(yyy in c("exp")){
     little_decision_mu = logical(length = MC)
     little_decision_aug = logical(length = MC)
     our_decision = logical(length = MC)
-    our_decision_corr = logical(length = MC)
-    our_decision_mean = logical(length = MC)
     
     for (i in 1:MC){
       X = delete_MAR_rank(data, p, c(1,2), cols_ctrl = c(3, 3))
@@ -75,8 +71,6 @@ for(yyy in c("exp")){
       little_decision_mu[i] = mcar_test(data.frame(X))$p.value < alpha
       
       our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99)
-      our_decision_corr[i] = MCAR_corrTest(X, alpha = 0.05, B = 99)
-      our_decision_mean[i] = MCAR_meanTest(X, alpha = 0.05, B = 99)
     }
     
     little_power_aug[ind] = mean(little_decision_aug)
@@ -84,8 +78,6 @@ for(yyy in c("exp")){
     little_power_cov[ind] = mean(little_decision_cov)
     
     our_power[ind] = mean(our_decision)
-    our_power_corr[ind] = mean(our_decision_corr)
-    our_power_mean[ind] = mean(our_decision_mean)
     
     ind = ind+1
   }
@@ -97,11 +89,9 @@ for(yyy in c("exp")){
   lines(xxx, little_power_aug, col="orange", pch=19, type = "b")
   lines(xxx, little_power_cov, col="brown", pch=20, type = "b")
   lines(xxx, our_power, col="blue", pch=21, type = "b")
-  lines(xxx, our_power_corr, col="darkviolet", pch=22, type = "b")
-  lines(xxx, our_power_mean, col="aquamarine2", pch=23, type = "b")
-  legend("right", inset = c(-0.4,0), xpd = TRUE,
+  legend("right", inset = c(-0.4,0), xpd = TRUE, 
          horiz = FALSE, lty = 1, bty = "n",
-         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'),
+         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), 
                     TeX(r'($d^2_{aug}$)'), "Omnibus"),
          col = c("green", "brown", "orange", "blue"),
          pch = c(18, 19, 20, 21))
@@ -137,8 +127,6 @@ for(yyy in c("exp")){
   little_power_cov = numeric(length = 7)
   little_power_aug = numeric(length = 7)
   our_power = numeric(length = 7)
-  our_power_corr = numeric(length = 7)
-  our_power_mean = numeric(length = 7)
   
   ind = 1
   for (p in xxx){
@@ -146,8 +134,6 @@ for(yyy in c("exp")){
     little_decision_mu = logical(length = MC)
     little_decision_aug = logical(length = MC)
     our_decision = logical(length = MC)
-    our_decision_corr = logical(length = MC)
-    our_decision_mean = logical(length = MC)
     
     for (i in 1:MC){
       X = delete_MAR_1_to_x(data, p, c(1,2), cols_ctrl = c(3, 3), x = 9)
@@ -157,16 +143,13 @@ for(yyy in c("exp")){
       little_decision_cov[i] = little_test(X, alpha, type = "cov")
       little_decision_mu[i] = mcar_test(data.frame(X))$p.value < alpha
       our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99)
-      # our_decision_corr[i] = MCAR_corrTest(X, alpha = 0.05, B = 99)
-      # our_decision_mean[i] = MCAR_meanTest(X, alpha = 0.05, B = 99)
     }
     
     little_power_aug[ind] = mean(little_decision_aug)
     little_power_mu[ind] = mean(little_decision_mu)
     little_power_cov[ind] = mean(little_decision_cov)
     our_power[ind] = mean(our_decision)
-    our_power_corr[ind] = mean(our_decision_corr)
-    our_power_mean[ind] = mean(our_decision_mean)
+    
     ind = ind+1
   }
   
@@ -177,11 +160,9 @@ for(yyy in c("exp")){
   lines(xxx, little_power_aug, col="orange", pch=19, type = "b")
   lines(xxx, little_power_cov, col="brown", pch=20, type = "b")
   lines(xxx, our_power, col="blue", pch=21, type = "b")
-  lines(xxx, our_power_corr, col="darkviolet", pch=22, type = "b")
-  lines(xxx, our_power_mean, col="aquamarine2", pch=23, type = "b")
-  legend("right", inset = c(-0.4,0), xpd = TRUE,
+  legend("right", inset = c(-0.4,0), xpd = TRUE, 
          horiz = FALSE, lty = 1, bty = "n",
-         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'),
+         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), 
                     TeX(r'($d^2_{aug}$)'), "Omnibus"),
          col = c("green", "brown", "orange", "blue"),
          pch = c(18, 19, 20, 21))
@@ -217,8 +198,6 @@ for(yyy in c("exp")){
   little_power_cov = numeric(length = 7)
   little_power_aug = numeric(length = 7)
   our_power = numeric(length = 7)
-  our_power_corr = numeric(length = 7)
-  our_power_mean = numeric(length = 7)
   
   ind = 1
   for (p in xxx){
@@ -226,8 +205,6 @@ for(yyy in c("exp")){
     little_decision_mu = logical(length = MC)
     little_decision_aug = logical(length = MC)
     our_decision = logical(length = MC)
-    our_decision_corr = logical(length = MC)
-    our_decision_mean = logical(length = MC)
     
     for (i in 1:MC){
       X = delete_MCAR(data, p, c(1,2))
@@ -236,16 +213,12 @@ for(yyy in c("exp")){
       little_decision_cov[i] = little_test(X, alpha, type = "cov")
       little_decision_mu[i] = mcar_test(data.frame(X))$p.value < alpha
       our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99)
-      our_decision_corr[i] = MCAR_corrTest(X, alpha = 0.05, B = 99)
-      our_decision_mean[i] = MCAR_meanTest(X, alpha = 0.05, B = 99)
     }
     
     little_power_aug[ind] = mean(little_decision_aug)
     little_power_mu[ind] = mean(little_decision_mu)
     little_power_cov[ind] = mean(little_decision_cov)
     our_power[ind] = mean(our_decision)
-    our_power_corr[ind] = mean(our_decision_corr)
-    our_power_mean[ind] = mean(our_decision_mean)
     
     ind = ind+1
   }
@@ -257,12 +230,10 @@ for(yyy in c("exp")){
   lines(xxx, little_power_aug, col="orange", pch=19, type = "b")
   lines(xxx, little_power_cov, col="brown", pch=20, type = "b")
   lines(xxx, our_power, col="blue", pch=21, type = "b")
-  lines(xxx, our_power_corr, col="darkviolet", pch=22, type = "b")
-  lines(xxx, our_power_mean, col="aquamarine2", pch=23, type = "b")
   lines(xxx, rep(alpha, length(xxx)), lty = 2, col = "red")
-  legend("right", inset = c(-0.4,0), xpd = TRUE,
+  legend("right", inset = c(-0.4,0), xpd = TRUE, 
          horiz = FALSE, lty = 1, bty = "n",
-         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'),
+         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), 
                     TeX(r'($d^2_{aug}$)'), "Omnibus"),
          col = c("green", "brown", "orange", "blue"),
          pch = c(18, 19, 20, 21))
@@ -301,8 +272,7 @@ for(yyy in c("norm")){
   little_power_cov = numeric(length = 7)
   little_power_aug = numeric(length = 7)
   our_power = numeric(length = 7)
-  our_power_corr = numeric(length = 7)
-  our_power_mean = numeric(length = 7)
+
   
   ind = 1
   for (p in xxx){
@@ -310,8 +280,6 @@ for(yyy in c("norm")){
     little_decision_mu = logical(length = MC)
     little_decision_aug = logical(length = MC)
     our_decision = logical(length = MC)
-    our_decision_corr = logical(length = MC)
-    our_decision_mean = logical(length = MC)
     
     for (i in 1:MC){
       X = delete_MAR_rank(data, p, c(1,2), cols_ctrl = c(3, 3))
@@ -319,19 +287,15 @@ for(yyy in c("norm")){
       little_decision_aug[i] = little_test(X, alpha)
       little_decision_cov[i] = little_test(X, alpha, type = "cov")
       little_decision_mu[i] = mcar_test(data.frame(X))$p.value < alpha
-      
+      # 
       our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99)
-      our_decision_corr[i] = MCAR_corrTest(X, alpha = 0.05, B = 99)
-      our_decision_mean[i] = MCAR_meanTest(X, alpha = 0.05, B = 99)
     }
     
     little_power_aug[ind] = mean(little_decision_aug)
     little_power_mu[ind] = mean(little_decision_mu)
     little_power_cov[ind] = mean(little_decision_cov)
-    
+
     our_power[ind] = mean(our_decision)
-    our_power_corr[ind] = mean(our_decision_corr)
-    our_power_mean[ind] = mean(our_decision_mean)
     
     ind = ind+1
   }
@@ -343,11 +307,9 @@ for(yyy in c("norm")){
   lines(xxx, little_power_aug, col="orange", pch=19, type = "b")
   lines(xxx, little_power_cov, col="brown", pch=20, type = "b")
   lines(xxx, our_power, col="blue", pch=21, type = "b")
-  lines(xxx, our_power_corr, col="darkviolet", pch=22, type = "b")
-  lines(xxx, our_power_mean, col="aquamarine2", pch=23, type = "b")
-  legend("right", inset = c(-0.4,0), xpd = TRUE,
+  legend("right", inset = c(-0.4,0), xpd = TRUE, 
          horiz = FALSE, lty = 1, bty = "n",
-         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'),
+         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), 
                     TeX(r'($d^2_{aug}$)'), "Omnibus"),
          col = c("green", "brown", "orange", "blue"),
          pch = c(18, 19, 20, 21))
@@ -383,8 +345,6 @@ for(yyy in c("norm")){
   little_power_cov = numeric(length = 7)
   little_power_aug = numeric(length = 7)
   our_power = numeric(length = 7)
-  our_power_corr = numeric(length = 7)
-  our_power_mean = numeric(length = 7)
   
   ind = 1
   for (p in xxx){
@@ -392,8 +352,6 @@ for(yyy in c("norm")){
     little_decision_mu = logical(length = MC)
     little_decision_aug = logical(length = MC)
     our_decision = logical(length = MC)
-    our_decision_corr = logical(length = MC)
-    our_decision_mean = logical(length = MC)
     
     for (i in 1:MC){
       X = delete_MAR_1_to_x(data, p, c(1,2), cols_ctrl = c(3, 3), x = 9)
@@ -403,16 +361,13 @@ for(yyy in c("norm")){
       little_decision_cov[i] = little_test(X, alpha, type = "cov")
       little_decision_mu[i] = mcar_test(data.frame(X))$p.value < alpha
       our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99)
-      our_decision_corr[i] = MCAR_corrTest(X, alpha = 0.05, B = 99)
-      our_decision_mean[i] = MCAR_meanTest(X, alpha = 0.05, B = 99)
     }
     
     little_power_aug[ind] = mean(little_decision_aug)
     little_power_mu[ind] = mean(little_decision_mu)
     little_power_cov[ind] = mean(little_decision_cov)
     our_power[ind] = mean(our_decision)
-    our_power_corr[ind] = mean(our_decision_corr)
-    our_power_mean[ind] = mean(our_decision_mean)
+    
     ind = ind+1
   }
   
@@ -423,11 +378,9 @@ for(yyy in c("norm")){
   lines(xxx, little_power_aug, col="orange", pch=19, type = "b")
   lines(xxx, little_power_cov, col="brown", pch=20, type = "b")
   lines(xxx, our_power, col="blue", pch=21, type = "b")
-  lines(xxx, our_power_corr, col="darkviolet", pch=22, type = "b")
-  lines(xxx, our_power_mean, col="aquamarine2", pch=23, type = "b")
-  legend("right", inset = c(-0.4,0), xpd = TRUE,
+  legend("right", inset = c(-0.4,0), xpd = TRUE, 
          horiz = FALSE, lty = 1, bty = "n",
-         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'),
+         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), 
                     TeX(r'($d^2_{aug}$)'), "Omnibus"),
          col = c("green", "brown", "orange", "blue"),
          pch = c(18, 19, 20, 21))
@@ -463,8 +416,6 @@ for(yyy in c("norm")){
   little_power_cov = numeric(length = 7)
   little_power_aug = numeric(length = 7)
   our_power = numeric(length = 7)
-  our_power_corr = numeric(length = 7)
-  our_power_mean = numeric(length = 7)
   
   ind = 1
   for (p in xxx){
@@ -472,8 +423,6 @@ for(yyy in c("norm")){
     little_decision_mu = logical(length = MC)
     little_decision_aug = logical(length = MC)
     our_decision = logical(length = MC)
-    our_decision_corr = logical(length = MC)
-    our_decision_mean = logical(length = MC)
     
     for (i in 1:MC){
       X = delete_MCAR(data, p, c(1,2))
@@ -482,16 +431,12 @@ for(yyy in c("norm")){
       little_decision_cov[i] = little_test(X, alpha, type = "cov")
       little_decision_mu[i] = mcar_test(data.frame(X))$p.value < alpha
       our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99)
-      our_decision_corr[i] = MCAR_corrTest(X, alpha = 0.05, B = 99)
-      our_decision_mean[i] = MCAR_meanTest(X, alpha = 0.05, B = 99)
     }
     
     little_power_aug[ind] = mean(little_decision_aug)
     little_power_mu[ind] = mean(little_decision_mu)
     little_power_cov[ind] = mean(little_decision_cov)
     our_power[ind] = mean(our_decision)
-    our_power_corr[ind] = mean(our_decision_corr)
-    our_power_mean[ind] = mean(our_decision_mean)
     
     ind = ind+1
   }
@@ -503,12 +448,10 @@ for(yyy in c("norm")){
   lines(xxx, little_power_aug, col="orange", pch=19, type = "b")
   lines(xxx, little_power_cov, col="brown", pch=20, type = "b")
   lines(xxx, our_power, col="blue", pch=21, type = "b")
-  lines(xxx, our_power_corr, col="darkviolet", pch=22, type = "b")
-  lines(xxx, our_power_mean, col="aquamarine2", pch=23, type = "b")
   lines(xxx, rep(alpha, length(xxx)), lty = 2, col = "red")
-  legend("right", inset = c(-0.4,0), xpd = TRUE,
+  legend("right", inset = c(-0.4,0), xpd = TRUE, 
          horiz = FALSE, lty = 1, bty = "n",
-         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'),
+         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), 
                     TeX(r'($d^2_{aug}$)'), "Omnibus"),
          col = c("green", "brown", "orange", "blue"),
          pch = c(18, 19, 20, 21))
@@ -547,8 +490,6 @@ for(yyy in c("lnorm")){
   little_power_cov = numeric(length = 7)
   little_power_aug = numeric(length = 7)
   our_power = numeric(length = 7)
-  our_power_corr = numeric(length = 7)
-  our_power_mean = numeric(length = 7)
   
   ind = 1
   for (p in xxx){
@@ -556,8 +497,6 @@ for(yyy in c("lnorm")){
     little_decision_mu = logical(length = MC)
     little_decision_aug = logical(length = MC)
     our_decision = logical(length = MC)
-    our_decision_corr = logical(length = MC)
-    our_decision_mean = logical(length = MC)
     
     for (i in 1:MC){
       X = delete_MAR_rank(data, p, c(1,2), cols_ctrl = c(3, 4))
@@ -567,8 +506,6 @@ for(yyy in c("lnorm")){
       little_decision_mu[i] = mcar_test(data.frame(X))$p.value < alpha
       
       our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99)
-      our_decision_corr[i] = MCAR_corrTest(X, alpha = 0.05, B = 99)
-      our_decision_mean[i] = MCAR_meanTest(X, alpha = 0.05, B = 99)
     }
     
     little_power_aug[ind] = mean(little_decision_aug)
@@ -576,8 +513,6 @@ for(yyy in c("lnorm")){
     little_power_cov[ind] = mean(little_decision_cov)
     
     our_power[ind] = mean(our_decision)
-    our_power_corr[ind] = mean(our_decision_corr)
-    our_power_mean[ind] = mean(our_decision_mean)
     
     ind = ind+1
   }
@@ -589,11 +524,9 @@ for(yyy in c("lnorm")){
   lines(xxx, little_power_aug, col="orange", pch=19, type = "b")
   lines(xxx, little_power_cov, col="brown", pch=20, type = "b")
   lines(xxx, our_power, col="blue", pch=21, type = "b")
-  lines(xxx, our_power_corr, col="darkviolet", pch=22, type = "b")
-  lines(xxx, our_power_mean, col="aquamarine2", pch=23, type = "b")
-  legend("right", inset = c(-0.4,0), xpd = TRUE,
+  legend("right", inset = c(-0.4,0), xpd = TRUE, 
          horiz = FALSE, lty = 1, bty = "n",
-         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'),
+         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), 
                     TeX(r'($d^2_{aug}$)'), "Omnibus"),
          col = c("green", "brown", "orange", "blue"),
          pch = c(18, 19, 20, 21))
@@ -629,8 +562,6 @@ for(yyy in c("lnorm")){
   little_power_cov = numeric(length = 7)
   little_power_aug = numeric(length = 7)
   our_power = numeric(length = 7)
-  our_power_corr = numeric(length = 7)
-  our_power_mean = numeric(length = 7)
   
   ind = 1
   for (p in xxx){
@@ -638,8 +569,6 @@ for(yyy in c("lnorm")){
     little_decision_mu = logical(length = MC)
     little_decision_aug = logical(length = MC)
     our_decision = logical(length = MC)
-    our_decision_corr = logical(length = MC)
-    our_decision_mean = logical(length = MC)
     
     for (i in 1:MC){
       X = delete_MAR_1_to_x(data, p, c(1,2), cols_ctrl = c(3, 4), x = 9)
@@ -649,16 +578,13 @@ for(yyy in c("lnorm")){
       little_decision_cov[i] = little_test(X, alpha, type = "cov")
       little_decision_mu[i] = mcar_test(data.frame(X))$p.value < alpha
       our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99)
-      our_decision_corr[i] = MCAR_corrTest(X, alpha = 0.05, B = 99)
-      our_decision_mean[i] = MCAR_meanTest(X, alpha = 0.05, B = 99)
     }
     
     little_power_aug[ind] = mean(little_decision_aug)
     little_power_mu[ind] = mean(little_decision_mu)
     little_power_cov[ind] = mean(little_decision_cov)
     our_power[ind] = mean(our_decision)
-    our_power_corr[ind] = mean(our_decision_corr)
-    our_power_mean[ind] = mean(our_decision_mean)
+    
     ind = ind+1
   }
   
@@ -669,11 +595,9 @@ for(yyy in c("lnorm")){
   lines(xxx, little_power_aug, col="orange", pch=19, type = "b")
   lines(xxx, little_power_cov, col="brown", pch=20, type = "b")
   lines(xxx, our_power, col="blue", pch=21, type = "b")
-  lines(xxx, our_power_corr, col="darkviolet", pch=22, type = "b")
-  lines(xxx, our_power_mean, col="aquamarine2", pch=23, type = "b")
-  legend("right", inset = c(-0.4,0), xpd = TRUE,
+  legend("right", inset = c(-0.4,0), xpd = TRUE, 
          horiz = FALSE, lty = 1, bty = "n",
-         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'),
+         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), 
                     TeX(r'($d^2_{aug}$)'), "Omnibus"),
          col = c("green", "brown", "orange", "blue"),
          pch = c(18, 19, 20, 21))
@@ -709,8 +633,6 @@ for(yyy in c("lnorm")){
   little_power_cov = numeric(length = 7)
   little_power_aug = numeric(length = 7)
   our_power = numeric(length = 7)
-  our_power_corr = numeric(length = 7)
-  our_power_mean = numeric(length = 7)
   
   ind = 1
   for (p in xxx){
@@ -718,8 +640,6 @@ for(yyy in c("lnorm")){
     little_decision_mu = logical(length = MC)
     little_decision_aug = logical(length = MC)
     our_decision = logical(length = MC)
-    our_decision_corr = logical(length = MC)
-    our_decision_mean = logical(length = MC)
     
     for (i in 1:MC){
       X = delete_MCAR(data, p, c(1,2))
@@ -728,16 +648,12 @@ for(yyy in c("lnorm")){
       little_decision_cov[i] = little_test(X, alpha, type = "cov")
       little_decision_mu[i] = mcar_test(data.frame(X))$p.value < alpha
       our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99)
-      our_decision_corr[i] = MCAR_corrTest(X, alpha = 0.05, B = 99)
-      our_decision_mean[i] = MCAR_meanTest(X, alpha = 0.05, B = 99)
     }
     
     little_power_aug[ind] = mean(little_decision_aug)
     little_power_mu[ind] = mean(little_decision_mu)
     little_power_cov[ind] = mean(little_decision_cov)
     our_power[ind] = mean(our_decision)
-    our_power_corr[ind] = mean(our_decision_corr)
-    our_power_mean[ind] = mean(our_decision_mean)
     
     ind = ind+1
   }
@@ -749,12 +665,10 @@ for(yyy in c("lnorm")){
   lines(xxx, little_power_aug, col="orange", pch=19, type = "b")
   lines(xxx, little_power_cov, col="brown", pch=20, type = "b")
   lines(xxx, our_power, col="blue", pch=21, type = "b")
-  lines(xxx, our_power_corr, col="darkviolet", pch=22, type = "b")
-  lines(xxx, our_power_mean, col="aquamarine2", pch=23, type = "b")
   lines(xxx, rep(alpha, length(xxx)), lty = 2, col = "red")
-  legend("right", inset = c(-0.4,0), xpd = TRUE,
+  legend("right", inset = c(-0.4,0), xpd = TRUE, 
          horiz = FALSE, lty = 1, bty = "n",
-         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'),
+         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), 
                     TeX(r'($d^2_{aug}$)'), "Omnibus"),
          col = c("green", "brown", "orange", "blue"),
          pch = c(18, 19, 20, 21))
