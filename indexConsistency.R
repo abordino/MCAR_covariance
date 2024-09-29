@@ -55,9 +55,9 @@ M = function(mu_S, patterns, MahS, n_S){
 
   sum = 0
   for(i in 1:n_pattern){
-    # sum = sum + sum(abs(mu_S[[i]] - av_mu[patterns[[i]]]))
-    sum = sum + n_S[[i]]*(mu_S[[i]] - av_mu[patterns[[i]]])%*%solve(MahS[[i]])%*%
-      (mu_S[[i]] - av_mu[patterns[[i]]])
+    dim_S = length(patterns[[i]])
+    MahS[[i]] = diag(dim_S)
+    sum = sum + n_S[[i]]*sum(abs(mu_S[[i]] - av_mu[patterns[[i]]]))
   }
 
   return(sum/sum(unlist(n_S)))
@@ -83,9 +83,3 @@ V = function(sigma_squared_S, patterns){
 
   return(1-min)
 }
-
-
-
-
-
-
