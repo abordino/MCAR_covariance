@@ -1,38 +1,30 @@
 source("computeR.R")
-source("little_test.R")
 source("bootstrap_test.R")
 source("find_SigmaS.R")
 source("indexConsistency.R")
 library(missMethods)
 library(MASS)
 library(norm)
-library(foreach)
-library(doSNOW)
-library(doParallel)
-library(future)
-library(parallel)
-library(foreach)
-library(doRNG) 
-library(doFuture)
 library(latex2exp)
 library(future.apply)
 library(naniar)
+
+alpha = 0.05
+n = 100
+MC = 40
+xxx =  seq(0.05, 0.4, length.out=7)
 
 # #----------------------------------------------------------------------------------------
 # #### miss methods
 # #----------------------------------------------------------------------------------------
 
+d = 3
+yyy = "exp"
 
-for(yyy in c("exp")){
-  
   #----------------------------------------------------------------------------------------
   ######### MAR ##############################
   #----------------------------------------------------------------------------------------
-  alpha = 0.05
-  n = 800
-  MC = 200
-  d = 3
-  
+
   #----------------------------------------------------------------------------------------
   # Select the copula
   #----------------------------------------------------------------------------------------
@@ -42,69 +34,61 @@ for(yyy in c("exp")){
   #----------------------------------------------------------------------------------------
   P = mvdc(copula = cp, margins = c(rep(yyy,d)),
            paramMargins = rep(list(rate = 1),d)) #list(c(mean = 0, sd = 1))
-  
+
   data = rMvdc(n, P)
-  
+
   #----------------------------------------------------------------------------------------
   # run little's and our tests
   #----------------------------------------------------------------------------------------
-  
-  xxx =  seq(0.05, 0.4, length.out=7)
-  
-  little_power_mu = numeric(length = 7)
-  little_power_cov = numeric(length = 7)
-  little_power_aug = numeric(length = 7)
+
+  little_power = numeric(length = 7)
+  combined_power = numeric(length = 7)
   our_power = numeric(length = 7)
-  
+
   ind = 1
   for (p in xxx){
-    little_decision_cov = logical(length = MC)
-    little_decision_mu = logical(length = MC)
-    little_decision_aug = logical(length = MC)
+    little_decision = logical(length = MC)
+    combined_decision = logical(length = MC)
     our_decision = logical(length = MC)
-    
+
     for (i in 1:MC){
       X = delete_MAR_rank(data, p, c(1,2), cols_ctrl = c(3, 3))
+
+      p_L = mcar_test(data.frame(X))$p.value
+      p_R = corr.compTest(X, B= 99)
+      p_M = mean.consTest(X, B= 99)
+      p_V = var.consTest(X, B = 99)
       
-      little_decision_aug[i] = little_test(X, alpha)
-      little_decision_cov[i] = little_test(X, alpha, type = "cov")
-      little_decision_mu[i] = mcar_test(data.frame(X))$p.value < alpha
+      little_decision[i] =  p_L < alpha
       
-      our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99)
+      # our_decision[i] = p_V < alpha
+     our_decision[i] = -2*(log(p_R)+log(p_M)+log(p_V)) > qchisq(1-2*alpha/3, 6)
+      combined_decision[i] = -2*(log(p_R)+log(p_L)+log(p_V)) > qchisq(1-2*alpha/3, 6)
     }
-    
-    little_power_aug[ind] = mean(little_decision_aug)
-    little_power_mu[ind] = mean(little_decision_mu)
-    little_power_cov[ind] = mean(little_decision_cov)
-    
+
+    little_power[ind] = mean(little_decision)
     our_power[ind] = mean(our_decision)
-    
+    combined_power[ind] = mean(combined_decision)
+
     ind = ind+1
   }
-  
-  png(paste(yyy, "_", "np", "_MAR1.png"))
+
+  png(paste("pictures/", yyy, "_", "np", "_MAR1.png"))
   par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-  plot(xxx, little_power_mu, col="green", ylim = c(0,1), pch=18,
+  plot(xxx, little_power, col="green", ylim = c(0,1), pch=18,
        xlab = "Missingness probability p", ylab = "Power", type="b", main = "")
-  lines(xxx, little_power_aug, col="orange", pch=19, type = "b")
-  lines(xxx, little_power_cov, col="brown", pch=20, type = "b")
   lines(xxx, our_power, col="blue", pch=21, type = "b")
-  legend("right", inset = c(-0.4,0), xpd = TRUE, 
+  lines(xxx, combined_power, col="orange", pch=20, type = "b")
+  legend("right", inset = c(-0.4,0), xpd = TRUE,
          horiz = FALSE, lty = 1, bty = "n",
-         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), 
-                    TeX(r'($d^2_{aug}$)'), "Omnibus"),
-         col = c("green", "brown", "orange", "blue"),
-         pch = c(18, 19, 20, 21))
+         legend = c(TeX(r'($d^2_\mu$)'), "Combined", "Omnibus"),
+         col = c("green", "orange", "blue"),
+         pch = c(18, 20, 21))
   dev.off()
-  
+
   #----------------------------------------------------------------------------------------
   ######### MAR ##############################
   #----------------------------------------------------------------------------------------
-  alpha = 0.05
-  n = 800
-  MC = 200
-  d = 3
-  
   #----------------------------------------------------------------------------------------
   # Select the copula
   #----------------------------------------------------------------------------------------
@@ -114,68 +98,61 @@ for(yyy in c("exp")){
   #----------------------------------------------------------------------------------------
   P = mvdc(copula = cp, margins = c(rep(yyy,d)),
            paramMargins = rep(list(rate = 1),d))
-  
+
   data = rMvdc(n, P)
-  
+
   #----------------------------------------------------------------------------------------
   # run little's and our tests
   #----------------------------------------------------------------------------------------
-  
-  xxx =  seq(0.05, 0.4, length.out=7)
-  
-  little_power_mu = numeric(length = 7)
-  little_power_cov = numeric(length = 7)
-  little_power_aug = numeric(length = 7)
+
+  little_power = numeric(length = 7)
+  combined_power = numeric(length = 7)
   our_power = numeric(length = 7)
   
   ind = 1
   for (p in xxx){
-    little_decision_cov = logical(length = MC)
-    little_decision_mu = logical(length = MC)
-    little_decision_aug = logical(length = MC)
+    little_decision = logical(length = MC)
+    combined_decision = logical(length = MC)
     our_decision = logical(length = MC)
     
     for (i in 1:MC){
       X = delete_MAR_1_to_x(data, p, c(1,2), cols_ctrl = c(3, 3), x = 9)
       
+      p_L = mcar_test(data.frame(X))$p.value
+      p_R = corr.compTest(X, B= 99)
+      p_M = mean.consTest(X, B= 99)
+      p_V = var.consTest(X, B = 99)
       
-      little_decision_aug[i] = little_test(X, alpha)
-      little_decision_cov[i] = little_test(X, alpha, type = "cov")
-      little_decision_mu[i] = mcar_test(data.frame(X))$p.value < alpha
-      our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99)
+      little_decision[i] =  p_L < alpha
+      
+      # our_decision[i] = p_V < alpha
+     our_decision[i] = -2*(log(p_R)+log(p_M)+log(p_V)) > qchisq(1-2*alpha/3, 6)
+      combined_decision[i] = -2*(log(p_R)+log(p_L)+log(p_V)) > qchisq(1-2*alpha/3, 6)
     }
     
-    little_power_aug[ind] = mean(little_decision_aug)
-    little_power_mu[ind] = mean(little_decision_mu)
-    little_power_cov[ind] = mean(little_decision_cov)
+    little_power[ind] = mean(little_decision)
     our_power[ind] = mean(our_decision)
+    combined_power[ind] = mean(combined_decision)
     
     ind = ind+1
   }
-  
-  png(paste(yyy, "_", "np", "_MAR2.png"))
+
+  png(paste("pictures/", yyy, "_", "np", "_MAR2.png"))
   par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-  plot(xxx, little_power_mu, col="green", ylim = c(0,1), pch=18,
+  plot(xxx, little_power, col="green", ylim = c(0,1), pch=18,
        xlab = "Missingness probability p", ylab = "Power", type="b", main = "")
-  lines(xxx, little_power_aug, col="orange", pch=19, type = "b")
-  lines(xxx, little_power_cov, col="brown", pch=20, type = "b")
   lines(xxx, our_power, col="blue", pch=21, type = "b")
-  legend("right", inset = c(-0.4,0), xpd = TRUE, 
+  lines(xxx, combined_power, col="orange", pch=20, type = "b")
+  legend("right", inset = c(-0.4,0), xpd = TRUE,
          horiz = FALSE, lty = 1, bty = "n",
-         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), 
-                    TeX(r'($d^2_{aug}$)'), "Omnibus"),
-         col = c("green", "brown", "orange", "blue"),
-         pch = c(18, 19, 20, 21))
+         legend = c(TeX(r'($d^2_\mu$)'), "Combined", "Omnibus"),
+         col = c("green", "orange", "blue"),
+         pch = c(18, 20, 21))
   dev.off()
-  
+
   #----------------------------------------------------------------------------------------
   ######### MCAR ############
   #----------------------------------------------------------------------------------------
-  alpha = 0.05
-  n = 800
-  MC = 200
-  d = 3
-  
   #----------------------------------------------------------------------------------------
   # Select the copula
   #----------------------------------------------------------------------------------------
@@ -185,71 +162,65 @@ for(yyy in c("exp")){
   #----------------------------------------------------------------------------------------
   P = mvdc(copula = cp, margins = c(rep(yyy,d)),
            paramMargins = rep(list(rate = 1),d))
-  
+
   data = rMvdc(n, P)
-  
+
   #----------------------------------------------------------------------------------------
   # run little's and our tests
   #----------------------------------------------------------------------------------------
-  
-  xxx =  seq(0.05, 0.4, length.out=7)
-  
-  little_power_mu = numeric(length = 7)
-  little_power_cov = numeric(length = 7)
-  little_power_aug = numeric(length = 7)
+  little_power = numeric(length = 7)
+  combined_power = numeric(length = 7)
   our_power = numeric(length = 7)
   
   ind = 1
   for (p in xxx){
-    little_decision_cov = logical(length = MC)
-    little_decision_mu = logical(length = MC)
-    little_decision_aug = logical(length = MC)
+    little_decision = logical(length = MC)
+    combined_decision = logical(length = MC)
     our_decision = logical(length = MC)
     
     for (i in 1:MC){
       X = delete_MCAR(data, p, c(1,2))
       
-      little_decision_aug[i] = little_test(X, alpha)
-      little_decision_cov[i] = little_test(X, alpha, type = "cov")
-      little_decision_mu[i] = mcar_test(data.frame(X))$p.value < alpha
-      our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99)
+      p_L = mcar_test(data.frame(X))$p.value
+      p_R = corr.compTest(X, B= 99)
+      p_M = mean.consTest(X, B= 99)
+      p_V = var.consTest(X, B = 99)
+      
+      little_decision[i] =  p_L < alpha
+      
+      # our_decision[i] = p_V < alpha
+     our_decision[i] = -2*(log(p_R)+log(p_M)+log(p_V)) > qchisq(1-2*alpha/3, 6)
+      combined_decision[i] = -2*(log(p_R)+log(p_L)+log(p_V)) > qchisq(1-2*alpha/3, 6)
     }
     
-    little_power_aug[ind] = mean(little_decision_aug)
-    little_power_mu[ind] = mean(little_decision_mu)
-    little_power_cov[ind] = mean(little_decision_cov)
+    little_power[ind] = mean(little_decision)
     our_power[ind] = mean(our_decision)
+    combined_power[ind] = mean(combined_decision)
     
     ind = ind+1
   }
-  
-  png(paste(yyy,"_","np","_MCAR.png"))
-  par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-  plot(xxx, little_power_mu, col="green", ylim = c(0,1), pch=18,
-       xlab = "Missingness probability p", ylab = "Power", type="b", main = "")
-  lines(xxx, little_power_aug, col="orange", pch=19, type = "b")
-  lines(xxx, little_power_cov, col="brown", pch=20, type = "b")
-  lines(xxx, our_power, col="blue", pch=21, type = "b")
-  lines(xxx, rep(alpha, length(xxx)), lty = 2, col = "red")
-  legend("right", inset = c(-0.4,0), xpd = TRUE, 
-         horiz = FALSE, lty = 1, bty = "n",
-         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), 
-                    TeX(r'($d^2_{aug}$)'), "Omnibus"),
-         col = c("green", "brown", "orange", "blue"),
-         pch = c(18, 19, 20, 21))
-  dev.off()
-}
 
-for(yyy in c("norm")){
+  png(paste("pictures/", yyy,"_","np","_MCAR.png"))
+  par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
+  plot(xxx, little_power, col="green", ylim = c(0,1), pch=18,
+       xlab = "Missingness probability p", ylab = "Size", type="b", main = "")
+  lines(xxx, rep(alpha, length(xxx)), lty = 2, col = "red")
+  lines(xxx, our_power, col="blue", pch=21, type = "b")
+  lines(xxx, combined_power, col="orange", pch=20, type = "b")
+  legend("right", inset = c(-0.4,0), xpd = TRUE,
+         horiz = FALSE, lty = 1, bty = "n",
+         legend = c(TeX(r'($d^2_\mu$)'), "Combined", "Omnibus"),
+         col = c("green", "orange", "blue"),
+         pch = c(18, 20, 21))
+  dev.off()
   
+  
+  
+d = 3
+yyy = "norm"
+
   #----------------------------------------------------------------------------------------
   ######### MAR ##############################
-  #----------------------------------------------------------------------------------------
-  alpha = 0.05
-  n = 800
-  MC = 200
-  d = 3
-  
   #----------------------------------------------------------------------------------------
   # Select the copula
   #----------------------------------------------------------------------------------------
@@ -266,63 +237,54 @@ for(yyy in c("norm")){
   # run little's and our tests
   #----------------------------------------------------------------------------------------
   
-  xxx =  seq(0.05, 0.4, length.out=7)
-  
-  little_power_mu = numeric(length = 7)
-  little_power_cov = numeric(length = 7)
-  little_power_aug = numeric(length = 7)
+  little_power = numeric(length = 7)
+  combined_power = numeric(length = 7)
   our_power = numeric(length = 7)
-
   
   ind = 1
   for (p in xxx){
-    little_decision_cov = logical(length = MC)
-    little_decision_mu = logical(length = MC)
-    little_decision_aug = logical(length = MC)
+    little_decision = logical(length = MC)
+    combined_decision = logical(length = MC)
     our_decision = logical(length = MC)
     
     for (i in 1:MC){
       X = delete_MAR_rank(data, p, c(1,2), cols_ctrl = c(3, 3))
       
-      little_decision_aug[i] = little_test(X, alpha)
-      little_decision_cov[i] = little_test(X, alpha, type = "cov")
-      little_decision_mu[i] = mcar_test(data.frame(X))$p.value < alpha
-      # 
-      our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99)
+      p_L = mcar_test(data.frame(X))$p.value
+      p_R = corr.compTest(X, B= 99)
+      p_M = mean.consTest(X, B= 99)
+      p_V = var.consTest(X, B = 99)
+      
+      little_decision[i] =  p_L < alpha
+      
+      # our_decision[i] = p_V < alpha
+     our_decision[i] = -2*(log(p_R)+log(p_M)+log(p_V)) > qchisq(1-2*alpha/3, 6)
+      combined_decision[i] = -2*(log(p_R)+log(p_L)+log(p_V)) > qchisq(1-2*alpha/3, 6)
     }
     
-    little_power_aug[ind] = mean(little_decision_aug)
-    little_power_mu[ind] = mean(little_decision_mu)
-    little_power_cov[ind] = mean(little_decision_cov)
-
+    little_power[ind] = mean(little_decision)
     our_power[ind] = mean(our_decision)
+    combined_power[ind] = mean(combined_decision)
     
     ind = ind+1
   }
   
-  png(paste(yyy, "_", "np", "_MAR1.png"))
+  png(paste("pictures/", yyy, "_", "np", "_MAR1.png"))
   par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-  plot(xxx, little_power_mu, col="green", ylim = c(0,1), pch=18,
+  plot(xxx, little_power, col="green", ylim = c(0,1), pch=18,
        xlab = "Missingness probability p", ylab = "Power", type="b", main = "")
-  lines(xxx, little_power_aug, col="orange", pch=19, type = "b")
-  lines(xxx, little_power_cov, col="brown", pch=20, type = "b")
   lines(xxx, our_power, col="blue", pch=21, type = "b")
-  legend("right", inset = c(-0.4,0), xpd = TRUE, 
+  lines(xxx, combined_power, col="orange", pch=20, type = "b")
+  legend("right", inset = c(-0.4,0), xpd = TRUE,
          horiz = FALSE, lty = 1, bty = "n",
-         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), 
-                    TeX(r'($d^2_{aug}$)'), "Omnibus"),
-         col = c("green", "brown", "orange", "blue"),
-         pch = c(18, 19, 20, 21))
+         legend = c(TeX(r'($d^2_\mu$)'), "Combined", "Omnibus"),
+         col = c("green", "orange", "blue"),
+         pch = c(18, 20, 21))
   dev.off()
   
   #----------------------------------------------------------------------------------------
   ######### MAR ##############################
   #----------------------------------------------------------------------------------------
-  alpha = 0.05
-  n = 800
-  MC = 200
-  d = 3
-  
   #----------------------------------------------------------------------------------------
   # Select the copula
   #----------------------------------------------------------------------------------------
@@ -339,61 +301,54 @@ for(yyy in c("norm")){
   # run little's and our tests
   #----------------------------------------------------------------------------------------
   
-  xxx =  seq(0.05, 0.4, length.out=7)
-  
-  little_power_mu = numeric(length = 7)
-  little_power_cov = numeric(length = 7)
-  little_power_aug = numeric(length = 7)
+  little_power = numeric(length = 7)
+  combined_power = numeric(length = 7)
   our_power = numeric(length = 7)
   
   ind = 1
   for (p in xxx){
-    little_decision_cov = logical(length = MC)
-    little_decision_mu = logical(length = MC)
-    little_decision_aug = logical(length = MC)
+    little_decision = logical(length = MC)
+    combined_decision = logical(length = MC)
     our_decision = logical(length = MC)
     
     for (i in 1:MC){
       X = delete_MAR_1_to_x(data, p, c(1,2), cols_ctrl = c(3, 3), x = 9)
       
+      p_L = mcar_test(data.frame(X))$p.value
+      p_R = corr.compTest(X, B= 99)
+      p_M = mean.consTest(X, B= 99)
+      p_V = var.consTest(X, B = 99)
       
-      little_decision_aug[i] = little_test(X, alpha)
-      little_decision_cov[i] = little_test(X, alpha, type = "cov")
-      little_decision_mu[i] = mcar_test(data.frame(X))$p.value < alpha
-      our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99)
+      little_decision[i] =  p_L < alpha
+      
+      # our_decision[i] = p_V < alpha
+     our_decision[i] = -2*(log(p_R)+log(p_M)+log(p_V)) > qchisq(1-2*alpha/3, 6)
+      combined_decision[i] = -2*(log(p_R)+log(p_L)+log(p_V)) > qchisq(1-2*alpha/3, 6)
     }
     
-    little_power_aug[ind] = mean(little_decision_aug)
-    little_power_mu[ind] = mean(little_decision_mu)
-    little_power_cov[ind] = mean(little_decision_cov)
+    little_power[ind] = mean(little_decision)
     our_power[ind] = mean(our_decision)
+    combined_power[ind] = mean(combined_decision)
     
     ind = ind+1
   }
   
-  png(paste(yyy, "_", "np", "_MAR2.png"))
+  png(paste("pictures/", yyy, "_", "np", "_MAR2.png"))
   par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-  plot(xxx, little_power_mu, col="green", ylim = c(0,1), pch=18,
+  plot(xxx, little_power, col="green", ylim = c(0,1), pch=18,
        xlab = "Missingness probability p", ylab = "Power", type="b", main = "")
-  lines(xxx, little_power_aug, col="orange", pch=19, type = "b")
-  lines(xxx, little_power_cov, col="brown", pch=20, type = "b")
   lines(xxx, our_power, col="blue", pch=21, type = "b")
-  legend("right", inset = c(-0.4,0), xpd = TRUE, 
+  lines(xxx, combined_power, col="orange", pch=20, type = "b")
+  legend("right", inset = c(-0.4,0), xpd = TRUE,
          horiz = FALSE, lty = 1, bty = "n",
-         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), 
-                    TeX(r'($d^2_{aug}$)'), "Omnibus"),
-         col = c("green", "brown", "orange", "blue"),
-         pch = c(18, 19, 20, 21))
+         legend = c(TeX(r'($d^2_\mu$)'), "Combined", "Omnibus"),
+         col = c("green", "orange", "blue"),
+         pch = c(18, 20, 21))
   dev.off()
   
   #----------------------------------------------------------------------------------------
   ######### MCAR ############
   #----------------------------------------------------------------------------------------
-  alpha = 0.05
-  n = 800
-  MC = 200
-  d = 3
-  
   #----------------------------------------------------------------------------------------
   # Select the copula
   #----------------------------------------------------------------------------------------
@@ -410,64 +365,59 @@ for(yyy in c("norm")){
   # run little's and our tests
   #----------------------------------------------------------------------------------------
   
-  xxx =  seq(0.05, 0.4, length.out=7)
-  
-  little_power_mu = numeric(length = 7)
-  little_power_cov = numeric(length = 7)
-  little_power_aug = numeric(length = 7)
+  little_power = numeric(length = 7)
+  combined_power = numeric(length = 7)
   our_power = numeric(length = 7)
   
   ind = 1
   for (p in xxx){
-    little_decision_cov = logical(length = MC)
-    little_decision_mu = logical(length = MC)
-    little_decision_aug = logical(length = MC)
+    little_decision = logical(length = MC)
+    combined_decision = logical(length = MC)
     our_decision = logical(length = MC)
     
     for (i in 1:MC){
       X = delete_MCAR(data, p, c(1,2))
       
-      little_decision_aug[i] = little_test(X, alpha)
-      little_decision_cov[i] = little_test(X, alpha, type = "cov")
-      little_decision_mu[i] = mcar_test(data.frame(X))$p.value < alpha
-      our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99)
+      p_L = mcar_test(data.frame(X))$p.value
+      p_R = corr.compTest(X, B= 99)
+      p_M = mean.consTest(X, B= 99)
+      p_V = var.consTest(X, B = 99)
+      
+      little_decision[i] =  p_L < alpha
+      
+      # our_decision[i] = p_V < alpha
+     our_decision[i] = -2*(log(p_R)+log(p_M)+log(p_V)) > qchisq(1-2*alpha/3, 6)
+      combined_decision[i] = -2*(log(p_R)+log(p_L)+log(p_V)) > qchisq(1-2*alpha/3, 6)
     }
     
-    little_power_aug[ind] = mean(little_decision_aug)
-    little_power_mu[ind] = mean(little_decision_mu)
-    little_power_cov[ind] = mean(little_decision_cov)
+    little_power[ind] = mean(little_decision)
     our_power[ind] = mean(our_decision)
+    combined_power[ind] = mean(combined_decision)
     
     ind = ind+1
   }
   
-  png(paste(yyy,"_","np","_MCAR.png"))
+  png(paste("pictures/", yyy,"_","np","_MCAR.png"))
   par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-  plot(xxx, little_power_mu, col="green", ylim = c(0,1), pch=18,
-       xlab = "Missingness probability p", ylab = "Power", type="b", main = "")
-  lines(xxx, little_power_aug, col="orange", pch=19, type = "b")
-  lines(xxx, little_power_cov, col="brown", pch=20, type = "b")
-  lines(xxx, our_power, col="blue", pch=21, type = "b")
+  plot(xxx, little_power, col="green", ylim = c(0,1), pch=18,
+       xlab = "Missingness probability p", ylab = "Size", type="b", main = "")
   lines(xxx, rep(alpha, length(xxx)), lty = 2, col = "red")
-  legend("right", inset = c(-0.4,0), xpd = TRUE, 
+  lines(xxx, our_power, col="blue", pch=21, type = "b")
+  lines(xxx, combined_power, col="orange", pch=20, type = "b")
+  legend("right", inset = c(-0.4,0), xpd = TRUE,
          horiz = FALSE, lty = 1, bty = "n",
-         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), 
-                    TeX(r'($d^2_{aug}$)'), "Omnibus"),
-         col = c("green", "brown", "orange", "blue"),
-         pch = c(18, 19, 20, 21))
+         legend = c(TeX(r'($d^2_\mu$)'), "Combined", "Omnibus"),
+         col = c("green", "orange", "blue"),
+         pch = c(18, 20, 21))
   dev.off()
-}
 
-for(yyy in c("lnorm")){
   
-  #----------------------------------------------------------------------------------------
-  ######### MAR ##############################
-  #----------------------------------------------------------------------------------------
-  alpha = 0.05
-  n = 800
-  MC = 200
   d = 5
+  yyy = "lnorm"
   
+  #----------------------------------------------------------------------------------------
+  ######### MAR ##############################
+  #----------------------------------------------------------------------------------------
   #----------------------------------------------------------------------------------------
   # Select the copula
   #----------------------------------------------------------------------------------------
@@ -484,62 +434,54 @@ for(yyy in c("lnorm")){
   # run little's and our tests
   #----------------------------------------------------------------------------------------
   
-  xxx =  seq(0.05, 0.4, length.out=7)
-  
-  little_power_mu = numeric(length = 7)
-  little_power_cov = numeric(length = 7)
-  little_power_aug = numeric(length = 7)
+  little_power = numeric(length = 7)
+  combined_power = numeric(length = 7)
   our_power = numeric(length = 7)
   
   ind = 1
   for (p in xxx){
-    little_decision_cov = logical(length = MC)
-    little_decision_mu = logical(length = MC)
-    little_decision_aug = logical(length = MC)
+    little_decision = logical(length = MC)
+    combined_decision = logical(length = MC)
     our_decision = logical(length = MC)
     
     for (i in 1:MC){
       X = delete_MAR_rank(data, p, c(1,2), cols_ctrl = c(3, 4))
       
-      little_decision_aug[i] = little_test(X, alpha)
-      little_decision_cov[i] = little_test(X, alpha, type = "cov")
-      little_decision_mu[i] = mcar_test(data.frame(X))$p.value < alpha
+      p_L = mcar_test(data.frame(X))$p.value
+      p_R = corr.compTest(X, B= 99)
+      p_M = mean.consTest(X, B= 99)
+      p_V = var.consTest(X, B = 99)
       
-      our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99)
+      little_decision[i] =  p_L < alpha
+      
+      # our_decision[i] = p_V < alpha
+     our_decision[i] = -2*(log(p_R)+log(p_M)+log(p_V)) > qchisq(1-2*alpha/3, 6)
+      combined_decision[i] = -2*(log(p_R)+log(p_L)+log(p_V)) > qchisq(1-2*alpha/3, 6)
     }
     
-    little_power_aug[ind] = mean(little_decision_aug)
-    little_power_mu[ind] = mean(little_decision_mu)
-    little_power_cov[ind] = mean(little_decision_cov)
-    
+    little_power[ind] = mean(little_decision)
     our_power[ind] = mean(our_decision)
+    combined_power[ind] = mean(combined_decision)
     
     ind = ind+1
   }
   
-  png(paste(yyy, "_", "np", "_MAR1.png"))
+  png(paste("pictures/", yyy, "_", "np", "_MAR1.png"))
   par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-  plot(xxx, little_power_mu, col="green", ylim = c(0,1), pch=18,
+  plot(xxx, little_power, col="green", ylim = c(0,1), pch=18,
        xlab = "Missingness probability p", ylab = "Power", type="b", main = "")
-  lines(xxx, little_power_aug, col="orange", pch=19, type = "b")
-  lines(xxx, little_power_cov, col="brown", pch=20, type = "b")
   lines(xxx, our_power, col="blue", pch=21, type = "b")
-  legend("right", inset = c(-0.4,0), xpd = TRUE, 
+  lines(xxx, combined_power, col="orange", pch=20, type = "b")
+  legend("right", inset = c(-0.4,0), xpd = TRUE,
          horiz = FALSE, lty = 1, bty = "n",
-         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), 
-                    TeX(r'($d^2_{aug}$)'), "Omnibus"),
-         col = c("green", "brown", "orange", "blue"),
-         pch = c(18, 19, 20, 21))
+         legend = c(TeX(r'($d^2_\mu$)'), "Combined", "Omnibus"),
+         col = c("green", "orange", "blue"),
+         pch = c(18, 20, 21))
   dev.off()
   
   #----------------------------------------------------------------------------------------
   ######### MAR ##############################
   #----------------------------------------------------------------------------------------
-  alpha = 0.05
-  n = 800
-  MC = 200
-  d = 5
-  
   #----------------------------------------------------------------------------------------
   # Select the copula
   #----------------------------------------------------------------------------------------
@@ -555,61 +497,54 @@ for(yyy in c("lnorm")){
   #----------------------------------------------------------------------------------------
   # run little's and our tests
   #----------------------------------------------------------------------------------------
-  
-  xxx =  seq(0.05, 0.4, length.out=7)
-  
-  little_power_mu = numeric(length = 7)
-  little_power_cov = numeric(length = 7)
-  little_power_aug = numeric(length = 7)
+  little_power = numeric(length = 7)
+  combined_power = numeric(length = 7)
   our_power = numeric(length = 7)
   
   ind = 1
   for (p in xxx){
-    little_decision_cov = logical(length = MC)
-    little_decision_mu = logical(length = MC)
-    little_decision_aug = logical(length = MC)
+    little_decision = logical(length = MC)
+    combined_decision = logical(length = MC)
     our_decision = logical(length = MC)
     
     for (i in 1:MC){
       X = delete_MAR_1_to_x(data, p, c(1,2), cols_ctrl = c(3, 4), x = 9)
       
+      p_L = mcar_test(data.frame(X))$p.value
+      p_R = corr.compTest(X, B= 99)
+      p_M = mean.consTest(X, B= 99)
+      p_V = var.consTest(X, B = 99)
       
-      little_decision_aug[i] = little_test(X, alpha)
-      little_decision_cov[i] = little_test(X, alpha, type = "cov")
-      little_decision_mu[i] = mcar_test(data.frame(X))$p.value < alpha
-      our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99)
+      little_decision[i] =  p_L < alpha
+      
+      # our_decision[i] = p_V < alpha
+     our_decision[i] = -2*(log(p_R)+log(p_M)+log(p_V)) > qchisq(1-2*alpha/3, 6)
+      combined_decision[i] = -2*(log(p_R)+log(p_L)+log(p_V)) > qchisq(1-2*alpha/3, 6)
     }
     
-    little_power_aug[ind] = mean(little_decision_aug)
-    little_power_mu[ind] = mean(little_decision_mu)
-    little_power_cov[ind] = mean(little_decision_cov)
+    little_power[ind] = mean(little_decision)
     our_power[ind] = mean(our_decision)
+    combined_power[ind] = mean(combined_decision)
     
     ind = ind+1
   }
   
-  png(paste(yyy, "_", "np", "_MAR2.png"))
+  png(paste("pictures/", yyy, "_", "np", "_MAR2.png"))
   par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-  plot(xxx, little_power_mu, col="green", ylim = c(0,1), pch=18,
+  plot(xxx, little_power, col="green", ylim = c(0,1), pch=18,
        xlab = "Missingness probability p", ylab = "Power", type="b", main = "")
-  lines(xxx, little_power_aug, col="orange", pch=19, type = "b")
-  lines(xxx, little_power_cov, col="brown", pch=20, type = "b")
   lines(xxx, our_power, col="blue", pch=21, type = "b")
-  legend("right", inset = c(-0.4,0), xpd = TRUE, 
+  lines(xxx, combined_power, col="orange", pch=20, type = "b")
+  legend("right", inset = c(-0.4,0), xpd = TRUE,
          horiz = FALSE, lty = 1, bty = "n",
-         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), 
-                    TeX(r'($d^2_{aug}$)'), "Omnibus"),
-         col = c("green", "brown", "orange", "blue"),
-         pch = c(18, 19, 20, 21))
+         legend = c(TeX(r'($d^2_\mu$)'), "Combined", "Omnibus"),
+         col = c("green", "orange", "blue"),
+         pch = c(18, 20, 21))
   dev.off()
   
   #----------------------------------------------------------------------------------------
   ######### MCAR ############
   #----------------------------------------------------------------------------------------
-  alpha = 0.05
-  n = 800
-  MC = 200
-  d = 5
   
   #----------------------------------------------------------------------------------------
   # Select the copula
@@ -627,50 +562,48 @@ for(yyy in c("lnorm")){
   # run little's and our tests
   #----------------------------------------------------------------------------------------
   
-  xxx =  seq(0.05, 0.4, length.out=7)
-  
-  little_power_mu = numeric(length = 7)
-  little_power_cov = numeric(length = 7)
-  little_power_aug = numeric(length = 7)
+  little_power = numeric(length = 7)
+  combined_power = numeric(length = 7)
   our_power = numeric(length = 7)
   
   ind = 1
   for (p in xxx){
-    little_decision_cov = logical(length = MC)
-    little_decision_mu = logical(length = MC)
-    little_decision_aug = logical(length = MC)
+    little_decision = logical(length = MC)
+    combined_decision = logical(length = MC)
     our_decision = logical(length = MC)
     
     for (i in 1:MC){
       X = delete_MCAR(data, p, c(1,2))
       
-      little_decision_aug[i] = little_test(X, alpha)
-      little_decision_cov[i] = little_test(X, alpha, type = "cov")
-      little_decision_mu[i] = mcar_test(data.frame(X))$p.value < alpha
-      our_decision[i] = MCAR_meancovTest(X, alpha = 0.05, B = 99)
+      p_L = mcar_test(data.frame(X))$p.value
+      p_R = corr.compTest(X, B= 99)
+      p_M = mean.consTest(X, B= 99)
+      p_V = var.consTest(X, B = 99)
+      
+      little_decision[i] =  p_L < alpha
+      
+      # our_decision[i] = p_V < alpha
+     our_decision[i] = -2*(log(p_R)+log(p_M)+log(p_V)) > qchisq(1-2*alpha/3, 6)
+      combined_decision[i] = -2*(log(p_R)+log(p_L)+log(p_V)) > qchisq(1-2*alpha/3, 6)
     }
     
-    little_power_aug[ind] = mean(little_decision_aug)
-    little_power_mu[ind] = mean(little_decision_mu)
-    little_power_cov[ind] = mean(little_decision_cov)
+    little_power[ind] = mean(little_decision)
     our_power[ind] = mean(our_decision)
+    combined_power[ind] = mean(combined_decision)
     
     ind = ind+1
   }
   
-  png(paste(yyy,"_","np","_MCAR.png"))
+  png(paste("pictures/", yyy,"_","np","_MCAR.png"))
   par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-  plot(xxx, little_power_mu, col="green", ylim = c(0,1), pch=18,
-       xlab = "Missingness probability p", ylab = "Power", type="b", main = "")
-  lines(xxx, little_power_aug, col="orange", pch=19, type = "b")
-  lines(xxx, little_power_cov, col="brown", pch=20, type = "b")
-  lines(xxx, our_power, col="blue", pch=21, type = "b")
+  plot(xxx, little_power, col="green", ylim = c(0,1), pch=18,
+       xlab = "Missingness probability p", ylab = "Size", type="b", main = "")
   lines(xxx, rep(alpha, length(xxx)), lty = 2, col = "red")
-  legend("right", inset = c(-0.4,0), xpd = TRUE, 
+  lines(xxx, our_power, col="blue", pch=21, type = "b")
+  lines(xxx, combined_power, col="orange", pch=20, type = "b")
+  legend("right", inset = c(-0.4,0), xpd = TRUE,
          horiz = FALSE, lty = 1, bty = "n",
-         legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'), 
-                    TeX(r'($d^2_{aug}$)'), "Omnibus"),
-         col = c("green", "brown", "orange", "blue"),
-         pch = c(18, 19, 20, 21))
+         legend = c(TeX(r'($d^2_\mu$)'), "Combined", "Omnibus"),
+         col = c("green", "orange", "blue"),
+         pch = c(18, 20, 21))
   dev.off()
-}
