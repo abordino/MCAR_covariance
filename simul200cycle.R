@@ -1,5 +1,4 @@
 source("computeR.R")
-source("little_test.R")
 source("bootstrap_test.R")
 source("find_SigmaS.R")
 source("indexConsistency.R")
@@ -7,25 +6,21 @@ library(missMethods)
 library(norm)
 library(naniar)
 library(MASS)
-library(naniar)
 library(latex2exp)
 library(compositions)
 
 # #----------------------------------------------------------------------------------------
 # ######### d-cycle: high-dimensional ############
 # #----------------------------------------------------------------------------------------
-d = 100
+d = 200
 
 alpha = 0.05
 n = 200
-MC = 50 # with 4000 I expect 4 hours
+MC = 20
 angle = pi/(2*(d-1))
 
-our_power_corr = c()
+our_power = c()
 R = c()
-
-start.time = Sys.time()
-
 for(t1 in seq(pi/2, 5*pi/8, length.out = 8)){
   
   #----------------------------------------------------------------------------------------
@@ -53,7 +48,7 @@ for(t1 in seq(pi/2, 5*pi/8, length.out = 8)){
   #----------------------------------------------------------------------------------------
   ###### SAMPLE LEVEL, REPEATING THE TEST MC TIMES #######
   #----------------------------------------------------------------------------------------
-  our_decision_corr = c()
+  our_decisions = c()
   for (i in 1:MC){
     
     #----------------------------------------------------------------------------------------
@@ -68,22 +63,22 @@ for(t1 in seq(pi/2, 5*pi/8, length.out = 8)){
     #----------------------------------------------------------------------------------------
     ### run our tests
     #----------------------------------------------------------------------------------------
-    our_decision_corr = c(our_decision_corr, MCAR_meancovTest(X, alpha, B = 99))
+    p_M = mean.consTest(X, B= 99)
+    p_R = corr.compTest(X, B= 99)
+    
+    our_decisions = c(our_decisions, 
+                      -2*(log(p_R)+log(p_M)+log(p_V)) > qchisq(1-2*alpha/3, 6))
   }
   
-  our_power_corr = c(our_power_corr, mean(our_decision_corr))
+  our_power = c(our_power, mean(our_decisions))
 }
-
-end.time = Sys.time()
-time.taken = round(end.time - start.time,2)
-time.taken
 
 png("100_cycle.png")
 par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-plot(R, our_power_corr, col="blue", ylim = c(0,1), pch=21,
+plot(R, our_power, col="blue", ylim = c(0,1), pch=21,
      xlab = TeX(r'($R(\Sigma_\$)$)'), ylab = "Power", type = "b")
 lines(R, rep(alpha, length(R)), lty = 2, col = "red")
-legend("right", inset = c(-0.3,0), xpd = TRUE,
+legend("right", inset = c(-0.4,0), xpd = TRUE,
        horiz = FALSE, lty = 1, bty = "n",
        legend = c("Omnibus"),
        col = c("blue"),
