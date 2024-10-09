@@ -1,5 +1,4 @@
 source("computeR.R")
-source("little_test.R")
 source("bootstrap_test.R")
 source("find_SigmaS.R")
 source("indexConsistency.R")
@@ -15,21 +14,18 @@ library(compositions)
 ######### 3-cycle: lognormal ############
 #----------------------------------------------------------------------------------------
 alpha = 0.05
-n = 5000
-MC = 800
+n = 60
+MC = 30
 t3 = pi/6
-t2 = pi/3
+t2 = pi/6
 d = 3
 
-little_power_mean = c()
 little_power = c()
-little_power_cov = c()
+combined_power = c()
 our_power = c()
 
-start.time = Sys.time()
-
 R = c()
-for(t1 in seq(t2+t3, pi-0.01, length.out = 8)){
+for(t1 in seq(t2+t3-pi/6, pi-pi/6, length.out = 8)){
 
   #----------------------------------------------------------------------------------------
   #### ESTIMATE R FROM DATA, WITH INDEPENDENT SAMPLE ######
@@ -66,7 +62,7 @@ for(t1 in seq(t2+t3, pi-0.01, length.out = 8)){
   R = c(R, tmp)
 }
 
-for(t1 in seq(t2+t3, pi-0.01, length.out = 8)){
+for(t1 in seq(t2+t3-pi/6, pi-pi/6, length.out = 8)){
 
   SigmaS=list()
   for(j in 1:3){
@@ -83,9 +79,8 @@ for(t1 in seq(t2+t3, pi-0.01, length.out = 8)){
   #----------------------------------------------------------------------------------------
   ###### SAMPLE LEVEL, REPEATING THE TEST MC TIMES #######
   #----------------------------------------------------------------------------------------
-  little_decisions_mean = c()
   little_decisions = c()
-  little_decisions_cov = c()
+  combined_decisions = c()
   our_decisions = c()
 
   for (i in 1:MC){
@@ -107,61 +102,55 @@ for(t1 in seq(t2+t3, pi-0.01, length.out = 8)){
     #----------------------------------------------------------------------------------------
     ### run little's test
     #----------------------------------------------------------------------------------------
-    little_decisions_mean = c(little_decisions_mean, mcar_test(data.frame(X))$p.value < alpha)
-    little_decisions = c(little_decisions, little_test(X, alpha))
-    little_decisions_cov = c(little_decisions_cov, little_test(X, alpha, "cov"))
+    p_L = mcar_test(data.frame(X))$p.value
+    little_decisions = c(little_decisions,  p_L < alpha)
 
     #----------------------------------------------------------------------------------------
     ### run our tests
     #----------------------------------------------------------------------------------------
-    our_decisions = c(our_decisions, MCAR_meancovTest(X, alpha, B = 99))
+    p_R = corr.compTest(X, B= 99)
+    p_M = mean.consTest(X, B= 99)
+    p_V = bootstrapTestV(X, B = 99)
+    combined_decisions = c(combined_decisions, 
+                           -2*(log(p_R)+log(p_L)+log(p_V)) > qchisq(1-alpha, 6))
+    our_decisions = c(our_decisions, 
+                      -2*(log(p_R)+log(p_M)+log(p_V)) > qchisq(1-alpha, 6))
   }
 
-  little_power_mean = c(little_power_mean, mean(little_decisions_mean))
   little_power = c(little_power, mean(little_decisions))
-  little_power_cov = c(little_power_cov, mean(little_decisions_cov))
+  combined_power = c(combined_power, mean(combined_decisions))
   our_power = c(our_power, mean(our_decisions))
 }
 
-end.time = Sys.time()
-time.taken = round(end.time - start.time,2)
-time.taken
 
-
-png("3_cycle_lognormal_1.png")
+png("pictures/3_cycle_lognormal_1.png")
 par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-plot(sort(R), little_power_mean, col="green", ylim = c(0,1), pch=18,
+plot(R, little_power, col="green", ylim = c(0,1), pch=18,
      xlab = TeX(r'($R(\Sigma_\$)$)'), ylab = "Power", type = "b")
-lines(sort(R), little_power, col="orange", pch=19, type = "b")
-lines(sort(R), little_power_cov, col="brown", pch=20, type = "b")
-lines(sort(R), our_power, col="blue", pch=21, type = "b")
-lines(sort(R), rep(alpha, length(R)), lty = 2, col = "red")
+lines(R, our_power, col="blue", pch=21, type = "b")
+lines(R, combined_power, col="orange", pch=20, type = "b")
+lines(R, rep(alpha, length(R)), lty = 2, col = "red")
 legend("right", inset = c(-0.4,0), xpd = TRUE,
        horiz = FALSE, lty = 1, bty = "n",
-       legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'),
-                  TeX(r'($d^2_{aug}$)'), "Omnibus"),
-       col = c("green", "brown", "orange", "blue"),
-       pch = c(18, 19, 20, 21))
+       legend = c(TeX(r'($d^2_\mu$)'), "Combined", "Omnibus"),
+       col = c("green", "orange", "blue"),
+       pch = c(18, 20, 21))
 dev.off()
-# 
+
 #----------------------------------------------------------------------------------------
 # ######### 3-cycle: setting 1 ############
 #----------------------------------------------------------------------------------------
 alpha = 0.05
-n = 200
-MC = 200
+n = 60
+MC = 30
 t3 = pi/6
 t2 = pi/3
 
-little_power_mean = c()
 little_power = c()
-little_power_cov = c()
 our_power = c()
+combined_power = c()
 
 R = c()
-
-start.time = Sys.time()
-
 for(t1 in seq(t2+t3, (pi + t2 + t3)/2, length.out = 8)){
 
   #----------------------------------------------------------------------------------------
@@ -185,11 +174,8 @@ for(t1 in seq(t2+t3, (pi + t2 + t3)/2, length.out = 8)){
   ###### SAMPLE LEVEL, REPEATING THE TEST MC TIMES #######
   #----------------------------------------------------------------------------------------
   little_decisions_mean = c()
-  little_decisions = c()
-  little_decisions_cov = c()
   our_decisions = c()
-  our_decisions_corr = c()
-  our_decisions_mean = c()
+  combined_decisions = c()
 
   for (i in 1:MC){
     #----------------------------------------------------------------------------------------
@@ -207,40 +193,40 @@ for(t1 in seq(t2+t3, (pi + t2 + t3)/2, length.out = 8)){
     X = as.matrix(X)
 
     #----------------------------------------------------------------------------------------
-    ### run little's tests
+    ### run little's test
     #----------------------------------------------------------------------------------------
-    little_decisions_mean = c(little_decisions_mean, mcar_test(data.frame(X))$p.value < alpha)
-    little_decisions = c(little_decisions, little_test(X, alpha))
-    little_decisions_cov = c(little_decisions_cov, little_test(X, alpha, "cov"))
-
+    p_L = mcar_test(data.frame(X))$p.value
+    little_decisions = c(little_decisions,  p_L < alpha)
+    
     #----------------------------------------------------------------------------------------
     ### run our tests
     #----------------------------------------------------------------------------------------
-    our_decisions = c(our_decisions, MCAR_meancovTest(X, alpha, B = 99))
+    p_R = corr.compTest(X, B= 99)
+    p_M = mean.consTest(X, B= 99)
+    p_V = bootstrapTestV(X, B = 99)
+    combined_decisions = c(combined_decisions, 
+                           -2*(log(p_R)+log(p_L)+log(p_V)) > qchisq(1-alpha, 6))
+    our_decisions = c(our_decisions, 
+                      -2*(log(p_R)+log(p_M)+log(p_V)) > qchisq(1-alpha, 6))
   }
 
-  little_power_mean = c(little_power_mean, mean(little_decisions_mean))
   little_power = c(little_power, mean(little_decisions))
-  little_power_cov = c(little_power_cov, mean(little_decisions_cov))
+  combined_power = c(combined_power, mean(combined_decisions))
   our_power = c(our_power, mean(our_decisions))
 }
 
-end.time = Sys.time()
-time.taken = round(end.time - start.time,2)
-time.taken
-
-png("3_cycle_1.png")
+png("pictures/3_cycle_1.png")
 par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-plot(R, little_power_mean, col="green", ylim = c(0,1), pch=18,
+plot(R, little_power, col="green", ylim = c(0,1), pch=18,
      xlab = TeX(r'($R(\Sigma_\$)$)'), ylab = "Power", type = "b")
-lines(R, little_power, col="orange", pch=19, type = "b")
-lines(R, little_power_cov, col="brown", pch=20, type = "b")
 lines(R, our_power, col="blue", pch=21, type = "b")
+lines(R, combined_power, col="orange", pch=20, type = "b")
 lines(R, rep(alpha, length(R)), lty = 2, col = "red")
 legend("right", inset = c(-0.4,0), xpd = TRUE,
        horiz = FALSE, lty = 1, bty = "n",
-       legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{cov}$)'),
-                  TeX(r'($d^2_{aug}$)'), "Omnibus"),
-       col = c("green", "brown", "orange", "blue"),
-       pch = c(18, 19, 20, 21))
+       legend = c(TeX(r'($d^2_\mu$)'), "Combined", "Omnibus"),
+       col = c("green", "orange", "blue"),
+       pch = c(18, 20, 21))
 dev.off()
+
+
