@@ -112,9 +112,9 @@ for(t1 in seq(t2+t3-pi/6, pi-pi/6, length.out = 8)){
     p_M = mean.consTest(X, B= 99)
     p_V = bootstrapTestV(X, B = 99)
     combined_decisions = c(combined_decisions, 
-                           -2*(log(p_R)+log(p_L)+log(p_V)) > qchisq(1-alpha, 6))
+                           -2*(log(p_R)+log(p_L)+log(p_V)) > qchisq(1-2*alpha/3, 6))
     our_decisions = c(our_decisions, 
-                      -2*(log(p_R)+log(p_M)+log(p_V)) > qchisq(1-alpha, 6))
+                      -2*(log(p_R)+log(p_M)+log(p_V)) > qchisq(1-2*alpha/3, 6))
   }
 
   little_power = c(little_power, mean(little_decisions))
@@ -205,9 +205,9 @@ for(t1 in seq(t2+t3, (pi + t2 + t3)/2, length.out = 8)){
     p_M = mean.consTest(X, B= 99)
     p_V = bootstrapTestV(X, B = 99)
     combined_decisions = c(combined_decisions, 
-                           -2*(log(p_R)+log(p_L)+log(p_V)) > qchisq(1-alpha, 6))
+                           -2*(log(p_R)+log(p_L)+log(p_V)) > qchisq(1-2*alpha/3, 6))
     our_decisions = c(our_decisions, 
-                      -2*(log(p_R)+log(p_M)+log(p_V)) > qchisq(1-alpha, 6))
+                      -2*(log(p_R)+log(p_M)+log(p_V)) > qchisq(1-2*alpha/3, 6))
   }
 
   little_power = c(little_power, mean(little_decisions))
@@ -228,5 +228,3 @@ legend("right", inset = c(-0.4,0), xpd = TRUE,
        col = c("green", "orange", "blue"),
        pch = c(18, 20, 21))
 dev.off()
-
-
