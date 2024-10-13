@@ -26,7 +26,7 @@ corr.compTest = function(X, B){
   #### compute R^0
   ####--------------------------------------------------------------------------
   
-  result = get_SigmaS(X)
+  result = get_SigmaS(X, min_diff = 1)
   d = result$ambient_dimension; N_S = result$n_S; n = sum(unlist(N_S))
   n_pattern = result$n_pattern; patterns = result$pattern
   
@@ -74,7 +74,7 @@ corr.compTest = function(X, B){
     ####--------------------------------------------------------------------------
     #### compute R^b
     ####--------------------------------------------------------------------------
-    result = get_SigmaS(X)
+    result = get_SigmaS(X, min_diff = 1)
     SigmaS_b = result$SigmaS
     
     R_hat_b = computeR(patterns, SigmaS_b)$R
@@ -95,7 +95,7 @@ mean.consTest = function(X, B){
   #### compute M^0
   ####--------------------------------------------------------------------------
   
-  result = get_SigmaS(X)
+  result = get_SigmaS(X, min_diff = 10)
   d = result$ambient_dimension; N_S = result$n_S; n = sum(unlist(N_S))
   n_pattern = result$n_pattern; patterns = result$pattern
   
@@ -111,10 +111,10 @@ mean.consTest = function(X, B){
   #### rotate X, to make it look like it's from H0
   ####--------------------------------------------------------------------------
   
-  # avmu = av(mu_S, patterns)
-  s = prelim.norm(as.matrix(X))
-  thetahat = em.norm(s)
-  avmu = getparam.norm(s,thetahat,corr=FALSE)$mu
+  avmu = av(mu_S, patterns)
+  # s = prelim.norm(as.matrix(X))
+  # thetahat = em.norm(s)
+  # avmu = getparam.norm(s,thetahat,corr=FALSE)$mu
   
   rot_data_pattern = list()
   for (i in 1:n_pattern){
@@ -144,7 +144,7 @@ mean.consTest = function(X, B){
     #### compute M^b
     ####--------------------------------------------------------------------------
     
-    result = get_SigmaS(X)
+    result = get_SigmaS(X, min_diff = 10)
     mu_S_b = result$mu_S
     
     M_hat_b = M(mu_S_b, patterns)
@@ -164,7 +164,7 @@ var.consTest = function(X, B){
   #### rescale the data
   ####--------------------------------------------------------------------------
   
-  result = get_SigmaS(X)
+  result = get_SigmaS(X, min_diff = 10)
   d = result$ambient_dimension; N_S = result$n_S; n = sum(unlist(N_S))
   n_pattern = result$n_pattern; patterns = result$pattern
   avsigma = av(result$sigma_squared_S, patterns)
@@ -176,7 +176,7 @@ var.consTest = function(X, B){
   ####--------------------------------------------------------------------------
   #### compute V^0
   ####--------------------------------------------------------------------------
-  result = get_SigmaS(X)
+  result = get_SigmaS(X, min_diff = 10)
   sigma_squared_S = result$sigma_squared_S
   
   data_pattern = result$data_pattern
@@ -220,14 +220,14 @@ var.consTest = function(X, B){
     #### rescale data and compute V^b
     ####--------------------------------------------------------------------------
     
-    result = get_SigmaS(X)
+    result = get_SigmaS(X, min_diff = 10)
     avsigma = av(result$sigma_squared_S, result$patterns)
     
     for (j in 1:d){
       X[,j] = X[,j]/sqrt(avsigma[j])
     }
     
-    result = get_SigmaS(X)
+    result = get_SigmaS(X, min_diff = 10)
     sigma_squared_S_b = result$sigma_squared_S
     
     V_hat_b = V(sigma_squared_S_b, patterns)
