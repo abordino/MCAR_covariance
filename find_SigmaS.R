@@ -2,7 +2,7 @@ library(copula)
 library(missMethods)
 library(misty)
 
-get_SigmaS = function(X){
+get_SigmaS = function(X, min_diff){
   
   #----------------------------------------------------------------------------------------
   # create vector with indicators of NA's
@@ -46,7 +46,7 @@ get_SigmaS = function(X){
   #----------------------------------------------------------------------------------------
   deletion = c()
   for (i in 1:n_pattern){
-    if (dim(data_pattern[[i]])[1] - 1 <= dim(data_pattern[[i]])[2]){
+    if (dim(data_pattern[[i]])[1] <= dim(data_pattern[[i]])[2] + min_diff){
       deletion = c(deletion, i)
     }
   }
