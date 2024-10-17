@@ -3,6 +3,7 @@ source("computeR.R")
 source("bootstrap_test.R")
 source("find_SigmaS.R")
 source("indexConsistency.R")
+source("little_test.R")
 
 library(missMethods)
 library(MASS)
@@ -15,15 +16,16 @@ library(compositions)
 ######### 3-cycle: lognormal ############
 #----------------------------------------------------------------------------------------
 alpha = 0.05
-n = 200
-MC = 100
+n = 100
+MC = 70
 t3 = pi/6
 t2 = pi/6
 d = 3
 
 little_power = c()
-combined_power = c()
+little_power_cov = c()
 our_power = c()
+combined_power = c()
 our_power_corr = c()
 
 R = c()
@@ -82,8 +84,9 @@ for(t1 in seq(t2+t3-pi/7, pi-pi/6, length.out = 8)){
   ###### SAMPLE LEVEL, REPEATING THE TEST MC TIMES #######
   #----------------------------------------------------------------------------------------
   little_decisions = c()
-  combined_decisions = c()
+  little_decisions_cov = c()
   our_decisions = c()
+  combined_decisions = c()
   our_decisions_corr = c()
 
   for (i in 1:MC){
@@ -106,39 +109,41 @@ for(t1 in seq(t2+t3-pi/7, pi-pi/6, length.out = 8)){
     ### run little's test
     #----------------------------------------------------------------------------------------
     p_L = mcar_test(data.frame(X))$p.value
+    p_aug = little_test(X, alpha)
     little_decisions = c(little_decisions,  p_L < alpha)
-
+    little_decisions_cov = c(little_decisions_cov, p_aug < alpha)
+    
     #----------------------------------------------------------------------------------------
     ### run our tests
     #----------------------------------------------------------------------------------------
-    p_R = corr.compTest(X, B= 99)
-    p_M = mean.consTest(X, B= 99)
+    p_R = corr.compTest(X, B = 99)
+    p_M = mean.consTest(X, B = 99)
     p_V = var.consTest(X, B = 99)
-    combined_decisions = c(combined_decisions, 
-                           -2*(log(p_R)+log(p_L)+log(p_V)) > qchisq(1-2*alpha/3, 6))
-    our_decisions = c(our_decisions, 
-                      -2*(log(p_R)+log(p_M)+log(p_V)) > qchisq(1-2*alpha/3, 6))
+    
+    combined_decisions = c(combined_decisions, max(c(p_R, p_M, p_V) < alpha/3))
+    our_decisions = c(our_decisions, max(c(p_R, p_L, p_V) < alpha/3))
     our_decisions_corr = c(our_decisions_corr, p_R < alpha)
   }
 
   little_power = c(little_power, mean(little_decisions))
+  little_power_cov = c(little_power_cov, mean(little_decisions_cov))
   combined_power = c(combined_power, mean(combined_decisions))
   our_power = c(our_power, mean(our_decisions))
   our_power_corr = c(our_power_corr, mean(our_decisions_corr))
 }
 
-
-png("pictures/3_cycle_lognormal_1.png")
+png("pictures/3_cycle_Lnorm.png")
 par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
 plot(R, little_power, col="green", pch=18,
      xlab = TeX(r'($R(\Sigma_\$)$)'), ylim = c(0,1), ylab = "Power", type = "b")
+lines(R, little_power_cov, col="black", pch=19, type = "b")
 lines(R, our_power, col="blue", pch=21, type = "b")
 lines(R, combined_power, col="orange", pch=20, type = "b")
 lines(R, our_power_corr, col="brown", pch=25, type = "b")
 lines(R, rep(alpha, length(R)), lty = 2, col = "red")
 legend("right", inset = c(-0.4,0), xpd = TRUE,
        horiz = FALSE, lty = 1, bty = "n",
-       legend = c(TeX(r'($d^2_\mu$)'), "Combined", "Omnibus", TeX(r'($p_R$)')),
-       col = c("green", "orange", "blue", "brown"),
-       pch = c(18, 20, 21, 25))
+       legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{aug}$)'), "Combined", "Omnibus", TeX(r'($p_R$)')),
+       col = c("green", "black", "orange", "blue", "brown"),
+       pch = c(18, 19, 20, 21, 25))
 dev.off()
