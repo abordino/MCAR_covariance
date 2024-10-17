@@ -112,9 +112,6 @@ mean.consTest = function(X, B){
   ####--------------------------------------------------------------------------
   
   avmu = av(mu_S, patterns)
-  # s = prelim.norm(as.matrix(X))
-  # thetahat = em.norm(s)
-  # avmu = getparam.norm(s,thetahat,corr=FALSE)$mu
   
   rot_data_pattern = list()
   for (i in 1:n_pattern){
@@ -188,9 +185,6 @@ var.consTest = function(X, B){
   ####--------------------------------------------------------------------------
   
   avsigma = av(sigma_squared_S, patterns)
-  # s = prelim.norm(as.matrix(X))
-  # thetahat = em.norm(s)
-  # avsigma = diag(getparam.norm(s,thetahat,corr=FALSE)$sigma)
   
   rot_data_pattern = list()
   for (i in 1:n_pattern){
