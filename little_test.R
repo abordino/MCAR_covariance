@@ -1,11 +1,13 @@
-little_test = function(X, alpha, type="mean&cov"){
+little_test = function(X, type="mean&cov"){
   s = prelim.norm(as.matrix(X))
   thetahat = em.norm(s)
-  mu_true = getparam.norm(s,thetahat,corr=TRUE)$mu; Sigma_true = getparam.norm(s,thetahat,corr=TRUE)$r
+  mu_true = getparam.norm(s,thetahat,corr=FALSE)$mu
+  Sigma_true = getparam.norm(s,thetahat,corr=FALSE)$sigma
   
-  result = get_SigmaS(X)
-  SigmaS = result$SigmaS; patterns = result$pattern; n_pattern = result$n_pattern; data_pattern = result$data_pattern
-  d = result$ambient_dimension
+  result = get_SigmaS(X, min_diff = 0)
+  Omega_S = result$C_S
+  patterns = result$pattern; data_pattern = result$data_pattern
+  n_pattern = result$n_pattern; d = result$ambient_dimension
   
   if(type == "mean"){
     d_squared = 0
@@ -16,14 +18,12 @@ little_test = function(X, alpha, type="mean&cov"){
       card_S = dim(data_pattern[[i]])[2]
       
       x_S = colMeans(data_pattern[[i]]) - mu_true[patterns[[i]]]
-      L_S = Sigma_true[patterns[[i]],patterns[[i]]]
-      Sigma_S = cor(data_pattern[[i]])
+      L_S = as.matrix(Sigma_true[patterns[[i]], patterns[[i]]])
       
-      d_squared = d_squared + n_S*t(x_S)%*%solve(n_S*L_S/(n_S-1))%*%t(t(x_S))
+      d_squared = d_squared + n_S*t(x_S)%*%solve(L_S)%*%x_S
       df = df + card_S
-      print(df)
     }
-    little_d = (d_squared > qchisq(1-alpha, df))
+    p_L = pchisq(d_squared, df, lower.tail = FALSE)
   }
   
   else if(type == "cov"){
@@ -36,16 +36,15 @@ little_test = function(X, alpha, type="mean&cov"){
       card_S = dim(data_pattern[[i]])[2]
       
       x_S = colMeans(data_pattern[[i]]) - mu_true[patterns[[i]]]
-      L_S = Sigma_true[patterns[[i]],patterns[[i]]]
-      Sigma_S = cor(data_pattern[[i]])
+      L_S = as.matrix(Sigma_true[patterns[[i]], patterns[[i]]])
       
-      d_cov = d_cov + n_S*(sum(diag(Sigma_S%*%solve(L_S))) - card_S - log(abs(det(as.matrix(Sigma_S)))) +
-                             log(det(as.matrix(L_S))))
+      d_cov = d_cov + n_S*(sum(diag(Omega_S[[i]]%*%solve(L_S))) - card_S -
+                                  log(det(Omega_S[[i]])) + log(det(L_S)))
       df = df + card_S*(card_S+1)/2
       print(df)
     }
     
-    little_d = (d_cov > qchisq(1-alpha, df))
+    p_L = pchisq(d_cov, df, lower.tail = FALSE)
   }
   
   else{
@@ -58,19 +57,17 @@ little_test = function(X, alpha, type="mean&cov"){
       card_S = dim(data_pattern[[i]])[2]
       
       x_S = colMeans(data_pattern[[i]]) - mu_true[patterns[[i]]]
-      L_S = Sigma_true[patterns[[i]],patterns[[i]]]
-      Sigma_S = cor(data_pattern[[i]])
+      L_S = as.matrix(Sigma_true[patterns[[i]], patterns[[i]]])
       
-      d_aug = d_aug + n_S*t(x_S)%*%solve(n_S*L_S/(n_S-1))%*%t(t(x_S)) + 
-        n_S*(sum(diag(Sigma_S%*%solve(L_S))) - card_S - log(abs(det(as.matrix(Sigma_S)))) + 
-               log(det(as.matrix(L_S))))
+      d_aug = d_aug + n_S*t(x_S)%*%solve(L_S)%*%x_S + 
+        n_S*(sum(diag(Omega_S[[i]]%*%solve(L_S))) - card_S -
+               log(det(Omega_S[[i]])) + log(det(L_S)))
       df = df + card_S*(card_S+3)/2
-      print(df)
     }
     
-    little_d = (d_aug > qchisq(1-alpha, df))
+    p_L = pchisq(d_aug, df, lower.tail = FALSE)
   }
   
-  return(little_d)
+  return(p_L)
   
 }
