@@ -13,8 +13,8 @@ library(naniar)
 
 # Constants and parameters
 alpha = 0.05
-n = 200
-MC = 70
+n = 350
+MC = 1000
 xxx = seq(0.05, 0.4, length.out = 7)
 
 #----------------------------------------------------------------------------------------
@@ -62,6 +62,9 @@ run_tests <- function(data_gen_func, file_suffix, method, x = NULL, under_null =
   }
   
   if (under_null == TRUE){
+    # Save the data
+    save(xxx, little_power, little_power_cov, our_power, combined_power, our_power_corr,
+         file = paste0("pictures/", yyy, "_", file_suffix, ".RData"))
     # Plot the results
     png(paste0("pictures/", yyy, "_", file_suffix, ".png"))
     par(mar = c(5.1, 4.1, 4.1, 8.1), xpd = TRUE)
@@ -71,14 +74,17 @@ run_tests <- function(data_gen_func, file_suffix, method, x = NULL, under_null =
     lines(xxx, rep(alpha, length(xxx)), lty = 2, col = "red")
     lines(xxx, our_power, col = "blue", pch = 21, type = "b")
     lines(xxx, combined_power, col = "orange", pch = 20, type = "b")
-    lines(xxx, our_power_corr, col="brown", pch=25, type = "b")
+    lines(xxx, our_power_corr, col="darkviolet", pch=25, type = "b")
     legend("right", inset = c(-0.4,0), xpd = TRUE,
            horiz = FALSE, lty = 1, bty = "n",
            legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{aug}$)'), "Combined", "Omnibus", TeX(r'($p_R$)')),
-           col = c("green", "black", "orange", "blue", "brown"),
+           col = c("green", "black", "orange", "blue", "darkviolet"),
            pch = c(18, 19, 20, 21, 25))
     dev.off()
   } else{
+    # Save the data
+    save(xxx, little_power, little_power_cov, our_power, combined_power, our_power_corr,
+         file = paste0("pictures/", yyy, "_", file_suffix, ".RData"))
     # Plot the results
     png(paste0("pictures/", yyy, "_", file_suffix, ".png"))
     par(mar = c(5.1, 4.1, 4.1, 8.1), xpd = TRUE)
@@ -87,11 +93,11 @@ run_tests <- function(data_gen_func, file_suffix, method, x = NULL, under_null =
     lines(xxx, little_power_cov, col = "black", pch = 19, type = "b")
     lines(xxx, our_power, col = "blue", pch = 21, type = "b")
     lines(xxx, combined_power, col = "orange", pch = 20, type = "b")
-    lines(xxx, our_power_corr, col="brown", pch=25, type = "b")
+    lines(xxx, our_power_corr, col="darkviolet", pch=25, type = "b")
     legend("right", inset = c(-0.4,0), xpd = TRUE,
            horiz = FALSE, lty = 1, bty = "n",
            legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{aug}$)'), "Combined", "Omnibus", TeX(r'($p_R$)')),
-           col = c("green", "black", "orange", "blue", "brown"),
+           col = c("green", "black", "orange", "blue", "darkviolet"),
            pch = c(18, 19, 20, 21, 25))
     dev.off()
   }
@@ -139,7 +145,7 @@ for (yyy in c("exp", "norm")){
   # Run tests for MAR (Method 1)
   #----------------------------------------------------------------------------------------
   run_tests(generate_data_MAR1, "MAR1", "MAR")
-  
+
   #----------------------------------------------------------------------------------------
   # Run tests for MAR (Method 2)
   #----------------------------------------------------------------------------------------
