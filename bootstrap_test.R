@@ -35,6 +35,17 @@ corr.compTest = function(X, B){
   data_pattern = result$data_pattern
   
   ####--------------------------------------------------------------------------
+  #### compute c
+  ####--------------------------------------------------------------------------
+  c = 1
+  for(i in 1:n_pattern){
+    cand = min(eigen(SigmaS[[i]])$values)
+    if (cand < c){
+      c = cand
+    }
+  }
+  
+  ####--------------------------------------------------------------------------
   
   tmp = computeR(patterns, SigmaS)
   Q_hat = tmp$Sigma/(1-tmp$R)
@@ -77,7 +88,7 @@ corr.compTest = function(X, B){
     result = get_SigmaS(X, min_diff = 1)
     SigmaS_b = result$SigmaS
     
-    R_hat_b = computeR(patterns, SigmaS_b)$R
+    R_hat_b = computeR.reg(patterns, SigmaS_b, 4/c)$R
     
     if (R_hat_b >= R_hat_0){
       sum_indicator = sum_indicator + 1
