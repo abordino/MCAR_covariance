@@ -16,10 +16,10 @@ library(compositions)
 ######### 3-cycle: lognormal ############
 #----------------------------------------------------------------------------------------
 alpha = 0.05
-n = 100
-MC = 70
-t3 = pi/6
-t2 = pi/6
+n = 200
+MC = 1000
+t3 = pi/4
+t2 = 3*pi/4
 d = 3
 
 little_power = c()
@@ -29,7 +29,7 @@ combined_power = c()
 our_power_corr = c()
 
 R = c()
-for(t1 in seq(t2+t3-pi/7, pi-pi/6, length.out = 8)){
+for(t1 in seq(pi/2 + pi/12, pi/12, length.out = 12)){
 
   #----------------------------------------------------------------------------------------
   #### ESTIMATE R FROM DATA, WITH INDEPENDENT SAMPLE ######
@@ -65,8 +65,9 @@ for(t1 in seq(t2+t3-pi/7, pi-pi/6, length.out = 8)){
   }
   R = c(R, tmp)
 }
+R
 
-for(t1 in seq(t2+t3-pi/7, pi-pi/6, length.out = 8)){
+for(t1 in seq(pi/2 + pi/12, pi/12, length.out = 12)){
 
   SigmaS=list()
   for(j in 1:3){
@@ -132,6 +133,8 @@ for(t1 in seq(t2+t3-pi/7, pi-pi/6, length.out = 8)){
   our_power_corr = c(our_power_corr, mean(our_decisions_corr))
 }
 
+save(R, little_power, little_power_cov, our_power, combined_power, our_power_corr, alpha, 
+     file = "pictures/3_cycle_Lnorm.RData")
 png("pictures/3_cycle_Lnorm.png")
 par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
 plot(R, little_power, col="green", pch=18,
@@ -139,11 +142,11 @@ plot(R, little_power, col="green", pch=18,
 lines(R, little_power_cov, col="black", pch=19, type = "b")
 lines(R, our_power, col="blue", pch=21, type = "b")
 lines(R, combined_power, col="orange", pch=20, type = "b")
-lines(R, our_power_corr, col="brown", pch=25, type = "b")
+lines(R, our_power_corr, col="darkviolet", pch=25, type = "b")
 lines(R, rep(alpha, length(R)), lty = 2, col = "red")
 legend("right", inset = c(-0.4,0), xpd = TRUE,
        horiz = FALSE, lty = 1, bty = "n",
        legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{aug}$)'), "Combined", "Omnibus", TeX(r'($p_R$)')),
-       col = c("green", "black", "orange", "blue", "brown"),
+       col = c("green", "black", "orange", "blue", "darkviolet"),
        pch = c(18, 19, 20, 21, 25))
 dev.off()
