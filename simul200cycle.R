@@ -2,6 +2,7 @@ source("computeR.R")
 source("bootstrap_test.R")
 source("find_SigmaS.R")
 source("indexConsistency.R")
+
 library(missMethods)
 library(norm)
 library(naniar)
@@ -79,15 +80,18 @@ for(t1 in seq(pi/2, 5*pi/8, length.out = 8)){
   our_power_corr = c(our_power_corr, mean(our_decisions_corr))
 }
 
+save(R, our_power, our_power_corr,
+     file = paste0("pictures/200_cycle.RData"))
+
 png("pictures/200_cycle.png")
 par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
 plot(R, our_power, col="blue", ylim = c(0,1), pch=21,
      xlab = TeX(r'($R(\Sigma_\$)$)'), ylab = "Power", type = "b")
-lines(R, our_power_corr, col="brown", pch=25, type = "b")
+lines(R, our_power_corr, col="darkviolet", pch=25, type = "b")
 lines(R, rep(alpha, length(R)), lty = 2, col = "red")
 legend("right", inset = c(-0.4,0), xpd = TRUE,
        horiz = FALSE, lty = 1, bty = "n",
        legend = c("Omnibus", TeX(r'($p_R$)')),
-       col = c("blue", "brown"),
+       col = c("blue", "darkviolet"),
        pch = c(21, 25))
 dev.off()
