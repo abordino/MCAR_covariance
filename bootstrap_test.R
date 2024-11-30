@@ -1,6 +1,7 @@
 source("computeR.R")
 source("find_SigmaS.R")
 source("indexConsistency.R")
+
 library(missMethods)
 library(MASS)
 library(norm)
@@ -58,6 +59,14 @@ corr.compTest = function(X, B){
   R_hat_0 = tmp$R
   
   ####--------------------------------------------------------------------------
+  # Early return if R_hat_0 exceeds threshold
+  ####--------------------------------------------------------------------------
+  
+  if (R_hat_0 >= 3 / 4) {
+    return(as.numeric(0))
+  }
+  
+  ####--------------------------------------------------------------------------
   #### rotate X, to make it look like it's from H0
   ####--------------------------------------------------------------------------
   rot_data_pattern = list()
@@ -88,7 +97,7 @@ corr.compTest = function(X, B){
     result = get_SigmaS(X, min_diff = 1)
     SigmaS_b = result$SigmaS
     
-    R_hat_b = computeR.reg(patterns, SigmaS_b, 4/c)$R
+    R_hat_b = computeR.reg(patterns, SigmaS_b, 2 / c)$R
     
     if (R_hat_b >= R_hat_0){
       sum_indicator = sum_indicator + 1
