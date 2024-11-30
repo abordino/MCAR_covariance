@@ -17,7 +17,7 @@ d = 200
 
 alpha = 0.05
 n = 200
-MC = 20
+MC = 100
 angle = pi/(2*(d-1))
 
 our_power_corr = c()
