@@ -100,7 +100,7 @@ for(t1 in seq(t2+t3, (pi + t2 + t3)/2, length.out = 8)){
 
 save(R, little_power, little_power_cov, our_power, combined_power, our_power_corr, alpha, 
      file = "pictures/3_cycle_Norm.RData")
-png("pictures/3_cycle_1.png")
+png("pictures/3_cycle_Norm.png")
 par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
 plot(R, little_power, col="green", pch=18,
      xlab = TeX(r'($R(\Sigma_\$)$)'), ylim = c(0,1), ylab = "Power", type = "b")
