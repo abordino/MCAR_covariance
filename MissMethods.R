@@ -13,7 +13,7 @@ library(naniar)
 
 # Constants and parameters
 alpha = 0.05
-n = 350
+n = 200
 MC = 1000
 xxx = seq(0.05, 0.4, length.out = 7)
 
