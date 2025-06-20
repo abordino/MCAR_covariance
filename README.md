@@ -4,7 +4,7 @@ This repository contains the implementation of the tests presented in [this pape
 
 ## Repository Structure
 
-Files in the main directory contain implementations for the algorithms presented in the paper, alongside with the code for Little's test as introduced in [this other paper](https://www.tandfonline.com/doi/abs/10.1080/01621459.1988.10478722).
+In the main directory, you will find implementations of the algorithms presented in the paper, along with the code for Little's test as introduced in [this other paper](https://www.tandfonline.com/doi/abs/10.1080/01621459.1988.10478722).
 
 - **`MCAR_test/`**  
   Contains auxiliary functions needed for the implementation of our procedures.
