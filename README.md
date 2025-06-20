@@ -12,6 +12,6 @@ Files in the main directory contain implementations for the algorithms presented
 - **`simulCycle/`**  
   Compares our tests with Little's methodologies in the case where the missingness pattern is a d-cycle.
   
-  - **`simulMissMethods/`**  
+- **`simulMissMethods/`**  
   Compares our tests with Little's methodologies in the case of a more general missingness mechanism, which is simulated using the R-package [missMethods](https://cran.r-project.org/web/packages/missMethods/index.html).
 
