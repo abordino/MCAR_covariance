@@ -1,0 +1,7 @@
+load("/Users/laburd/Documents/phd/MCAR_covariance/codes/Bonferroni/pictures/exp_MAR1.RData")
+ls
+load("/Users/laburd/Documents/phd/MCAR_covariance/codes/Bonferroni/pictures/3_cycle_Norm.RData")
+load("/Users/laburd/Documents/phd/MCAR_covariance/codes/regularised/pictures/exp_MCAR.RData")
+load("/Users/laburd/Documents/phd/MCAR_covariance/codes/simulation_regularised/pictures/100_cycle.RData")
+data = load("/Users/laburd/Documents/phd/MCAR_covariance/codes/simulation_regularised/pictures/100_cycle.RData")
+data

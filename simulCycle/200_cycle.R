@@ -1,7 +1,14 @@
-source("computeR.R")
-source("bootstrap_test.R")
-source("find_SigmaS.R")
-source("indexConsistency.R")
+rm(list = ls())  # Clear environment
+gc()             # Free memory
+
+setwd("~/Desktop/simulation_regularised/")
+
+# Load external functions and libraries
+source("MCARtest/computeR.R")
+source("MCARtest/find_SigmaS.R")
+source("MCARtest/indexConsistency.R")
+source("bootstrap_test_cycle.R")
+source("little_test.R")
 
 library(missMethods)
 library(norm)
@@ -13,17 +20,23 @@ library(compositions)
 # #----------------------------------------------------------------------------------------
 # ######### d-cycle: high-dimensional ############
 # #----------------------------------------------------------------------------------------
+set.seed(180966)
+
 d = 200
+n = 200
+MC = 500
 
 alpha = 0.05
-n = 200
-MC = 100
 angle = pi/(2*(d-1))
 
 our_power_corr = c()
 our_power = c()
 R = c()
+
 for(t1 in seq(pi/2, 5*pi/8, length.out = 8)){
+  print("------------------------------------------------------------------------")
+  print(t1)
+  print("------------------------------------------------------------------------")
   
   #----------------------------------------------------------------------------------------
   #### POPULATION LEVEL ######
@@ -35,8 +48,8 @@ for(t1 in seq(pi/2, 5*pi/8, length.out = 8)){
     SigmaS[[j]][2,1] = cos(angle)
   }
   
-  SigmaS[[d]][1,2] = cos(t1)
-  SigmaS[[d]][2,1] = cos(t1)
+  SigmaS[[1]][1,2] = cos(t1)
+  SigmaS[[1]][2,1] = cos(t1)
   
   patterns = list()
   v = 1:d
@@ -55,23 +68,34 @@ for(t1 in seq(pi/2, 5*pi/8, length.out = 8)){
   for (i in 1:MC){
     
     #----------------------------------------------------------------------------------------
-    #### generate dataset from patter S = {{1,2},{2,3},{1,3}}
+    #### generate dataset from patter S = {{1,2},{2,3}, ..., {1,d}}
     #----------------------------------------------------------------------------------------
-    X = data.frame(matrix(nrow = d*n, ncol = d))
+    d0 = d; n0 = n*d; patterns0 = patterns
+    X = data.frame(matrix(nrow = n0, ncol = d0))
+    
+    data_pattern0 = list()
+    mu_S0 = list(); C_S0 = list(); sigma_squared_S0 = list(); SigmaS0 = list()
     for (i in 1:d){
-      X[(1+(i-1)*n):(i*n), patterns[[i]]] = mvrnorm(n, rep(0, 2), SigmaS[[i]])
+      tmp = mvrnorm(n, rep(0, 2), SigmaS[[i]])
+      X[(1+(i-1)*n):(i*n), patterns0[[i]]] = tmp
+      data_pattern0[[i]] = tmp
+      
+      mu_S0[[i]] = colMeans(data_pattern0[[i]])
+      C_S0[[i]] = var(data_pattern0[[i]])
+      sigma_squared_S0[[i]] = diag(C_S0[[i]])
+      SigmaS0[[i]] = cov2cor(C_S0[[i]])
     }
+    
     X = as.matrix(X)
     
     #----------------------------------------------------------------------------------------
     ### run our tests
     #----------------------------------------------------------------------------------------
-    p_M = mean.consTest(X, B= 99)
-    p_R = corr.compTest(X, B= 99)
-    p_V = var.consTest(X, B = 99)
+    p_R = corr.compTest.cycle(X, B=99)
+    p_M = mean.consTest.cycle(X, B=99)
+    p_V = var.consTest.cycle(X, B=99)
     
-    our_decisions = c(our_decisions, 
-                      -2*(log(p_R)+log(p_M)+log(p_V)) > qchisq(1-2*alpha/3, 6))
+    our_decisions = c(our_decisions, max(c(p_R, p_M, p_V) < alpha/3))
     our_decisions_corr = c(our_decisions_corr, p_R < alpha)
     
   }
@@ -80,10 +104,17 @@ for(t1 in seq(pi/2, 5*pi/8, length.out = 8)){
   our_power_corr = c(our_power_corr, mean(our_decisions_corr))
 }
 
-save(R, our_power, our_power_corr,
-     file = paste0("pictures/200_cycle.RData"))
+#----------------------------------------------------------------------------------------
+# ######### save data ############
+#----------------------------------------------------------------------------------------
+data_to_save = data.frame(R, our_power, our_power_corr, alpha)
+write.csv(data_to_save, "simulCycle/results/200_cyclePar.csv", row.names = FALSE)
 
-png("pictures/200_cycle.png")
+#----------------------------------------------------------------------------------------
+# ######### plot results ############
+#----------------------------------------------------------------------------------------
+
+png("simulCycle/pictures/200_cyclePar.png")
 par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
 plot(R, our_power, col="blue", ylim = c(0,1), pch=21,
      xlab = TeX(r'($R(\Sigma_\$)$)'), ylab = "Power", type = "b")
@@ -95,3 +126,6 @@ legend("right", inset = c(-0.4,0), xpd = TRUE,
        col = c("blue", "darkviolet"),
        pch = c(21, 25))
 dev.off()
+
+
+

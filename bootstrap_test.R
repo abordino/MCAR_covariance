@@ -1,6 +1,6 @@
-source("computeR.R")
-source("find_SigmaS.R")
-source("indexConsistency.R")
+source("MCARtest/computeR.R")
+source("MCARtest/find_SigmaS.R")
+source("MCARtest/indexConsistency.R")
 
 library(missMethods)
 library(MASS)
@@ -142,6 +142,7 @@ mean.consTest = function(X, B){
   
   sum_indicator = 0
   for (b in 1:B){
+    print(b)
     
     r_ind = 0
     X = data.frame(matrix(nrow = d*n, ncol = d))
@@ -215,6 +216,7 @@ var.consTest = function(X, B){
   
   sum_indicator = 0
   for (b in 1:B){
+    print(b)
     
     r_ind = 0
     X = data.frame(matrix(nrow = d*n, ncol = d))

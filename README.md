@@ -1,7 +1,17 @@
-# Testing Missing Completely at Random (MCAR) using covariance matrices. 
- ## Abstract, based on https://arxiv.org/abs/2401.05256
-We study the problem of testing whether the missing values of a potentially high-dimensional dataset are Missing Completely at Random (MCAR). We relax the problem of testing MCAR to the problem of testing the compatibility of a collection of covariance matrices, motivated by the fact that this procedure is feasible when the dimension grows with the sample size. Tests of compatibility can be used to test the feasibility of positive semi-definite matrix completion problems with noisy observations, and thus our results may be of independent interest.
-     Our first contributions are to define a natural measure of the incompatibility of a collection of correlation matrices, which can be characterised as the optimal value of a Semi-definite Programming (SDP) problem, and to establish a key duality result allowing its practical computation and interpretation. By analysing the concentration properties of the natural plug-in estimator for this measure, we propose a novel hypothesis test. This test is calibrated via a bootstrap procedure and demonstrates power against any distribution with incompatible covariance matrices. By considering key examples of missingness structures, we demonstrate that our procedures are minimax rate optimal in certain cases. We further validate our methodology with numerical simulations that provide evidence of validity and power, even when data are heavy tailed.
+# MCAR_covariance: Tests for Missing Completely at Random based on covariance matrices
 
-## Scope of this repository
-This repository contains the code for all the simulations in the paper.
+This repository contains the implementation of the tests presented in [this paper](https://arxiv.org/abs/2401.05256) along with code to reproduce all simulations and experiments presented in the paper 
+
+## Repository Structure
+
+Files in the main directory contain implementations for the algorithms presented in the paper, alongside with the code for Little's test as introduced in [this other paper](https://www.tandfonline.com/doi/abs/10.1080/01621459.1988.10478722).
+
+- **`MCAR_test/`**  
+  Contains auxiliary functions needed for the implementation of our procedures.
+
+- **`simulCycle/`**  
+  Compares our tests with Little's methodologies in the case where the missingness pattern is a d-cycle.
+  
+  - **`simulMissMethods/`**  
+  Compares our tests with Little's methodologies in the case of a more general missingness mechanism, which is simulated using the R-package [missMethods](https://cran.r-project.org/web/packages/missMethods/index.html).
+

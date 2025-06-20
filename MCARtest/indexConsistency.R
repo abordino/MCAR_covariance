@@ -1,4 +1,4 @@
-source("find_SigmaS.R")
+source("MCARtest/find_SigmaS.R")
 
 library(missMethods)
 library(MASS)
@@ -26,15 +26,15 @@ av = function(x_S, patterns){
   return(res)
 }
 
-M = function(x_S, patterns){
+M = function(mu_S, patterns){
   
-  av_x = av(x_S, patterns)
+  av_x = av(mu_S, patterns)
   n_pattern = length(patterns)
   d = max(unlist(patterns))
   
   num = 0
   for(i in 1:n_pattern){
-    cand = Norm(x_S[[i]] - av_x[patterns[[i]]], p = 1)
+    cand = Norm(mu_S[[i]] - av_x[patterns[[i]]], p = 1)
     if (cand > num){
       num = cand
     }

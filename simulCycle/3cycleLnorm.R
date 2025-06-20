@@ -1,8 +1,13 @@
+rm(list = ls())  # Clear environment
+gc()             # Free memory
+
+setwd("~/Documents/phd/MCAR_covariance/simulation_final/")
+
 # Load external functions and libraries
-source("computeR.R")
+source("MCARtest/computeR.R")
+source("MCARtest/find_SigmaS.R")
+source("MCARtest/indexConsistency.R")
 source("bootstrap_test.R")
-source("find_SigmaS.R")
-source("indexConsistency.R")
 source("little_test.R")
 
 library(missMethods)
@@ -15,9 +20,12 @@ library(compositions)
 #----------------------------------------------------------------------------------------
 ######### 3-cycle: lognormal ############
 #----------------------------------------------------------------------------------------
+set.seed(221198)
+
 alpha = 0.05
 n = 200
-MC = 1000
+MC = 500
+
 t3 = pi/4
 t2 = 3*pi/4
 d = 3
@@ -65,9 +73,10 @@ for(t1 in seq(pi/2 + pi/12, pi/12, length.out = 12)){
   }
   R = c(R, tmp)
 }
-R
 
 for(t1 in seq(pi/2 + pi/12, pi/12, length.out = 12)){
+  
+  print(t1)
 
   SigmaS=list()
   for(j in 1:3){
@@ -121,9 +130,9 @@ for(t1 in seq(pi/2 + pi/12, pi/12, length.out = 12)){
     p_M = mean.consTest(X, B = 99)
     p_V = var.consTest(X, B = 99)
     
-    combined_decisions = c(combined_decisions, max(c(p_R, p_M, p_V) < alpha/3))
-    our_decisions = c(our_decisions, max(c(p_R, p_L, p_V) < alpha/3))
+    our_decisions = c(our_decisions, max(c(p_R, p_M, p_V) < alpha/3))
     our_decisions_corr = c(our_decisions_corr, p_R < alpha)
+    combined_decisions = c(combined_decisions, max(c(p_R, p_L, p_V) < alpha/3))
   }
 
   little_power = c(little_power, mean(little_decisions))
@@ -133,17 +142,32 @@ for(t1 in seq(pi/2 + pi/12, pi/12, length.out = 12)){
   our_power_corr = c(our_power_corr, mean(our_decisions_corr))
 }
 
-save(R, little_power, little_power_cov, our_power, combined_power, our_power_corr, alpha, 
-     file = "pictures/3_cycle_Lnorm.RData")
-png("pictures/3_cycle_Lnorm.png")
+data = read.csv(file = "simulCycle/results/3_cycle_Lnorm.csv")
+tmp = data$combined_power
+data$combined_power = data$our_power
+data$our_power = tmp
+
+#----------------------------------------------------------------------------------------
+# ######### save data ############
+#----------------------------------------------------------------------------------------
+data_to_save = data.frame(R, little_power, little_power_cov, our_power, 
+                          combined_power, our_power_corr, alpha)
+write.csv(data_to_save, "simulCycle/results/3_cycle_Lnorm.csv", row.names = FALSE)
+
+#----------------------------------------------------------------------------------------
+# ######### plot results ############
+#----------------------------------------------------------------------------------------
+data = read.csv("simulCycle/results/3_cycle_Lnorm.csv")
+
+png("simulCycle/pictures/3_cycle_Lnorm.png")
 par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-plot(R, little_power, col="green", pch=18,
+plot(data$R, data$little_power, col="green", pch=18,
      xlab = TeX(r'($R(\Sigma_\$)$)'), ylim = c(0,1), ylab = "Power", type = "b")
-lines(R, little_power_cov, col="black", pch=19, type = "b")
-lines(R, our_power, col="blue", pch=21, type = "b")
-lines(R, combined_power, col="orange", pch=20, type = "b")
-lines(R, our_power_corr, col="darkviolet", pch=25, type = "b")
-lines(R, rep(alpha, length(R)), lty = 2, col = "red")
+lines(data$R, data$little_power_cov, col="black", pch=19, type = "b")
+lines(data$R, data$our_power, col="blue", pch=21, type = "b")
+lines(data$R, data$combined_power, col="orange", pch=20, type = "b")
+lines(data$R, data$our_power_corr, col="darkviolet", pch=25, type = "b")
+lines(data$R, rep(alpha, length(data$R)), lty = 2, col = "red")
 legend("right", inset = c(-0.4,0), xpd = TRUE,
        horiz = FALSE, lty = 1, bty = "n",
        legend = c(TeX(r'($d^2_\mu$)'), TeX(r'($d^2_{aug}$)'), "Combined", "Omnibus", TeX(r'($p_R$)')),

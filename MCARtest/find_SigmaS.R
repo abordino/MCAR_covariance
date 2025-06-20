@@ -2,7 +2,7 @@ library(copula)
 library(missMethods)
 library(misty)
 
-get_SigmaS = function(X, min_diff){
+get_SigmaS = function(X, min_diff = 0){
   
   #----------------------------------------------------------------------------------------
   # create vector with indicators of NA's
@@ -79,15 +79,4 @@ get_SigmaS = function(X, min_diff){
                  "C_S" = C_S, "sigma_squared_S" = sigma_squared_S, 
                  "SigmaS" = SigmaS, "ambient_dimension" = d)
   return(my_list)
-}
-
-if (sys.nframe() == 0){
-  n = 1000
-  cp = claytonCopula(param = c(1), dim = 5)
-  P = mvdc(copula = cp, margins = c("exp", "exp", "exp", "exp", "exp"),
-           paramMargins = list(list(1), list(1), list(1), list(1), list(1)))
-  X = rMvdc(n, P)
-  X = delete_MCAR(X, 0.1, c(1,4,5))
-  
-  get_SigmaS(X)
 }
