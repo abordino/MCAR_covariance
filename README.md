@@ -1,6 +1,6 @@
 # MCAR_covariance: Tests for Missing Completely at Random based on covariance matrices
 
-This repository contains the implementation of the tests presented in [this paper](https://arxiv.org/abs/2401.05256) along with code to reproduce all simulations and experiments. Further details can be found in the documentation of the R-package [MCARtest]([https://cran.r-project.org/web/packages/MCARtest/MCARtest.pdf](https://cran.r-project.org/web/packages/MCARtest/index.html).
+This repository contains the implementation of the tests presented in [this paper](https://arxiv.org/abs/2401.05256) along with code to reproduce all simulations and experiments. Further details can be found in the documentation of the R-package [MCARtest](https://cran.r-project.org/web/packages/MCARtest/index.html).
 
 ## Repository Structure
 
